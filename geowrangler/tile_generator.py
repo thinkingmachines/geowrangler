@@ -18,11 +18,11 @@ class TileGenerator:
         reprojected_gdf = self.gdf.to_crs(self.grid_projection)
         minx, miny, maxx, maxy = reprojected_gdf.total_bounds
         grid_size = self.grid_size
-        xrange = np.arange(minx, maxx + grid_size, grid_size)
-        yrange = np.arange(miny, maxy + grid_size, grid_size)
+        xrange = np.arange(minx, maxx, grid_size)
+        yrange = np.arange(miny, maxy, grid_size)
         polygons = []
-        for x_idx, x in enumerate(xrange[:-1]):
-            for y_idx, y in enumerate(yrange[:-1]):
+        for x_idx, x in enumerate(xrange):
+            for y_idx, y in enumerate(yrange):
                 polygons.append(
                     {
                         "x": x_idx,
