@@ -17,8 +17,8 @@ Generate square grids
 import geopandas as gpd
 from geowrangler import grids
 gdf = gpd.read_file("../admin.geojson")
-tile_generator = tile_generator.TileGenerator(gdf, 100)
-grids_gdf = tile_generator.generate_grids()
+grid_generator = tile_generator.GridGenerator(gdf, 100)
+grids_gdf = grid_generator.generate_grids()
 grids_gdf.to_file("../grids.geojson", drivers="GeoJSON")
 ```
 
