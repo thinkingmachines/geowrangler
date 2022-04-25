@@ -24,7 +24,7 @@ grids_gdf.to_file("../grids.geojson", drivers="GeoJSON")
 
 ## Development
 
-See (CONTRIBUTING.md)[/CONTRIBUTING.md] before anything
+See [CONTRIBUTING.md](/CONTRIBUTING.md) before anything
 
 ### Setting up
 
