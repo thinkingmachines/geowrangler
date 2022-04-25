@@ -2,9 +2,9 @@
 
 #### Table of Contents
 
-[Feature Requests or Feedback](#feature-requests-or-feedback)  
-[Report Bugs](#report-bugs)
-[Creating a Pull Request](#creating-a-pull-request)
+1. [Feature Requests or Feedback](#feature-requests-or-feedback)
+2. [Report Bugs](#report-bugs)
+3. [Creating a Pull Request](#creating-a-pull-request)
 
 ## Feature Requests or Feedback
 
