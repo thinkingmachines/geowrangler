@@ -12,12 +12,3 @@ repos:
     rev: 5.6.4
     hooks:
       - id: isort
-  - repo: local
-    hooks:
-      - id: pyright
-        name: pyright
-        entry: pyright
-        language: node
-        exclude: tests/
-        types: [python]
-        additional_dependencies: ["pyright@1.1.234"]
