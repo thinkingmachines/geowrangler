@@ -4,6 +4,8 @@
 
 ## Development
 
+See (CONTRIBUTING.md)[/CONTRIBUTING.md] before anything
+
 ### Setting up
 
 ```
