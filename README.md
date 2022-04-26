@@ -16,15 +16,16 @@ Generate square grids
 ```python
 import geopandas as gpd
 from geowrangler import grids
+
 gdf = gpd.read_file("../admin.geojson")
-grid_generator = tile_generator.GridGenerator(gdf, 100)
+grid_generator = grids.GridGenerator(gdf, 100)
 grids_gdf = grid_generator.generate_grids()
 grids_gdf.to_file("../grids.geojson", drivers="GeoJSON")
 ```
 
 ## Development
 
-See [CONTRIBUTING.md](/CONTRIBUTING.md) before anything
+Please read [CONTRIBUTING.md](/CONTRIBUTING.md) and [CODE_OF_CONDUCT.md](/CODE_OF_CONDUCT.md) before anything
 
 ### Setting up
 
