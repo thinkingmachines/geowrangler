@@ -12,3 +12,8 @@ repos:
     rev: 5.6.4
     hooks:
       - id: isort
+  - repo: https://github.com/zricethezav/gitleaks
+    rev: v7.5.0
+    hooks:
+      - id: gitleaks
+        args: ['--verbose']

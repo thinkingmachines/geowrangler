@@ -29,15 +29,17 @@ Please read [CONTRIBUTING.md](/CONTRIBUTING.md) and [CODE_OF_CONDUCT.md](/CODE_O
 
 ### Setting up
 
+Please ensure you are using python `3.9` or higher
+
 ```
-pip install pre-commit
+pip install pre-commit poery
 pre-commit install
 poetry install
 ```
 
 ### Running tests
 
-We are using `pytest` as our test runner. To run all tests and generate a generate a coverage report, run the following.
+We are using `pytest` as our test framework. To run all tests and generate a generate a coverage report, run the following.
 
 ```
 poetry run pytest --cov . -n auto
