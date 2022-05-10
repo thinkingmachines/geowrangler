@@ -18,6 +18,8 @@ isort = "^5.10.1"
 jupyterlab = "^3.3.2"
 pytest-cov = "^3.0.0"
 pytest-xdist = "^2.5.0"
+nbdev = "^1.2.8"
+jupyterlab-vim = "^0.15.1"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
