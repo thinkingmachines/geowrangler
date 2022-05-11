@@ -10,10 +10,10 @@ entries:
       title: Overview
       url: /
     - output: web,pdf
-      title: module name here
-      url: core.html
+      title: Grids
+      url: grids.html
     - output: web,pdf
-      title: Title
+      title: Sample
       url: Sample.html
     output: web
     title: geowrangler
