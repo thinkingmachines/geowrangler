@@ -21,6 +21,7 @@ pytest-xdist = "^2.5.0"
 nbdev = "^1.2.8"
 jupyterlab-vim = "^0.15.1"
 watchdog = "^2.1.7"
+nb-black = "^1.0.7"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
