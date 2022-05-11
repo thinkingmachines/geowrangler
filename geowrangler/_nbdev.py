@@ -2,9 +2,9 @@
 
 __all__ = ["index", "modules", "custom_doc_links", "git_url"]
 
-index = {}
+index = {"GridGenerator": "00_grids.ipynb", "logger": "00_grids.ipynb"}
 
-modules = []
+modules = ["grids.py"]
 
 doc_url = "https://thinkingmachines.github.io/geowrangler/"
 
