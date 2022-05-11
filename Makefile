@@ -35,3 +35,6 @@ dist: clean
 
 clean:
 	rm -rf dist
+
+watch:
+	watchmedo shell-command --command nbdev_build_docs --pattern *.ipynb --recursive --drop
