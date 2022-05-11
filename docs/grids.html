@@ -32,66 +32,30 @@ nb_path: "notebooks/00_grids.ipynb"
     {% raw %}
     
 <div class="cell border-box-sizing code_cell rendered">
-<div class="input">
 
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">logging</span>
+<div class="output_wrapper">
+<div class="output">
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">geopandas</span> <span class="kn">import</span> <span class="n">GeoDataFrame</span>
-<span class="kn">from</span> <span class="nn">shapely.geometry</span> <span class="kn">import</span> <span class="n">Polygon</span>
-
-<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+<div class="output_area">
 
 
-<span class="k">class</span> <span class="nc">GridGenerator</span><span class="p">:</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">gdf</span><span class="p">:</span> <span class="n">GeoDataFrame</span><span class="p">,</span>
-        <span class="n">grid_size</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-        <span class="n">grid_projection</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;EPSG:3857&quot;</span><span class="p">,</span>
-    <span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">gdf</span> <span class="o">=</span> <span class="n">gdf</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">grid_size</span> <span class="o">=</span> <span class="n">grid_size</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">grid_projection</span> <span class="o">=</span> <span class="n">grid_projection</span>
+<div class="output_markdown rendered_html output_subarea ">
+<h2 id="GridGenerator" class="doc_header"><code>class</code> <code>GridGenerator</code><a href="https://github.com/thinkingmachines/geowrangler/tree/master/geowrangler/grids.py#L15" class="source_link" style="float:right">[source]</a></h2><blockquote><p><code>GridGenerator</code>(<strong><code>gdf</code></strong>:<code>GeoDataFrame</code>, <strong><code>grid_size</code></strong>:<code>float</code>, <strong><code>grid_projection</code></strong>:<code>str</code>=<em><code>'EPSG:3857'</code></em>)</p>
+</blockquote>
 
-    <span class="k">def</span> <span class="nf">get_ranges</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Get ranges of the top and left corners of grid&quot;&quot;&quot;</span>
-        <span class="n">reprojected_gdf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gdf</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_projection</span><span class="p">)</span>
-        <span class="n">minx</span><span class="p">,</span> <span class="n">miny</span><span class="p">,</span> <span class="n">maxx</span><span class="p">,</span> <span class="n">maxy</span> <span class="o">=</span> <span class="n">reprojected_gdf</span><span class="o">.</span><span class="n">total_bounds</span>
-        <span class="n">xrange</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">minx</span><span class="p">,</span> <span class="n">maxx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_size</span><span class="p">)</span>
-        <span class="n">yrange</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">miny</span><span class="p">,</span> <span class="n">maxy</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_size</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">xrange</span><span class="p">,</span> <span class="n">yrange</span>
+</div>
 
-    <span class="k">def</span> <span class="nf">create_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Polygon</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Create a grid based on the top left coordinates and grid_size&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">Polygon</span><span class="p">(</span>
-            <span class="p">[</span>
-                <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">),</span>
-                <span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_size</span><span class="p">,</span> <span class="n">y</span><span class="p">),</span>
-                <span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_size</span><span class="p">,</span> <span class="n">y</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_size</span><span class="p">),</span>
-                <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_size</span><span class="p">),</span>
-            <span class="p">]</span>
-        <span class="p">)</span>
+</div>
 
-    <span class="k">def</span> <span class="nf">generate_grids</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">GeoDataFrame</span><span class="p">:</span>
-        <span class="n">xrange</span><span class="p">,</span> <span class="n">yrange</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_ranges</span><span class="p">()</span>
-        <span class="n">polygons</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">x_idx</span><span class="p">,</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">xrange</span><span class="p">):</span>
-            <span class="k">for</span> <span class="n">y_idx</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">yrange</span><span class="p">):</span>
-                <span class="n">polygons</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                    <span class="p">{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="n">x_idx</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="n">y_idx</span><span class="p">,</span> <span class="s2">&quot;geometry&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_grid</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)}</span>
-                <span class="p">)</span>
-        <span class="n">dest</span> <span class="o">=</span> <span class="n">GeoDataFrame</span><span class="p">(</span><span class="n">polygons</span><span class="p">,</span> <span class="n">geometry</span><span class="o">=</span><span class="s2">&quot;geometry&quot;</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_projection</span><span class="p">)</span>
-        <span class="n">dest_reproject</span> <span class="o">=</span> <span class="n">dest</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gdf</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
-        <span class="n">final</span> <span class="o">=</span> <span class="n">dest_reproject</span><span class="p">[</span><span class="n">dest_reproject</span><span class="o">.</span><span class="n">intersects</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gdf</span><span class="o">.</span><span class="n">unary_union</span><span class="p">)]</span>
-        <span class="k">return</span> <span class="n">final</span>
-</pre></div>
-
-    </div>
 </div>
 </div>
+
+</div>
+    {% endraw %}
+
+    {% raw %}
+    
+<div class="cell border-box-sizing code_cell rendered">
 
 </div>
     {% endraw %}
