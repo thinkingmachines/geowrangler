@@ -13,8 +13,8 @@ entries:
       title: Grids
       url: grids.html
     - output: web,pdf
-      title: Sample
-      url: Sample.html
+      title: Samples
+      url: Samples.html
     output: web
     title: geowrangler
   output: web
