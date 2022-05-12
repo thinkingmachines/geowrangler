@@ -16,4 +16,10 @@ repos:
     rev: v7.5.0
     hooks:
       - id: gitleaks
-        args: ['--verbose']
+        args: ["--verbose"]
+  - repo: https://github.com/nbQA-dev/nbQA
+    rev: 1.3.1
+    hooks:
+      - id: nbqa-black
+      - id: nbqa-flake8
+      - id: nbqa-isort
