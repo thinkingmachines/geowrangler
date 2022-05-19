@@ -1,3 +1,4 @@
+import geopandas as gpd
 import pytest
 from geopandas import GeoDataFrame
 from shapely.geometry import Polygon
@@ -30,3 +31,18 @@ def test_create_grids():
             (0, 100),
         ]
     )
+
+
+def test_get_ranges():
+    gdf = gpd.read_file("data/region3_admin.geojson")
+    grid_generator = grids.GridGenerator(gdf, 5000)
+    grid_range = grid_generator.get_ranges()
+    assert grid_range[0].shape[0] == 55
+    assert grid_range[1].shape[0] == 49
+
+
+def test_generate_grids():
+    gdf = gpd.read_file("data/region3_admin.geojson")
+    grid_generator = grids.GridGenerator(gdf, 15000)
+    grids_gdf = grid_generator.generate_grids()
+    assert len(grids_gdf) == 154
