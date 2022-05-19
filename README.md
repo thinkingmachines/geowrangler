@@ -14,7 +14,7 @@ pip install git+https://github.com/thinkingmachines/geowrangler.git
 
 Import packages
 
-```
+```python
 import geopandas as gpd
 
 from geowrangler import grids
@@ -22,14 +22,14 @@ from geowrangler import grids
 
 Load a sample geojson file
 
-```
+```python
 gdf = gpd.read_file("../data/region3_admin.geojson")
 ```
 
     length of gdf: 1 row(s)
 
 
-```
+```python
 print(gdf)
 ```
 
@@ -40,7 +40,7 @@ print(gdf)
     0  MULTIPOLYGON (((120.11687 14.76309, 120.11684 ...  
 
 
-```
+```python
 gdf.plot();
 ```
 
@@ -52,13 +52,13 @@ gdf.plot();
 
 Create a grid generator with a size of 5000
 
-```
+```python
 grid_generator = grids.GridGenerator(gdf, 5000)
 ```
 
 Generate square grids
 
-```
+```python
 %%time
 grids_gdf = grid_generator.generate_grids()
 ```
@@ -72,7 +72,7 @@ Show gridded version of sample geojson file
     length of grids_gdf: 1074 row(s)
 
 
-```
+```python
 grids_gdf.plot();
 ```
 
@@ -82,7 +82,7 @@ grids_gdf.plot();
     
 
 
-```
+```python
 %%time
 # write geojson with grids
 grids_gdf.to_file("../data/region3_admin_grids.geojson", drivers="GeoJSON")

@@ -2,7 +2,7 @@
 
 __all__ = ["index", "modules", "custom_doc_links", "git_url"]
 
-index = {"GridGenerator": "00_grids.ipynb", "logger": "00_grids.ipynb"}
+index = {"logger": "00_grids.ipynb", "GridGenerator": "00_grids.ipynb"}
 
 modules = ["grids.py"]
 
