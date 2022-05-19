@@ -1,0 +1,6 @@
+[run]
+source = geowrangler/
+omit = venv/*,tests/*
+
+[report]
+omit = venv/*,tests/*
