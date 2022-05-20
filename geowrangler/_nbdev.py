@@ -8,6 +8,11 @@ index = {
     "Validator": "00_validation.ipynb",
     "OrientationValidator": "00_validation.ipynb",
     "GeometryValidation": "00_validation.ipynb",
+    "Validator.validate": "00_validation.ipynb",
+    "OrientationValidator.check": "00_validation.ipynb",
+    "OrientationValidator.fix": "00_validation.ipynb",
+    "GeometryValidation.validate": "00_validation.ipynb",
+    "GeometryValidation.validate_all": "00_validation.ipynb",
 }
 
 modules = ["grids.py", "validation.py"]

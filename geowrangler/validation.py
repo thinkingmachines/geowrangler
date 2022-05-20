@@ -8,15 +8,18 @@ from abc import ABC, abstractmethod
 from typing import Sequence, Union
 
 import geopandas as gpd
+from fastcore.basics import patch
 from shapely.algorithms.cga import signed_area
+from shapely.geometry.base import BaseGeometry
 from shapely.geometry.polygon import orient
 
 logger = logging.getLogger(__name__)
 
+
 # Cell
-
-
 class Validator(ABC):
+    """Abstract Base Class for single validator"""
+
     def __init__(
         self, gdf: gpd.GeoDataFrame, add_new_column: bool = True, apply_fix: bool = True
     ):
@@ -30,36 +33,50 @@ class Validator(ABC):
         pass
 
     @abstractmethod
-    def check(self, geometry):
+    def check(self, geometry: BaseGeometry):
         pass
 
     @abstractmethod
-    def fix(self, geometry):
+    def fix(self, geometry: BaseGeometry):
         pass
 
-    def validate(self):
-        gdf = self.gdf.copy()
-        is_valid = gdf.geometry.apply(self.check)
-        if self.add_new_column:
-            gdf[self.validator_column_name] = is_valid
-        if self.apply_fix:
-            gdf.loc[~is_valid, "geometry"] = gdf[~is_valid].geometry.apply(self.fix)
-        return gdf
+
+@patch
+def validate(self: Validator) -> gpd.GeoDataFrame:
+    """Method that checks the validity of a each geometry and applies a fix to these geometry"""
+    gdf = self.gdf.copy()
+    is_valid = gdf.geometry.apply(self.check)
+    if self.add_new_column:
+        gdf[self.validator_column_name] = is_valid
+    if self.apply_fix:
+        gdf.loc[~is_valid, "geometry"] = gdf[~is_valid].geometry.apply(self.fix)
+    return gdf
 
 
 # Cell
+
+
 class OrientationValidator(Validator):
+    """Checks and fixes Orienation of the geometry to ensure it works for multiple system"""
+
     validator_column_name = "is_oriented_properly"
 
-    def check(self, geometry):
-        return signed_area(geometry.exterior) >= 0
 
-    def fix(self, geometry):
-        return orient(geometry)
+@patch
+def check(self: OrientationValidator, geometry: BaseGeometry) -> bool:
+    """Checks if orientation is counter clockwise"""
+    return signed_area(geometry.exterior) >= 0
+
+
+@patch
+def fix(self: OrientationValidator, geometry: BaseGeometry) -> BaseGeometry:
+    """Fixes orientation if orientation is clockwise"""
+    return orient(geometry)
 
 
 # Cell
 class GeometryValidation:
+    """Applies a list of validation checks and tries to fix them"""
 
     validators_map = {"orientation": OrientationValidator}
 
@@ -75,7 +92,8 @@ class GeometryValidation:
         self.add_validation_columns = add_validation_columns
         self.apply_fixes = apply_fixes
 
-    def _get_validators(self):
+    def _get_validators(self) -> Sequence[Validator]:
+        """Gets a list of Validator Classes based on string"""
         validators_classes = []
         for validator in self.validators:
             if isinstance(validator, str):
@@ -89,13 +107,16 @@ class GeometryValidation:
                 raise Exception("Invalid validator.")
         return validators_classes
 
-    def validate(self):
-        validators = self._get_validators()
-        gdf = self.gdf
-        for validator in validators:
-            gdf = validator(
-                gdf,
-                add_new_column=self.add_validation_columns,
-                apply_fix=self.apply_fixes,
-            ).validate()
-        return gdf
+
+@patch
+def validate_all(self: GeometryValidation) -> gpd.GeoDataFrame:
+    """Sequentially run validators"""
+    validators = self._get_validators()
+    gdf = self.gdf
+    for validator in validators:
+        gdf = validator(
+            gdf,
+            add_new_column=self.add_validation_columns,
+            apply_fix=self.apply_fixes,
+        ).validate()
+    return gdf
