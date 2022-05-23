@@ -2,7 +2,16 @@
 
 __all__ = ["index", "modules", "custom_doc_links", "git_url"]
 
-index = {"logger": "00_grids.ipynb", "GridGenerator": "00_grids.ipynb"}
+index = {
+    "logger": "00_grids.ipynb",
+    "GridGenerator": "00_grids.ipynb",
+    "get_ranges": "00_grids.ipynb",
+    "create_grid": "00_grids.ipynb",
+    "generate_grids": "00_grids.ipynb",
+    "GridGenerator.get_ranges": "00_grids.ipynb",
+    "GridGenerator.create_grid": "00_grids.ipynb",
+    "GridGenerator.generate_grids": "00_grids.ipynb",
+}
 
 modules = ["grids.py"]
 
