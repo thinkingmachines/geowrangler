@@ -1,102 +1,39 @@
 # Geowrangler
-> Tools for dealing with geospatial data
+> Tools for wrangling with geospatial data
 
+## Overview
 
-## Usage
+**Geowrangler** is a geospatial python package that aims to shorten the workflows in geodata wrangling. Its goal is to solve the problem of having to build time-consuming data transformation workflows with no out-of-the-box solutions from other libraries.
 
-### Installation
+Our immediate audience is the AI4D poverty mapping team, with the primary audience being the researchers and engineers delivering geospatial projects as well as other GIS data analysts. 
+
+We have surveyed insights from past projects and have a pipeline of ongoing and upcoming geospatial projects that require these data transformations and we saw the need to create **Geowrangler** to be able to extract and reuse these solutions we keep encountering in our work. [^1]
+
+### Modules
+* Grid Tile Generation
+* Geometry Validation 
+* Vector Zonal Stats 
+* Raster Zonal Stats (_planned_)
+* Geometry Simplification (_planned_)
+* Grid Tile Spatial Imputation (_planned_)
+
+## Installation
 
 ```
 pip install git+https://github.com/thinkingmachines/geowrangler.git
 ```
 
-### Usage
+## Documentation
 
-Import packages
-
-```python
-import geopandas as gpd
-
-from geowrangler import grids
-```
-
-Load a sample geojson file
-
-```python
-gdf = gpd.read_file("../data/region3_admin.geojson")
-```
-
-    length of gdf: 1 row(s)
-
-
-```python
-print(gdf)
-```
-
-        Reg_Code    Reg_Name   Reg_Alt_Name  \
-    0  030000000  Region III  Central Luzon   
-    
-                                                geometry  
-    0  MULTIPOLYGON (((120.11687 14.76309, 120.11684 ...  
-
-
-```python
-gdf.plot();
-```
-
-
-    
-![png](docs/images/output_7_0.png)
-    
-
-
-Create a grid generator with a size of 5000
-
-```python
-grid_generator = grids.GridGenerator(gdf, 5000)
-```
-
-Generate square grids
-
-```python
-%%time
-grids_gdf = grid_generator.generate_grids()
-```
-
-    CPU times: user 24.4 s, sys: 4.43 ms, total: 24.4 s
-    Wall time: 24.4 s
-
-
-Show gridded version of sample geojson file 
-
-    length of grids_gdf: 1074 row(s)
-
-
-```python
-grids_gdf.plot();
-```
-
-
-    
-![png](docs/images/output_14_0.png)
-    
-
-
-```python
-%%time
-# write geojson with grids
-grids_gdf.to_file("../data/region3_admin_grids.geojson", drivers="GeoJSON")
-```
-
-    CPU times: user 236 ms, sys: 21.1 ms, total: 257 ms
-    Wall time: 243 ms
-
+The documentation for [the project is available here](https://thinkingmachines.github.io/geowrangler)
 
 ## Development
 
-Please read [CONTRIBUTING.md](https://github.com/thinkingmachines/geowrangler/blob/master/CONTRIBUTING.md) and [CODE_OF_CONDUCT.md](https://github.com/thinkingmachines/geowrangler/blob/master/CODE_OF_CONDUCT.md) before anything
+### Development Setup
 
-### Setting up
+If you want to learn more about **Geowrangler** and explore its inner workings,
+you can setup a local development environment. You can run geowrangler's jupyter notebooks
+to see how the different modules are built and how they work. 
 
 Please ensure you are using python `3.9` or higher
 
@@ -111,36 +48,51 @@ poetry run pip install -e .
 
 The code for the **geowrangler** python package resides in Jupyter notebooks located in the `notebooks` folder.
 
-Using [nbdev](https://nbdev.fast.ai), we generate the python package code residing in the `geowrangler` folder from code cells in jupyter notebooks marked with a `#export` comment. A `#default_exp <module_name>` comment at the first code cell of each notebook directs nbdev to put the code in a module named `<module_name>` in the `geowrangler` folder. 
+Using [nbdev](https://nbdev.fast.ai), we generate the python modules residing in the `geowrangler` folder from code cells in jupyter notebooks marked with a `#export` comment. A `#default_exp <module_name>` comment at the first code cell of each notebook directs `nbdev` to put the code in a module named `<module_name>` in the `geowrangler` folder. 
 
 See the [nbdev cli](https://nbdev.fast.ai/cli.html) documentation for more details on the commands to generate the package as well as the documentation.
+### Running notebooks
+
+Run the following to view the jupyter notebooks in the `notebooks` folder
+
+```
+poetry run jupyter lab
+```
+### Generating and viewing the documentation site
+
+To generate and view the documentation site on your local machine, the quickest way is to setup [Docker](https://docs.docker.com/get-started/). The following assumes that you have setup docker on your system.
+```
+poetry run nbdev_build_docs --mk_readme False
+docker-compose up jekyll
+```
+
+As an alternative if you don't want to use _Docker_ you can [install jekyll](https://jekyllrb.com/docs/installation/) to view the documentation site locally.
+
+`nbdev` converts notebooks within the `notebooks/` folder into a jekyll site.
+
+From this jekyll site, you can then create a static site.
+
+To generate the docs, run the following
+
+```
+poetry run nbdev_build_docs -mk_readme False
+
+```
+
+To run the jekyll site, run the following
+
+```
+cd docs
+bundle exec jekyll serve
+```
 
 ### Running tests
 
 We are using `pytest` as our test framework. To run all tests and generate a generate a coverage report, run the following.
 
 ```
-poetry run pytest --cov . -n auto
+poetry run pytest --cov cov-config=.coveragerc -n auto
 ```
-
-    /home/butchtm/work/ai4d/geowrangler
-    [1m============================= test session starts ==============================[0m
-    platform linux -- Python 3.9.12, pytest-7.1.1, pluggy-1.0.0
-    rootdir: /home/butchtm/work/ai4d
-    plugins: forked-1.4.0, cov-3.0.0, xdist-2.5.0, anyio-3.5.0
-    gw0 [4] / gw1 [4] / gw2 [4] / gw3 [4][0m1m1m[1m[1m[1m[1m[1m[1m[1m
-    [32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m                                                                     [100%][0m
-    
-    ---------- coverage: platform linux, python 3.9.12-final-0 -----------
-    Name                      Stmts   Miss  Cover
-    ---------------------------------------------
-    geowrangler/__init__.py       1      0   100%
-    geowrangler/grids.py         29      0   100%
-    ---------------------------------------------
-    TOTAL                        30      0   100%
-    
-    [32m============================== [32m[1m4 passed[0m[32m in 6.70s[0m[32m ===============================[0m
-    /home/butchtm/work/ai4d/geowrangler/notebooks
 
 
 To run a single test or test file
@@ -151,24 +103,11 @@ poetry run pytest tests/test_grids.py::test_create_grids
 # for a single test file
 poetry run pytest tests/test_grids.py
 ```
+### Contributing
 
-    /home/butchtm/work/ai4d/geowrangler
-    [1m============================= test session starts ==============================[0m
-    platform linux -- Python 3.9.12, pytest-7.1.1, pluggy-1.0.0
-    rootdir: /home/butchtm/work/ai4d/geowrangler
-    plugins: forked-1.4.0, cov-3.0.0, xdist-2.5.0, anyio-3.5.0
-    collected 1 item                                                               [0m
-    
-    tests/test_grids.py [32m.[0m[32m                                                    [100%][0m
-    
-    [32m============================== [32m[1m1 passed[0m[32m in 0.33s[0m[32m ===============================[0m
-    [1m============================= test session starts ==============================[0m
-    platform linux -- Python 3.9.12, pytest-7.1.1, pluggy-1.0.0
-    rootdir: /home/butchtm/work/ai4d/geowrangler
-    plugins: forked-1.4.0, cov-3.0.0, xdist-2.5.0, anyio-3.5.0
-    collected 3 items                                                              [0m
-    
-    tests/test_grids.py [32m.[0m[32m.[0m[32m.[0m[32m                                                  [100%][0m
-    
-    [32m============================== [32m[1m3 passed[0m[32m in 5.87s[0m[32m ===============================[0m
+Please read [CONTRIBUTING.md](https://github.com/thinkingmachines/geowrangler/blob/master/CONTRIBUTING.md) and [CODE_OF_CONDUCT.md](https://github.com/thinkingmachines/geowrangler/blob/master/CODE_OF_CONDUCT.md) before anything.
 
+
+### References
+
+[^1] [Geowrangler Onboarding Document](https://docs.google.com/presentation/d/1zWURVMVYILtqN1_iKrXqLuhA4Rfb2kJ6cN2r8a1wMMM/edit?usp=sharing) (private)
