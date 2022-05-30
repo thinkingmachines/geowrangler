@@ -41,7 +41,7 @@ poetry run pip install -e .
 4. Run tests
 
 ```
-poetry run pytest --cov . -n auto
+poetry run pytest --cov cov-config=.coveragerc -n auto
 ```
 
 5. Commit and Submit PR for review
