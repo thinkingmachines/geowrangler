@@ -91,7 +91,7 @@ bundle exec jekyll serve
 We are using `pytest` as our test framework. To run all tests and generate a generate a coverage report, run the following.
 
 ```
-poetry run pytest --cov cov-config=.coveragerc -n auto
+poetry run pytest --cov --cov-config=.coveragerc -n auto
 ```
 
 

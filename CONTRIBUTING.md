@@ -38,14 +38,16 @@ poetry run pip install -e .
 
 3. Make necessary changes. See [Developing with nbdev](#developing-with-nbdev) for more info.
 
-4. Run tests
+4. Run tests and ensure they all pass before submitting a PR. Also add tests whenever adding a new feature. Finally, clean up tests that are longer applicable.
 
 ```
-poetry run pytest --cov cov-config=.coveragerc -n auto
+poetry run pytest --cov --cov-config=.coveragerc --cov-fail-under=80 -n auto
 ```
+
 
 5. Commit and Submit PR for review
 
+> Note:  If the code coverage falls below 80 percent, the PR will be rejected.
 ## Developing with nbdev
 
 [nbdev](https://nbdev.fast.ai) a library that allows you to develop a python library in Jupyter Notebooks.
