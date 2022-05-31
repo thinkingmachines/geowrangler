@@ -24,7 +24,7 @@ index = {
 
 modules = ["grids.py", "validation.py"]
 
-doc_url = "https://thinkingmachines.github.io/"
+doc_url = "https://geowrangler.web.app/"
 
 git_url = "https://github.com/thinkingmachines/geowrangler/tree/master/"
 
