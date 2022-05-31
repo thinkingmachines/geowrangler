@@ -5,6 +5,7 @@ __all__ = [
     "Validator",
     "OrientationValidator",
     "CrsBoundsValidator",
+    "SelfIntersectingValidator",
     "GeometryValidation",
 ]
 
@@ -16,6 +17,7 @@ from typing import Sequence, Union
 
 import geopandas as gpd
 from fastcore.basics import patch
+from shapely import validation as shapely_validation
 from shapely.algorithms.cga import signed_area
 from shapely.geometry.base import BaseGeometry
 from shapely.geometry.polygon import orient
@@ -105,7 +107,7 @@ def fix(self: OrientationValidator, geometry: BaseGeometry) -> BaseGeometry:
 class CrsBoundsValidator(Validator):
     """Checks bounds of the geometry to ensure it is within bounds or crs"""
 
-    validator_column_name = "is_oriented_properly"
+    validator_column_name = "is_bounds_within_crs"
     fix_available = False
     warning_message = "Found geometries out of bounds from crs"
 
@@ -126,9 +128,32 @@ def check(
 
 
 @patch
-def fix(self: CrsBoundsValidator, geometry: BaseGeometry) -> BaseGeometry:
+def fix(
+    self: CrsBoundsValidator, geometry: BaseGeometry
+) -> BaseGeometry:  # pragma: no cover
     """No fix available for CRS Bounds"""
     return geometry
+
+
+# Cell
+
+
+class SelfIntersectingValidator(Validator):
+    """Checks bounds of the geometry to ensure it is within bounds or crs"""
+
+    validator_column_name = "is_not_self_intersecting"
+
+
+@patch
+def check(self: SelfIntersectingValidator, geometry: BaseGeometry) -> bool:
+    explanation = shapely_validation.explain_validity(geometry)
+    return "Self-intersection" not in explanation
+
+
+@patch
+def fix(self: SelfIntersectingValidator, geometry: BaseGeometry) -> BaseGeometry:
+    """Fix intersection geometry by applying shapely.validation.make_valid"""
+    return shapely_validation.make_valid(geometry)
 
 
 # Cell
@@ -140,6 +165,7 @@ class GeometryValidation:
     validators_map = {
         "orientation": OrientationValidator,
         "crs_bounds": CrsBoundsValidator,
+        "self_intersecting": SelfIntersectingValidator,
     }
 
     def __init__(
