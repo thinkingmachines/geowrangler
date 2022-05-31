@@ -22,7 +22,6 @@ from shapely.geometry.polygon import orient
 
 logger = logging.getLogger(__name__)
 
-
 # Cell
 class ValidationError(Exception):
     pass
@@ -31,6 +30,9 @@ class ValidationError(Exception):
 # Cell
 class Validator(ABC):
     """Abstract Base Class for single validator"""
+
+    fix_available = True
+    warning_message = "Geometry errors found"
 
     def __init__(
         self,
@@ -45,6 +47,9 @@ class Validator(ABC):
     def validator_column_name(self):  # pragma: no cover
         pass
 
+    def get_check_arguments(self, gdf: gpd.GeoDataFrame) -> dict:
+        return {}
+
     def check(
         self, geometry: BaseGeometry, gdf: gpd.GeoDataFrame
     ) -> bool:  # pragma: no cover
@@ -56,13 +61,19 @@ class Validator(ABC):
 
 @patch
 def validate(self: Validator, gdf: gpd.GeoDataFrame, clone=True) -> gpd.GeoDataFrame:
-    """Method that checks the validity of a each geometry and applies a fix to these geometry"""
+    """Method that checks the validity of a each geometry and applies a fix to these geometries or raise a warning"""
     if clone:
         gdf = gdf.copy()
-    is_valid = gdf.geometry.apply(self.check)
+    check_arguments = self.get_check_arguments(gdf)
+    is_valid = gdf.geometry.apply(self.check, **check_arguments)
     if self.add_new_column:
         gdf[self.validator_column_name] = is_valid
-    if self.apply_fix:
+
+    # For cases where no fix is available, run warning instead of applying fixes
+    if (not self.fix_available) and (~is_valid.all()):
+        warnings.warn(self.warning_message)
+    # Fix geometries
+    elif self.apply_fix:
         gdf.loc[~is_valid, "geometry"] = gdf[~is_valid].geometry.apply(self.fix)
     return gdf
 
@@ -95,6 +106,11 @@ class CrsBoundsValidator(Validator):
     """Checks bounds of the geometry to ensure it is within bounds or crs"""
 
     validator_column_name = "is_oriented_properly"
+    fix_available = False
+    warning_message = "Found geometries out of bounds from crs"
+
+    def get_check_arguments(self, gdf: gpd.GeoDataFrame) -> dict:
+        return {"gdf": gdf}
 
 
 @patch
@@ -113,21 +129,6 @@ def check(
 def fix(self: CrsBoundsValidator, geometry: BaseGeometry) -> BaseGeometry:
     """No fix available for CRS Bounds"""
     return geometry
-
-
-@patch
-def validate(
-    self: CrsBoundsValidator, gdf: gpd.GeoDataFrame, clone=True
-) -> gpd.GeoDataFrame:
-    """Method that checks the validity of a each geometry and applies a fix to these geometry"""
-    if clone:
-        gdf = gdf.copy()
-    is_valid = gdf.geometry.apply(self.check, gdf=gdf)
-    if self.add_new_column:
-        gdf[self.validator_column_name] = is_valid
-    if self.apply_fix and ~is_valid.all():
-        warnings.warn("Found geometries out of bounds from crs")
-    return gdf
 
 
 # Cell
