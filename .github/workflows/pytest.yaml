@@ -27,6 +27,6 @@ jobs:
             poetry-${{ hashFiles('**/poetry.lock') }}
       - run: poetry install
         if: steps.cache.outputs.cache-hit != 'true'
-      - run: poetry run pytest --cov . -n auto
       # Code cove with a min percentage
       # - run: poetry run pytest --cov . --cov-fail-under=80 -n auto
+      - run: poetry run pytest --cov --cov-config=.coveragerc --cov-fail-under=80 -n auto
