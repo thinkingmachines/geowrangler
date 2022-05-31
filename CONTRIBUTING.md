@@ -44,7 +44,6 @@ poetry run pip install -e .
 poetry run pytest --cov --cov-config=.coveragerc --cov-fail-under=80 -n auto
 ```
 
-
 5. Commit and Submit PR for review
 
 > Note:  If the code coverage falls below 80 percent, the PR will be rejected.
