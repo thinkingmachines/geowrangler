@@ -1,4 +1,5 @@
 import geopandas as gpd
+import numpy as np
 import pytest
 from shapely.geometry import multipolygon, polygon
 
@@ -251,3 +252,26 @@ def test_self_intersecting_validator_fix(
         .fix(geometry=self_intersecting_geometry)
         .equals(fixed_self_intersecting_geometry)
     )
+
+
+def test_null_invalid():
+    assert validation.NullValidator().check(geometry=None) is False
+    assert validation.NullValidator().check(geometry=np.nan) is False
+
+
+def test_null_valid():
+    assert (
+        validation.NullValidator().check(
+            geometry=polygon.Polygon(([(0, 0), (1, 0), (1, 1), (0, 1)]))
+        )
+        is True
+    )
+
+
+def test_null_warning():
+    gdf = gpd.GeoDataFrame(
+        geometry=[None, np.nan],
+        crs="EPSG:4326",
+    )
+    with pytest.warns(UserWarning, match="Found null geometries"):
+        validation.NullValidator().validate(gdf)
