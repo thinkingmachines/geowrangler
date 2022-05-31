@@ -5,3 +5,4 @@
 ### Features
 
 - Implemented `GridGenerator`
+- Implemented `GeometryValidation`
