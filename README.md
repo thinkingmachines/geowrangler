@@ -7,7 +7,7 @@
 
 Our immediate audience is the AI4D poverty mapping team, with the primary audience being the researchers and engineers delivering geospatial projects as well as other GIS data analysts. 
 
-We have surveyed insights from past projects and have a pipeline of ongoing and upcoming geospatial projects that require these data transformations and we saw the need to create **Geowrangler** to be able to extract and reuse these solutions we keep encountering in our work. [^1]
+We have surveyed insights from past projects and have a pipeline of ongoing and upcoming geospatial projects that require these data transformations and we saw the need to create **Geowrangler** to be able to extract and reuse these solutions we keep encountering in our work [^1].
 
 ### Modules
 * Grid Tile Generation
@@ -20,12 +20,15 @@ We have surveyed insights from past projects and have a pipeline of ongoing and 
 ## Installation
 
 ```
-pip install git+https://github.com/thinkingmachines/geowrangler.git
+pip install git+ssh://git@github.com/thinkingmachines/geowrangler.git
 ```
+
+> Note: please make sure you have access to the [geowrangler github repo](https://github.com/thinkingmachines/geowrangler)
+
 
 ## Documentation
 
-The documentation for [the project is available here](https://thinkingmachines.github.io/geowrangler)
+The documentation for [the package is available here](https://geowrangler.web.app)
 
 ## Development
 
@@ -91,7 +94,7 @@ bundle exec jekyll serve
 We are using `pytest` as our test framework. To run all tests and generate a generate a coverage report, run the following.
 
 ```
-poetry run pytest --cov cov-config=.coveragerc -n auto
+poetry run pytest --cov --cov-config=.coveragerc -n auto
 ```
 
 
@@ -110,4 +113,5 @@ Please read [CONTRIBUTING.md](https://github.com/thinkingmachines/geowrangler/bl
 
 ### References
 
-[^1] [Geowrangler Onboarding Document](https://docs.google.com/presentation/d/1zWURVMVYILtqN1_iKrXqLuhA4Rfb2kJ6cN2r8a1wMMM/edit?usp=sharing) (private)
+
+[^1]: [Geowrangler Onboarding Document](https://docs.google.com/presentation/d/1zWURVMVYILtqN1_iKrXqLuhA4Rfb2kJ6cN2r8a1wMMM/edit?usp=sharing) (private)

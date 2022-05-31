@@ -2,9 +2,9 @@
 
 #### Table of Contents
 
-1. [Feedback](#feature-requests-or-feedback)
+1. [Feedback](#feedback)
 2. [Report Bugs](#report-bugs)
-3. [Creating a Pull Request](#creating-a-pull-request)
+3. [Creating Pull Requests](#creating-pull-requests)
 4. [Developing with nbdev](#developing-with-nbdev)
 
 ## Feedback
@@ -26,7 +26,7 @@ If you are reporting a bug, please include:
 ## Creating pull requests
 
 1. Fork the repo in Github or go to https://github.com/thinkingmachines/geowrangler/fork
-2. Enable and install pre-commit and poetry
+2. Install and enable `pre-commit` and `poetry`
 
 ```
 pip install poetry pre-commit
@@ -36,19 +36,20 @@ poetry run pip install pip --upgrade
 poetry run pip install -e .
 ```
 
-3. Make necessary changes. See [Developing with nbdev](#developing-with-nbdev) for more info.
+3. Make the necessary changes. See [Developing with nbdev](#developing-with-nbdev) for more info.
 
-4. Run tests
+4. Run the tests and ensure they all pass before submitting a PR. Also add tests whenever adding a new feature. Finally, clean up tests that are longer applicable.
 
 ```
-poetry run pytest --cov cov-config=.coveragerc -n auto
+poetry run pytest --cov --cov-config=.coveragerc --cov-fail-under=80 -n auto
 ```
 
 5. Commit and Submit PR for review
 
+> Note:  If the code coverage falls below 80 percent, the PR will be rejected.
 ## Developing with nbdev
 
-[nbdev](https://nbdev.fast.ai) a library that allows you to develop a python library in Jupyter Notebooks.
+[nbdev](https://nbdev.fast.ai) is a library that allows you to develop a python library in [Jupyter Notebooks](https://jupyter.org/) as well, putting all your code and documentation in one place.
 
 
 ### Generating the python code
