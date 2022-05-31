@@ -6,6 +6,7 @@ __all__ = [
     "OrientationValidator",
     "CrsBoundsValidator",
     "SelfIntersectingValidator",
+    "NullValidator",
     "GeometryValidation",
 ]
 
@@ -16,6 +17,7 @@ from abc import ABC, abstractmethod
 from typing import Sequence, Union
 
 import geopandas as gpd
+import pandas as pd
 from fastcore.basics import patch
 from shapely import validation as shapely_validation
 from shapely.algorithms.cga import signed_area
@@ -107,7 +109,7 @@ def fix(self: OrientationValidator, geometry: BaseGeometry) -> BaseGeometry:
 class CrsBoundsValidator(Validator):
     """Checks bounds of the geometry to ensure it is within bounds or crs"""
 
-    validator_column_name = "is_bounds_within_crs"
+    validator_column_name = "is_within_crs_bounds"
     fix_available = False
     warning_message = "Found geometries out of bounds from crs"
 
@@ -159,6 +161,31 @@ def fix(self: SelfIntersectingValidator, geometry: BaseGeometry) -> BaseGeometry
 # Cell
 
 
+class NullValidator(Validator):
+    """Checks bounds of the geometry to ensure it is within bounds or crs"""
+
+    validator_column_name = "is_not_null"
+    fix_available = False
+    warning_message = "Found null geometries"
+
+
+@patch
+def check(self: NullValidator, geometry: BaseGeometry) -> bool:
+    """Checks if polygon is within bounds of crs"""
+    return not pd.isnull(geometry)
+
+
+@patch
+def fix(
+    self: NullValidator, geometry: BaseGeometry
+) -> BaseGeometry:  # pragma: no cover
+    """No fix available for CRS Bounds"""
+    return geometry
+
+
+# Cell
+
+
 class GeometryValidation:
     """Applies a list of validation checks and tries to fix them"""
 
@@ -166,12 +193,18 @@ class GeometryValidation:
         "orientation": OrientationValidator,
         "crs_bounds": CrsBoundsValidator,
         "self_intersecting": SelfIntersectingValidator,
+        "null": NullValidator,
     }
 
     def __init__(
         self,
         gdf: gpd.GeoDataFrame,
-        validators: Sequence[Union[str, Validator]] = ("orientation", "crs_bounds"),
+        validators: Sequence[Union[str, Validator]] = (
+            "orientation",
+            "crs_bounds",
+            "self_intersecting",
+            "null",
+        ),
         add_validation_columns: bool = True,
         apply_fixes: bool = True,
     ) -> gpd.GeoDataFrame:
