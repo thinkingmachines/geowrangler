@@ -20,6 +20,12 @@ index = {
     "CrsBoundsValidator.validate": "00_validation.ipynb",
     "GeometryValidation": "00_validation.ipynb",
     "GeometryValidation.validate_all": "00_validation.ipynb",
+    "SelfIntersectingValidator": "00_validation.ipynb",
+    "SelfIntersectingValidator.check": "00_validation.ipynb",
+    "SelfIntersectingValidator.fix": "00_validation.ipynb",
+    "NullValidator": "00_validation.ipynb",
+    "NullValidator.check": "00_validation.ipynb",
+    "NullValidator.fix": "00_validation.ipynb",
 }
 
 modules = ["grids.py", "validation.py"]

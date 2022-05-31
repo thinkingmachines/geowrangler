@@ -5,6 +5,8 @@ __all__ = [
     "Validator",
     "OrientationValidator",
     "CrsBoundsValidator",
+    "SelfIntersectingValidator",
+    "NullValidator",
     "GeometryValidation",
 ]
 
@@ -15,7 +17,9 @@ from abc import ABC, abstractmethod
 from typing import Sequence, Union
 
 import geopandas as gpd
+import pandas as pd
 from fastcore.basics import patch
+from shapely import validation as shapely_validation
 from shapely.algorithms.cga import signed_area
 from shapely.geometry.base import BaseGeometry
 from shapely.geometry.polygon import orient
@@ -105,7 +109,7 @@ def fix(self: OrientationValidator, geometry: BaseGeometry) -> BaseGeometry:
 class CrsBoundsValidator(Validator):
     """Checks bounds of the geometry to ensure it is within bounds or crs"""
 
-    validator_column_name = "is_oriented_properly"
+    validator_column_name = "is_within_crs_bounds"
     fix_available = False
     warning_message = "Found geometries out of bounds from crs"
 
@@ -126,7 +130,55 @@ def check(
 
 
 @patch
-def fix(self: CrsBoundsValidator, geometry: BaseGeometry) -> BaseGeometry:
+def fix(
+    self: CrsBoundsValidator, geometry: BaseGeometry
+) -> BaseGeometry:  # pragma: no cover
+    """No fix available for CRS Bounds"""
+    return geometry
+
+
+# Cell
+
+
+class SelfIntersectingValidator(Validator):
+    """Checks bounds of the geometry to ensure it is within bounds or crs"""
+
+    validator_column_name = "is_not_self_intersecting"
+
+
+@patch
+def check(self: SelfIntersectingValidator, geometry: BaseGeometry) -> bool:
+    explanation = shapely_validation.explain_validity(geometry)
+    return "Self-intersection" not in explanation
+
+
+@patch
+def fix(self: SelfIntersectingValidator, geometry: BaseGeometry) -> BaseGeometry:
+    """Fix intersection geometry by applying shapely.validation.make_valid"""
+    return shapely_validation.make_valid(geometry)
+
+
+# Cell
+
+
+class NullValidator(Validator):
+    """Checks bounds of the geometry to ensure it is within bounds or crs"""
+
+    validator_column_name = "is_not_null"
+    fix_available = False
+    warning_message = "Found null geometries"
+
+
+@patch
+def check(self: NullValidator, geometry: BaseGeometry) -> bool:
+    """Checks if polygon is within bounds of crs"""
+    return not pd.isnull(geometry)
+
+
+@patch
+def fix(
+    self: NullValidator, geometry: BaseGeometry
+) -> BaseGeometry:  # pragma: no cover
     """No fix available for CRS Bounds"""
     return geometry
 
@@ -140,12 +192,19 @@ class GeometryValidation:
     validators_map = {
         "orientation": OrientationValidator,
         "crs_bounds": CrsBoundsValidator,
+        "self_intersecting": SelfIntersectingValidator,
+        "null": NullValidator,
     }
 
     def __init__(
         self,
         gdf: gpd.GeoDataFrame,
-        validators: Sequence[Union[str, Validator]] = ("orientation", "crs_bounds"),
+        validators: Sequence[Union[str, Validator]] = (
+            "orientation",
+            "crs_bounds",
+            "self_intersecting",
+            "null",
+        ),
         add_validation_columns: bool = True,
         apply_fixes: bool = True,
     ) -> gpd.GeoDataFrame:

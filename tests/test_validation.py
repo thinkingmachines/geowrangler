@@ -1,6 +1,7 @@
 import geopandas as gpd
+import numpy as np
 import pytest
-from shapely.geometry import polygon
+from shapely.geometry import multipolygon, polygon
 
 from geowrangler import validation
 
@@ -15,6 +16,21 @@ def misoriented_geometry():
 def oriented_geometry():
     """Generates a shapely polygon that where the points are counter-clockwise"""
     return polygon.Polygon(([(0, 0), (1, 0), (1, 1), (0, 1)]))
+
+
+@pytest.fixture()
+def self_intersecting_geometry():
+    return polygon.Polygon([(0, 0), (0, 2), (1, 1), (2, 2), (2, 0), (1, 1), (0, 0)])
+
+
+@pytest.fixture()
+def fixed_self_intersecting_geometry():
+    return multipolygon.MultiPolygon(
+        [
+            polygon.Polygon([(0, 0), (0, 2), (1, 1), (0, 0)]),
+            polygon.Polygon([(1, 1), (2, 2), (2, 0), (1, 1)]),
+        ]
+    )
 
 
 def test_validator_validate_passes(mocker):
@@ -208,3 +224,54 @@ def test_crs_bounds_warning():
     )
     with pytest.warns(UserWarning, match="Found geometries out of bounds from crs"):
         validation.CrsBoundsValidator().validate(gdf)
+
+
+def test_self_intersecting_invalid(self_intersecting_geometry):
+    assert (
+        validation.SelfIntersectingValidator().check(
+            geometry=self_intersecting_geometry
+        )
+        is False
+    )
+
+
+def test_self_intersecting_invalid(fixed_self_intersecting_geometry):
+    assert (
+        validation.SelfIntersectingValidator().check(
+            geometry=fixed_self_intersecting_geometry
+        )
+        is True
+    )
+
+
+def test_self_intersecting_validator_fix(
+    self_intersecting_geometry, fixed_self_intersecting_geometry
+):
+    assert (
+        validation.SelfIntersectingValidator()
+        .fix(geometry=self_intersecting_geometry)
+        .equals(fixed_self_intersecting_geometry)
+    )
+
+
+def test_null_invalid():
+    assert validation.NullValidator().check(geometry=None) is False
+    assert validation.NullValidator().check(geometry=np.nan) is False
+
+
+def test_null_valid():
+    assert (
+        validation.NullValidator().check(
+            geometry=polygon.Polygon(([(0, 0), (1, 0), (1, 1), (0, 1)]))
+        )
+        is True
+    )
+
+
+def test_null_warning():
+    gdf = gpd.GeoDataFrame(
+        geometry=[None, np.nan],
+        crs="EPSG:4326",
+    )
+    with pytest.warns(UserWarning, match="Found null geometries"):
+        validation.NullValidator().validate(gdf)
