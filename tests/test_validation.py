@@ -19,6 +19,26 @@ def oriented_geometry():
 
 
 @pytest.fixture()
+def misoriented_multipolygon():
+    return multipolygon.MultiPolygon(
+        [
+            polygon.Polygon(([(0, 0), (0, 1), (1, 1), (1, 0)])),
+            polygon.Polygon(([(10, 10), (11, 10), (11, 11), (10, 11)])),
+        ]
+    )
+
+
+@pytest.fixture()
+def oriented_multipolygon():
+    return multipolygon.MultiPolygon(
+        [
+            polygon.Polygon(([(0, 0), (1, 0), (1, 1), (0, 1)])),
+            polygon.Polygon(([(10, 10), (11, 10), (11, 11), (10, 11)])),
+        ]
+    )
+
+
+@pytest.fixture()
 def self_intersecting_geometry():
     return polygon.Polygon([(0, 0), (0, 2), (1, 1), (2, 2), (2, 0), (1, 1), (0, 0)])
 
@@ -144,6 +164,29 @@ def test_orientation_validator_fix_invalid(misoriented_geometry, oriented_geomet
         validation.OrientationValidator()
         .fix(geometry=misoriented_geometry)
         .equals(oriented_geometry)
+    )
+
+
+def test_orientation_validator_invalid_multipolygon(misoriented_multipolygon):
+    assert (
+        validation.OrientationValidator().check(geometry=misoriented_multipolygon)
+        is False
+    )
+
+
+def test_orientation_validator_valid_multipolygon(oriented_multipolygon):
+    assert (
+        validation.OrientationValidator().check(geometry=oriented_multipolygon) is True
+    )
+
+
+def test_orientation_validator_fix_invalid_multipolygon(
+    misoriented_multipolygon, oriented_multipolygon
+):
+    assert (
+        validation.OrientationValidator()
+        .fix(geometry=misoriented_multipolygon)
+        .equals(oriented_multipolygon)
     )
 
 
