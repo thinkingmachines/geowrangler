@@ -22,6 +22,7 @@ from fastcore.basics import patch
 from shapely import validation as shapely_validation
 from shapely.algorithms.cga import signed_area
 from shapely.geometry.base import BaseGeometry
+from shapely.geometry.multipolygon import MultiPolygon
 from shapely.geometry.polygon import orient
 
 logger = logging.getLogger(__name__)
@@ -94,13 +95,23 @@ class OrientationValidator(Validator):
 @patch
 def check(self: OrientationValidator, geometry: BaseGeometry) -> bool:
     """Checks if orientation is counter clockwise"""
-    return signed_area(geometry.exterior) >= 0
+    if geometry.geom_type == "Polygon":
+        return signed_area(geometry.exterior) >= 0
+    elif geometry.geom_type == "MultiPolygon":
+        return all([signed_area(g.exterior) >= 0 for g in geometry.geoms])
+    else:
+        return True
 
 
 @patch
 def fix(self: OrientationValidator, geometry: BaseGeometry) -> BaseGeometry:
     """Fixes orientation if orientation is clockwise"""
-    return orient(geometry)
+    if geometry.geom_type == "Polygon":
+        return orient(geometry)
+    elif geometry.geom_type == "MultiPolygon":
+        return MultiPolygon([orient(g) for g in geometry.geoms])
+    else:
+        return geometry
 
 
 # Cell
