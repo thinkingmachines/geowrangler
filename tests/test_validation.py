@@ -57,7 +57,7 @@ def test_validator_validate_passes(mocker):
     check = mocker.MagicMock(return_value=True)
     fix = mocker.MagicMock(return_value=polygon.Polygon([(0, 0), (1, 0), (1, 1)]))
 
-    class TestValidator(validation.Validator):
+    class TestValidator(validation.BaseValidator):
         validator_column_name = "test_column"
 
         def fix(self, geometry):
@@ -81,7 +81,7 @@ def test_validator_validate_fails(mocker):
     check = mocker.MagicMock(return_value=False)
     fix = mocker.MagicMock(return_value=polygon.Polygon([(0, 0), (1, 0), (1, 1)]))
 
-    class TestValidator(validation.Validator):
+    class TestValidator(validation.BaseValidator):
         validator_column_name = "test_column"
 
         def fix(self, geometry):
@@ -105,7 +105,7 @@ def test_validator_validate_no_column(mocker):
     check = mocker.MagicMock(return_value=False)
     fix = mocker.MagicMock(return_value=polygon.Polygon([(0, 0), (1, 0), (1, 1)]))
 
-    class TestValidator(validation.Validator):
+    class TestValidator(validation.BaseValidator):
         validator_column_name = "test_column"
 
         def fix(self, geometry):
@@ -129,7 +129,7 @@ def test_validator_validate_apply_fix(mocker):
     check = mocker.MagicMock(return_value=False)
     fix = mocker.MagicMock(return_value=polygon.Polygon([(0, 0), (1, 0), (1, 1)]))
 
-    class TestValidator(validation.Validator):
+    class TestValidator(validation.BaseValidator):
         validator_column_name = "test_column"
 
         def fix(self, geometry):
@@ -203,7 +203,7 @@ def test_geometry_validation(oriented_geometry):
 def test_geometry_validation_get_validators(oriented_geometry):
     gdf = gpd.GeoDataFrame(geometry=[oriented_geometry])
     validators = validation.GeometryValidation(gdf, ["orientation"])._get_validators()
-    assert all(issubclass(v, validation.Validator) for v in validators)
+    assert all(issubclass(v, validation.BaseValidator) for v in validators)
 
 
 def test_geometry_validation_get_validators_not_valid(

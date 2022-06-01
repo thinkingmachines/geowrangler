@@ -1,0 +1,9 @@
+{
+"type": "FeatureCollection",
+"features": [
+{ "type": "Feature", "properties": { "id": "valid" }, "geometry": { "type": "Polygon", "coordinates": [ [ [ 0.0, 0.0 ], [ 1.0, 0.0 ], [ 0.0, 1.0 ], [ 0.0, 0.0 ] ] ] } },
+{ "type": "Feature", "properties": { "id": "out_of_crs_bounds" }, "geometry": { "type": "Polygon", "coordinates": [ [ [ 200.0, 0.0 ], [ 1.0, 0.0 ], [ 0.0, 1.0 ], [ 200.0, 0.0 ] ] ] } },
+{ "type": "Feature", "properties": { "id": "misoriented" }, "geometry": { "type": "Polygon", "coordinates": [ [ [ 0.0, 0.0 ], [ 0.0, 1.0 ], [ 1.0, 1.0 ], [ 1.0, 0.0 ], [ 0.0, 0.0 ] ] ] } },
+{ "type": "Feature", "properties": { "id": "self_intersecting" }, "geometry": { "type": "Polygon", "coordinates": [ [ [ 0.0, 0.0 ], [ 0.0, 2.0 ], [ 1.0, 1.0 ], [ 2.0, 2.0 ], [ 2.0, 0.0 ], [ 1.0, 1.0 ], [ 0.0, 0.0 ] ] ] } }
+]
+}

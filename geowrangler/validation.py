@@ -2,7 +2,7 @@
 
 __all__ = [
     "ValidationError",
-    "Validator",
+    "BaseValidator",
     "OrientationValidator",
     "CrsBoundsValidator",
     "SelfIntersectingValidator",
@@ -33,7 +33,7 @@ class ValidationError(Exception):
 
 
 # Cell
-class Validator(ABC):
+class BaseValidator(ABC):
     """Abstract Base Class for single validator"""
 
     fix_available = True
@@ -65,7 +65,9 @@ class Validator(ABC):
 
 
 @patch
-def validate(self: Validator, gdf: gpd.GeoDataFrame, clone=True) -> gpd.GeoDataFrame:
+def validate(
+    self: BaseValidator, gdf: gpd.GeoDataFrame, clone=True
+) -> gpd.GeoDataFrame:
     """Method that checks the validity of a each geometry and applies a fix to these geometries or raise a warning"""
     if clone:
         gdf = gdf.copy()
@@ -86,7 +88,7 @@ def validate(self: Validator, gdf: gpd.GeoDataFrame, clone=True) -> gpd.GeoDataF
 # Cell
 
 
-class OrientationValidator(Validator):
+class OrientationValidator(BaseValidator):
     """Checks and fixes Orienation of the geometry to ensure it works for multiple system"""
 
     validator_column_name = "is_oriented_properly"
@@ -117,7 +119,7 @@ def fix(self: OrientationValidator, geometry: BaseGeometry) -> BaseGeometry:
 # Cell
 
 
-class CrsBoundsValidator(Validator):
+class CrsBoundsValidator(BaseValidator):
     """Checks bounds of the geometry to ensure it is within bounds or crs"""
 
     validator_column_name = "is_within_crs_bounds"
@@ -151,7 +153,7 @@ def fix(
 # Cell
 
 
-class SelfIntersectingValidator(Validator):
+class SelfIntersectingValidator(BaseValidator):
     """Checks bounds of the geometry to ensure it is within bounds or crs"""
 
     validator_column_name = "is_not_self_intersecting"
@@ -172,7 +174,7 @@ def fix(self: SelfIntersectingValidator, geometry: BaseGeometry) -> BaseGeometry
 # Cell
 
 
-class NullValidator(Validator):
+class NullValidator(BaseValidator):
     """Checks bounds of the geometry to ensure it is within bounds or crs"""
 
     validator_column_name = "is_not_null"
@@ -210,11 +212,11 @@ class GeometryValidation:
     def __init__(
         self,
         gdf: gpd.GeoDataFrame,
-        validators: Sequence[Union[str, Validator]] = (
+        validators: Sequence[Union[str, BaseValidator]] = (
+            "null",
+            "self_intersecting",
             "orientation",
             "crs_bounds",
-            "self_intersecting",
-            "null",
         ),
         add_validation_columns: bool = True,
         apply_fixes: bool = True,
@@ -224,7 +226,7 @@ class GeometryValidation:
         self.add_validation_columns = add_validation_columns
         self.apply_fixes = apply_fixes
 
-    def _get_validators(self) -> Sequence[Validator]:
+    def _get_validators(self) -> Sequence[BaseValidator]:
         """Gets a list of Validator Classes based on string"""
         validators_classes = []
         for validator in self.validators:
@@ -232,6 +234,8 @@ class GeometryValidation:
                 if validator not in self.validators_map:
                     raise ValidationError("Invalid validator.")
                 validator = self.validators_map[validator]
+                validators_classes.append(validator)
+            if issubclass(validator, BaseValidator):
                 validators_classes.append(validator)
             else:
                 raise ValidationError("Invalid validator.")
