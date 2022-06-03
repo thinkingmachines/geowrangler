@@ -243,9 +243,8 @@ class GeometryValidation:
             if isinstance(validator, str):
                 if validator not in self.validators_map:
                     raise ValidationError("Invalid validator.")
-                validator = self.validators_map[validator]
-                validators_classes.append(validator)
-            if issubclass(validator, BaseValidator):
+                validators_classes.append(self.validators_map[validator])
+            elif issubclass(validator, BaseValidator):
                 validators_classes.append(validator)
             else:
                 raise ValidationError("Invalid validator.")
