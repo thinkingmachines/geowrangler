@@ -38,6 +38,7 @@ class BaseValidator(ABC):
 
     fix_available = True
     warning_message = "Geometry errors found"
+    geometry_types = None
 
     def __init__(
         self,
@@ -63,6 +64,16 @@ class BaseValidator(ABC):
     def fix(self, geometry: BaseGeometry):  # pragma: no cover
         pass
 
+    def skip(self, geometry: BaseGeometry):
+        """Checks whether to skip the check. Used for skipping check that only works for certain types."""
+        # If nothing is specified always, run validator
+        if self.geometry_types is None:
+            return False
+        elif geometry.geom_type not in self.geometry_types:
+            return False
+        else:
+            return True
+
 
 @patch
 def validate(
@@ -72,7 +83,9 @@ def validate(
     if clone:
         gdf = gdf.copy()
     check_arguments = self.get_check_arguments(gdf)
-    is_valid = gdf.geometry.apply(self.check, **check_arguments)
+    is_valid = gdf.geometry.apply(
+        lambda g: self.skip(g) or self.check(g, **check_arguments),
+    )
     if self.add_new_column:
         gdf[self.validator_column_name] = is_valid
 
@@ -92,6 +105,7 @@ class OrientationValidator(BaseValidator):
     """Checks and fixes Orienation of the geometry to ensure it works for multiple system"""
 
     validator_column_name = "is_oriented_properly"
+    geometry_types = ["MultiPolygon", "Polygon"]
 
 
 @patch
