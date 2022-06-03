@@ -1,7 +1,7 @@
 import geopandas as gpd
 import numpy as np
 import pytest
-from shapely.geometry import multipolygon, polygon
+from shapely.geometry import multipolygon, point, polygon
 
 from geowrangler import validation
 
@@ -147,6 +147,35 @@ def test_validator_validate_apply_fix(mocker):
     check.assert_called_once()
     fix.assert_not_called()
     assert "test_column" in validated_gdf
+
+
+def test_validator_skip(mocker):
+    check = mocker.MagicMock(return_value=True)
+    fix = mocker.MagicMock(return_value=polygon.Polygon([(0, 0), (1, 0), (1, 1)]))
+
+    class TestValidator(validation.BaseValidator):
+        validator_column_name = "test_column"
+        geometry_types = ["Point"]
+
+        def fix(self, geometry):
+            return fix(geometry)
+
+        def check(self, geometry):
+            return check(geometry)
+
+    gdf = gpd.GeoDataFrame(
+        geometry=[
+            polygon.Polygon([(0, 0), (1, 0), (0, 1)]),
+        ]
+    )
+    TestValidator().validate(gdf)
+    check.assert_not_called()
+    fix.assert_not_called()
+
+
+def test_orientation_validator_geometry_type():
+    gdf = gpd.GeoDataFrame(geometry=[point.Point(0, 0)])
+    assert validation.OrientationValidator().validate(gdf)["is_oriented_properly"].all()
 
 
 def test_orientation_validator_invalid(misoriented_geometry):
