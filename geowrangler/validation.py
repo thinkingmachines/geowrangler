@@ -69,7 +69,7 @@ class BaseValidator(ABC):
         # If nothing is specified always, run validator
         if self.geometry_types is None:
             return False
-        elif geometry.geom_type not in self.geometry_types:
+        elif geometry.geom_type in self.geometry_types:
             return False
         else:
             return True
@@ -115,8 +115,6 @@ def check(self: OrientationValidator, geometry: BaseGeometry) -> bool:
         return signed_area(geometry.exterior) >= 0
     elif geometry.geom_type == "MultiPolygon":
         return all([signed_area(g.exterior) >= 0 for g in geometry.geoms])
-    else:
-        return True
 
 
 @patch
@@ -126,8 +124,6 @@ def fix(self: OrientationValidator, geometry: BaseGeometry) -> BaseGeometry:
         return orient(geometry)
     elif geometry.geom_type == "MultiPolygon":
         return MultiPolygon([orient(g) for g in geometry.geoms])
-    else:
-        return geometry
 
 
 # Cell
