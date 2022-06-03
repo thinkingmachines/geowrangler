@@ -1,6 +1,6 @@
 import geopandas as gpd
+import numpy as np
 import pytest
-from geopandas import GeoDataFrame
 from shapely.geometry import Polygon
 
 from geowrangler import grids
@@ -8,20 +8,25 @@ from geowrangler import grids
 
 @pytest.fixture
 def sample_gdf():
-    yield GeoDataFrame(
-        geometry=Polygon(
-            [
-                (0, 0),
-                (1, 0),
-                (1, 1),
-                (0, 1),
-            ]
-        ),
-        crs="EPSG:3857",
+    """Create an L shape Polygon"""
+    yield gpd.GeoDataFrame(
+        geometry=[
+            Polygon(
+                [
+                    (0, 0),
+                    (2, 0),
+                    (2, 1),
+                    (1, 1),
+                    (1, 3),
+                    (0, 3),
+                ]
+            )
+        ],
+        crs="EPSG:4326",
     )
 
 
-def test_create_grids():
+def test_create_grids(sample_gdf):
     grid_generator = grids.GridGenerator(sample_gdf, grid_size=100)
     assert grid_generator.create_grid(0, 0) == Polygon(
         [
@@ -33,16 +38,16 @@ def test_create_grids():
     )
 
 
-def test_get_ranges():
-    gdf = gpd.read_file("data/region3_admin.geojson")
-    grid_generator = grids.GridGenerator(gdf, 5000)
-    grid_range = grid_generator.get_ranges()
-    assert grid_range[0].shape[0] == 55
-    assert grid_range[1].shape[0] == 49
+def test_get_ranges(sample_gdf):
+    grid_generator = grids.GridGenerator(sample_gdf, 5000)
+    x_range, y_range = grid_generator.get_ranges()
+    assert len(x_range) == 45
+    assert len(y_range) == 67
 
 
-def test_generate_grids():
-    gdf = gpd.read_file("data/region3_admin.geojson")
-    grid_generator = grids.GridGenerator(gdf, 15000)
+def test_generate_grids(sample_gdf):
+    grid_generator = grids.GridGenerator(sample_gdf, 15000)
     grids_gdf = grid_generator.generate_grids()
-    assert len(grids_gdf) == 154
+    assert len(grids_gdf) == 240
+    # Check if area of each grid is what we expect
+    assert grids_gdf.to_crs("EPSG:3857").area.apply(np.isclose, b=15000**2).all()
