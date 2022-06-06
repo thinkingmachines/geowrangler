@@ -311,9 +311,9 @@ python-versions = "*"
 
 [[package]]
 name = "fastcore"
-version = "1.4.2"
+version = "1.4.4"
 description = "Python supercharged for fastai development"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.7"
 
@@ -1026,7 +1026,7 @@ python-versions = ">=3.8"
 name = "packaging"
 version = "21.3"
 description = "Core utilities for Python packages"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.6"
 
@@ -1233,7 +1233,7 @@ python-versions = ">=3.5"
 name = "pyparsing"
 version = "3.0.7"
 description = "Python parsing module"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.6"
 
@@ -1659,7 +1659,7 @@ notebook = ">=4.4.1"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "493c93cb4da3a547850dd599aa9b4910b3d51fb6387c641073a758542ad15982"
+content-hash = "b0eb8780c207f41c049144c769ad78959279cd953d68e884ddb5b657b86b90ce"
 
 [metadata.files]
 anyio = [
@@ -1914,8 +1914,8 @@ executing = [
     {file = "executing-0.8.3.tar.gz", hash = "sha256:c6554e21c6b060590a6d3be4b82fb78f8f0194d809de5ea7df1c093763311501"},
 ]
 fastcore = [
-    {file = "fastcore-1.4.2-py3-none-any.whl", hash = "sha256:86c31395a87ea429c35f9291e826098f525684a3a6555238448a371274224ddb"},
-    {file = "fastcore-1.4.2.tar.gz", hash = "sha256:43bb895507788168317f28cf82031c5ce1796d95a229fc515c10bd90f2355a37"},
+    {file = "fastcore-1.4.4-py3-none-any.whl", hash = "sha256:62f28b7fd0fb860a3732cc386ed4b8d8833e97f0c9f0fef403e34ef5685d08bc"},
+    {file = "fastcore-1.4.4.tar.gz", hash = "sha256:db404195a7b6f59294b526ee465ebd6cd11ba463e017e345e47548835a4cc09c"},
 ]
 fastrelease = [
     {file = "fastrelease-0.1.16-py3-none-any.whl", hash = "sha256:c82d53f29c65602f78558a0df440ddf63a430064b7f29487bafbe0f9ad202d57"},

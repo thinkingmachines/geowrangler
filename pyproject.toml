@@ -9,6 +9,7 @@ license = "MIT"
 python = "^3.9"
 pandas = "^1.4.1"
 geopandas = "^0.10.2"
+fastcore = "^1.4.4"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.1.1"
