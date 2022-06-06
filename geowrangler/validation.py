@@ -10,7 +10,6 @@ __all__ = [
     "GeometryValidation",
 ]
 
-
 # Internal Cell
 import logging
 import warnings
