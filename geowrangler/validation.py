@@ -246,8 +246,6 @@ class GeometryValidation:
                 validators_classes.append(self.validators_map[validator])
             elif issubclass(validator, BaseValidator):
                 validators_classes.append(validator)
-            if issubclass(validator, BaseValidator):
-                validators_classes.append(validator)
             else:
                 raise ValidationError("Invalid validator.")
         return validators_classes
