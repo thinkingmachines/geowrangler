@@ -21,9 +21,13 @@ index = {
     "NullValidator.fix": "00_validation.ipynb",
     "GeometryValidation": "00_validation.ipynb",
     "GeometryValidation.validate_all": "00_validation.ipynb",
+    "GridGenerator": "00_grids.ipynb",
+    "GridGenerator.get_ranges": "00_grids.ipynb",
+    "GridGenerator.create_grid": "00_grids.ipynb",
+    "GridGenerator.generate_grids": "00_grids.ipynb",
 }
 
-modules = ["validation.py"]
+modules = ["validation.py", "grids.py"]
 
 doc_url = "https://geowrangler.web.app/"
 
