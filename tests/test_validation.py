@@ -229,6 +229,24 @@ def test_geometry_validation(oriented_geometry):
     validation.GeometryValidation(gdf).validate_all()
 
 
+def test_geometry_validation_by_class(oriented_geometry):
+    gdf = gpd.GeoDataFrame(
+        geometry=[
+            oriented_geometry,
+        ],
+        crs="EPSG:4326",
+    )
+    validation.GeometryValidation(
+        gdf,
+        validators=[
+            validation.NullValidator,
+            validation.SelfIntersectingValidator,
+            validation.OrientationValidator,
+            validation.CrsBoundsValidator,
+        ],
+    ).validate_all()
+
+
 def test_geometry_validation_get_validators(oriented_geometry):
     gdf = gpd.GeoDataFrame(geometry=[oriented_geometry])
     validators = validation.GeometryValidation(gdf, ["orientation"])._get_validators()
