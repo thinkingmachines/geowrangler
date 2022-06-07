@@ -54,11 +54,15 @@ class BaseValidator(ABC):
     def validator_column_name(self):  # pragma: no cover
         pass
 
-    def get_check_arguments(self, gdf: gpd.GeoDataFrame) -> dict:
+    def get_check_arguments(
+        self, gdf: gpd.GeoDataFrame  # GeoDataFrame to check
+    ) -> dict:
         return {}
 
     def check(
-        self, geometry: BaseGeometry, gdf: gpd.GeoDataFrame
+        self,
+        geometry: BaseGeometry,  # Geometry to check
+        gdf: gpd.GeoDataFrame,  # GeoDataFrame to check
     ) -> bool:  # pragma: no cover
         pass
 
@@ -117,7 +121,7 @@ class OrientationValidator(BaseValidator):
 # Cell
 @patch
 def check(
-    self: OrientationValidator, geometry: BaseGeometry  # geometry to validate
+    self: OrientationValidator, geometry: BaseGeometry  # Geometry to validate
 ) -> bool:
     """Checks if orientation is counter clockwise"""
     if geometry.geom_type == "Polygon":
@@ -129,7 +133,7 @@ def check(
 # Cell
 @patch
 def fix(
-    self: OrientationValidator, geometry: BaseGeometry  # geometry to fix
+    self: OrientationValidator, geometry: BaseGeometry  # Geometry to fix
 ) -> BaseGeometry:
     """Fixes orientation if orientation is clockwise"""
     if geometry.geom_type == "Polygon":
@@ -198,7 +202,7 @@ class SelfIntersectingValidator(BaseValidator):
 # Cell
 @patch
 def check(
-    self: SelfIntersectingValidator, geometry: BaseGeometry  # Geometry to validate
+    self: SelfIntersectingValidator, geometry: BaseGeometry  # Geometry to check
 ) -> bool:
     explanation = shapely_validation.explain_validity(geometry)
     return "Self-intersection" not in explanation
