@@ -15,6 +15,7 @@ index = {
     "OrientationValidator.check": "00_validation.ipynb",
     "OrientationValidator.fix": "00_validation.ipynb",
     "CrsBoundsValidator": "00_validation.ipynb",
+    "CrsBoundsValidator.get_check_arguments": "00_validation.ipynb",
     "CrsBoundsValidator.check": "00_validation.ipynb",
     "CrsBoundsValidator.fix": "00_validation.ipynb",
     "SelfIntersectingValidator": "00_validation.ipynb",
