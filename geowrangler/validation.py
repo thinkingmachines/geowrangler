@@ -10,6 +10,7 @@ __all__ = [
     "GeometryValidation",
 ]
 
+
 # Internal Cell
 import logging
 import warnings
@@ -42,8 +43,8 @@ class BaseValidator(ABC):
 
     def __init__(
         self,
-        add_new_column: bool = True,
-        apply_fix: bool = True,
+        add_new_column: bool = True,  # Add new column to show errors
+        apply_fix: bool = True,  # Update geometry
     ):
         self.add_new_column = add_new_column
         self.apply_fix = apply_fix
@@ -53,11 +54,15 @@ class BaseValidator(ABC):
     def validator_column_name(self):  # pragma: no cover
         pass
 
-    def get_check_arguments(self, gdf: gpd.GeoDataFrame) -> dict:
+    def get_check_arguments(
+        self, gdf: gpd.GeoDataFrame  # GeoDataFrame to check
+    ) -> dict:
         return {}
 
     def check(
-        self, geometry: BaseGeometry, gdf: gpd.GeoDataFrame
+        self,
+        geometry: BaseGeometry,  # Geometry to check
+        gdf: gpd.GeoDataFrame,  # GeoDataFrame to check
     ) -> bool:  # pragma: no cover
         pass
 
@@ -75,9 +80,14 @@ class BaseValidator(ABC):
             return True
 
 
+# Cell
+
+
 @patch
 def validate(
-    self: BaseValidator, gdf: gpd.GeoDataFrame, clone=True
+    self: BaseValidator,
+    gdf: gpd.GeoDataFrame,  # GeoDataFrame to validate
+    clone=True,  # Apply validation to copy
 ) -> gpd.GeoDataFrame:
     """Method that checks the validity of a each geometry and applies a fix to these geometries or raise a warning"""
     if clone:
@@ -102,14 +112,17 @@ def validate(
 
 
 class OrientationValidator(BaseValidator):
-    """Checks and fixes Orienation of the geometry to ensure it works for multiple system"""
+    """Checks and fixes Orientation of the geometry to ensure it works for multiple systems"""
 
     validator_column_name = "is_oriented_properly"
     geometry_types = ["MultiPolygon", "Polygon"]
 
 
+# Cell
 @patch
-def check(self: OrientationValidator, geometry: BaseGeometry) -> bool:
+def check(
+    self: OrientationValidator, geometry: BaseGeometry  # Geometry to validate
+) -> bool:
     """Checks if orientation is counter clockwise"""
     if geometry.geom_type == "Polygon":
         return signed_area(geometry.exterior) >= 0
@@ -117,8 +130,11 @@ def check(self: OrientationValidator, geometry: BaseGeometry) -> bool:
         return all([signed_area(g.exterior) >= 0 for g in geometry.geoms])
 
 
+# Cell
 @patch
-def fix(self: OrientationValidator, geometry: BaseGeometry) -> BaseGeometry:
+def fix(
+    self: OrientationValidator, geometry: BaseGeometry  # Geometry to fix
+) -> BaseGeometry:
     """Fixes orientation if orientation is clockwise"""
     if geometry.geom_type == "Polygon":
         return orient(geometry)
@@ -130,19 +146,32 @@ def fix(self: OrientationValidator, geometry: BaseGeometry) -> BaseGeometry:
 
 
 class CrsBoundsValidator(BaseValidator):
-    """Checks bounds of the geometry to ensure it is within bounds or crs"""
+    """Checks bounds of the geometry to ensure it is within bounds of the crs"""
 
     validator_column_name = "is_within_crs_bounds"
     fix_available = False
     warning_message = "Found geometries out of bounds from crs"
 
-    def get_check_arguments(self, gdf: gpd.GeoDataFrame) -> dict:
-        return {"gdf": gdf}
+
+# Cell
+
+
+@patch
+def get_check_arguments(
+    self: CrsBoundsValidator, gdf: gpd.GeoDataFrame  # GeoDataFrame to check
+) -> dict:
+    """Return check arguments"""
+    return {"gdf": gdf}
+
+
+# Cell
 
 
 @patch
 def check(
-    self: CrsBoundsValidator, geometry: BaseGeometry, gdf: gpd.GeoDataFrame
+    self: CrsBoundsValidator,
+    geometry: BaseGeometry,  # Geometry to validate
+    gdf: gpd.GeoDataFrame,  # GeoDataframe to check
 ) -> bool:
     """Checks if polygon is within bounds of crs"""
     xmin, ymin, xmax, ymax = gdf.crs.area_of_use.bounds
@@ -152,9 +181,10 @@ def check(
     )
 
 
+# Cell
 @patch
 def fix(
-    self: CrsBoundsValidator, geometry: BaseGeometry
+    self: CrsBoundsValidator, geometry: BaseGeometry  # Geometry to fix
 ) -> BaseGeometry:  # pragma: no cover
     """No fix available for CRS Bounds"""
     return geometry
@@ -169,12 +199,16 @@ class SelfIntersectingValidator(BaseValidator):
     validator_column_name = "is_not_self_intersecting"
 
 
+# Cell
 @patch
-def check(self: SelfIntersectingValidator, geometry: BaseGeometry) -> bool:
+def check(
+    self: SelfIntersectingValidator, geometry: BaseGeometry  # Geometry to check
+) -> bool:
     explanation = shapely_validation.explain_validity(geometry)
     return "Self-intersection" not in explanation
 
 
+# Cell
 @patch
 def fix(self: SelfIntersectingValidator, geometry: BaseGeometry) -> BaseGeometry:
     """Fix intersection geometry by applying shapely.validation.make_valid"""
@@ -192,15 +226,17 @@ class NullValidator(BaseValidator):
     warning_message = "Found null geometries"
 
 
+# Cell
 @patch
-def check(self: NullValidator, geometry: BaseGeometry) -> bool:
+def check(self: NullValidator, geometry: BaseGeometry) -> bool:  # Geometry to check
     """Checks if polygon is within bounds of crs"""
     return not pd.isnull(geometry)
 
 
+# Cell
 @patch
 def fix(
-    self: NullValidator, geometry: BaseGeometry
+    self: NullValidator, geometry: BaseGeometry  # Geometry to fix
 ) -> BaseGeometry:  # pragma: no cover
     """No fix available for CRS Bounds"""
     return geometry
@@ -221,15 +257,15 @@ class GeometryValidation:
 
     def __init__(
         self,
-        gdf: gpd.GeoDataFrame,
-        validators: Sequence[Union[str, BaseValidator]] = (
+        gdf: gpd.GeoDataFrame,  # GeoDataFrame to validate
+        validators: Sequence[Union[str, BaseValidator]] = (  # Validators to apply
             "null",
             "self_intersecting",
             "orientation",
             "crs_bounds",
         ),
-        add_validation_columns: bool = True,
-        apply_fixes: bool = True,
+        add_validation_columns: bool = True,  # Add column to show errors
+        apply_fixes: bool = True,  # Update geometry
     ) -> gpd.GeoDataFrame:
         self.gdf = gdf
         self.validators = validators
@@ -249,6 +285,9 @@ class GeometryValidation:
             else:
                 raise ValidationError("Invalid validator.")
         return validators_classes
+
+
+# Cell
 
 
 @patch
