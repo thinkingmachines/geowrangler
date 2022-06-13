@@ -959,7 +959,7 @@ webpdf = ["pyppeteer (>=1,<1.1)"]
 
 [[package]]
 name = "nbdev"
-version = "1.2.9"
+version = "1.2.10"
 description = "Writing a library entirely in notebooks"
 category = "main"
 optional = false
@@ -984,7 +984,7 @@ pyyaml = "*"
 type = "git"
 url = "https://github.com/butchland/nbdev.git"
 reference = "add-black-format"
-resolved_reference = "c15134220b4d6b96dd67952e27a57a8e5c1bf4c3"
+resolved_reference = "98e9396cd2ad4b728a6b251f645ed2a236b72696"
 
 [[package]]
 name = "nbformat"
