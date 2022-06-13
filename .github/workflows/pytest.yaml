@@ -15,11 +15,13 @@ jobs:
         python_version: ["3.7", "3.8", "3.9", "3.10"]
     steps:
       - uses: actions/checkout@v2
+      - name: Install poetry
+        run: pipx install poetry
       - uses: actions/setup-python@v4
         name: Install Python ${{ matrix.python_version }}
         with:
           python-version: ${{ matrix.python_version }}
-          cache: "pip"
+          cache: "poetry"
       # Code cove with a min percentage
       # - run: poetry run pytest --cov . --cov-fail-under=80 -n auto
       - name: Run tests
