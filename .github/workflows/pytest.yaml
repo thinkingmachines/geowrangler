@@ -21,7 +21,6 @@ jobs:
         name: Install Python ${{ matrix.python_version }}
         with:
           python-version: ${{ matrix.python_version }}
-          cache: "poetry"
       # Code cove with a min percentage
       # - run: poetry run pytest --cov . --cov-fail-under=80 -n auto
       - name: Run tests
