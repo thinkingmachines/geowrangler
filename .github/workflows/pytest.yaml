@@ -14,9 +14,6 @@ jobs:
         os: [Ubuntu]
         python_version: ["3.7", "3.8", "3.9", "3.10"]
     steps:
-      - uses: actions/checkout@v2
-      - name: Install poetry
-        run: pipx install poetry
       - uses: actions/setup-python@v4
         name: Install Python ${{ matrix.python_version }}
         with:
