@@ -1,9 +1,14 @@
 [tool.poetry]
 name = "geowrangler"
-version = "0.1.0-dev"
+version = "0.1.0-dev1"
 description = "Tools for dealing with geospatial data"
 authors = ["Thinking Machines <geowrangler@thinkingmachin.es>"]
 license = "MIT"
+readme = "README.md"
+homepage = "https://github.com/thinkingmachines/geowrangler"
+repository = "https://github.com/thinkingmachines/geowrangler"
+keywords = ["geospatial", "tools"]
+include = ["LICENSE"]
 
 [tool.poetry.dependencies]
 python = "^3.7.1,<4.0"
