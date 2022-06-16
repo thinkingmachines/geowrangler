@@ -14,6 +14,7 @@ jobs:
         os: [Ubuntu]
         python_version: ["3.7", "3.8", "3.9", "3.10"]
     steps:
+      - uses: actions/checkout@v2
       - uses: actions/setup-python@v4
         name: Install Python ${{ matrix.python_version }}
         with:
@@ -22,6 +23,5 @@ jobs:
           cache-dependency-path: |
             settings.ini
             poetry.lock
-      - uses: actions/checkout@v2
       - name: Run tests
         run: pipx run nox --error-on-missing-interpreters -s tests-${{ matrix.python_version }}
