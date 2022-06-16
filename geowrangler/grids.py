@@ -9,6 +9,7 @@ from typing import List, Tuple, Union
 import numpy as np
 from fastcore.basics import patch
 from geopandas import GeoDataFrame
+from pyproj import Transformer
 from shapely.geometry import Polygon
 
 logger = logging.getLogger(__name__)
@@ -17,6 +18,8 @@ logger = logging.getLogger(__name__)
 
 
 class SquareGridBoundary:
+    """Reusing Boundary. x_min, y_min, x_max, and y_max are in the the target crs"""
+
     def __init__(self, x_min: float, y_min: float, x_max: float, y_max: float):
         self.x_min = x_min
         self.y_min = y_min
@@ -90,7 +93,12 @@ def generate_grid(self: SquareGridGenerator) -> GeoDataFrame:
     elif isinstance(self.boundary, SquareGridBoundary):
         boundary = self.boundary
     else:
-        boundary = SquareGridBoundary(*self.boundary)
+        transformer = Transformer.from_crs(
+            self.gdf.crs, reprojected_gdf.crs, always_xy=True
+        )
+        x_min, y_min = transformer.transform(self.boundary[0], self.boundary[1])
+        x_max, y_max = transformer.transform(self.boundary[2], self.boundary[3])
+        boundary = SquareGridBoundary(x_min, y_min, x_max, y_max)
 
     # TODO: Catch case where no geometries are within the boundary
     x_idx_offset, xrange, y_idx_offset, yrange = boundary.get_range_subset(

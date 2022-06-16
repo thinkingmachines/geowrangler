@@ -48,7 +48,7 @@ def test_generate_grids(sample_gdf):
 
 def test_generate_grids_w_custom_boundary(sample_gdf):
     grid_generator = grids.SquareGridGenerator(
-        sample_gdf, 15000, boundary=(0, 0, 5000000, 5000000)
+        sample_gdf, 15000, boundary=(0, 0, 10, 10)
     )
     grids_gdf = grid_generator.generate_grid()
 
@@ -58,7 +58,9 @@ def test_generate_grids_w_custom_boundary(sample_gdf):
 
 
 def test_generate_grids_w_custom_boundary_2(sample_gdf):
-    boundary = grids.SquareGridBoundary(0, 0, 5000000, 5000000)
+    boundary = grids.SquareGridBoundary(
+        0, 0, 5000000, 5000000
+    )  # SquareGridBoundary used the target projection
     grid_generator = grids.SquareGridGenerator(sample_gdf, 15000, boundary=boundary)
     grids_gdf = grid_generator.generate_grid()
     assert len(grids_gdf) == 240
