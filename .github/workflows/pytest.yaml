@@ -1,6 +1,8 @@
 name: Check code coverage
 on:
   pull_request:
+    paths:
+      - "**.py"
   push:
     branches: [master]
 jobs:
