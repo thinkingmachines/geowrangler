@@ -3,11 +3,11 @@
 __all__ = ["index", "modules", "custom_doc_links", "git_url"]
 
 index = {
-    "logger": "00_grids.ipynb",
-    "GridGenerator": "00_grids.ipynb",
-    "GridGenerator.get_ranges": "00_grids.ipynb",
-    "GridGenerator.create_grid": "00_grids.ipynb",
-    "GridGenerator.generate_grids": "00_grids.ipynb",
+    "logger": "00_validation.ipynb",
+    "SquareGridBoundary": "00_grids.ipynb",
+    "SquareGridGenerator": "00_grids.ipynb",
+    "SquareGridGenerator.create_cell": "00_grids.ipynb",
+    "SquareGridGenerator.generate_grid": "00_grids.ipynb",
     "ValidationError": "00_validation.ipynb",
     "BaseValidator": "00_validation.ipynb",
     "BaseValidator.validate": "00_validation.ipynb",
@@ -26,10 +26,6 @@ index = {
     "NullValidator.fix": "00_validation.ipynb",
     "GeometryValidation": "00_validation.ipynb",
     "GeometryValidation.validate_all": "00_validation.ipynb",
-    "SquareGridGenerator": "00_grids.ipynb",
-    "SquareGridGenerator.get_ranges": "00_grids.ipynb",
-    "SquareGridGenerator.create_cell": "00_grids.ipynb",
-    "SquareGridGenerator.generate_grid": "00_grids.ipynb",
 }
 
 modules = ["grids.py", "validation.py"]
