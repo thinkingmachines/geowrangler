@@ -4,18 +4,25 @@ __all__ = ["fix_agg", "prep_aoi", "aggregate_stats", "create_zonal_stats"]
 
 
 # Internal Cell
+from typing import Any, Dict
+
+# exporti
+# hide
 import geopandas as gpd
 import pandas as pd
 
 # Cell
-def fix_agg(agg: {}) -> {}:  # A dict containing at the minimum a 'func' key
+def fix_agg(
+    agg: Dict[str, Any],  # A dict containing at the minimum a 'func' key
+) -> Dict[str, Any]:
     """
-    Validate and (possibly) Fix an aggregation specification
-    and outputs a dict containing the following keys:
-    'func': a list of aggregation functions (should be a valid 'agg' function)
-    'column': a column to apply the aggregation functions (should be a valid numeric column in data)
-    'output': the names of the new columns containing the application of the aggregation functions (default: concat column + '_' + func)
-    'fillna': boolean list whether to replace new columns with 'NA' values  with 0 (default: True)
+    Validate and (possibly) fix an aggregation spec.
+
+    It outputs a dict containing the following keys:
+      - 'func': a list of aggregation functions (should be a valid 'agg' function)
+      - 'column': a column to apply the aggregation functions (should be a valid numeric column in data)
+      - 'output': the names of the new columns containing the application of the aggregation functions (default: concat column + '_' + func)
+      - 'fillna': boolean list whether to replace new columns with 'NA' values  with 0 (default: True)
     """
     if "func" not in agg:
         raise ValueError(f"Missing key 'func' for agg {agg}")
@@ -52,7 +59,7 @@ def fix_agg(agg: {}) -> {}:  # A dict containing at the minimum a 'func' key
 # Cell
 def prep_aoi(aoi: gpd.GeoDataFrame) -> gpd.GeoDataFrame:  # Area of interest
     """
-    prepare aoi for spatial join
+    Prepare aoi for spatial join
       - split off any existing columns named index and aoi_index and drop them from aoi
       - create a column 'aoi_index' from aoi index
     """
@@ -94,6 +101,14 @@ def aggregate_stats(
     renames = {k: v for k, v in zip(agg["func"], agg["output"])}
     aggregates.rename(columns=renames, inplace=True)
     results = aoi.merge(aggregates, how="left", on="aoi_index", suffixes=(None, "_y"))
+
+    # set NAs to 0 if fillna
+    for i, colname in enumerate(agg["output"]):
+        if agg["fillna"][i]:
+            if colname in list(aoi.columns.values):
+                colname = colname + "_y"  # try if merged df has colname + _y
+            if colname in list(results.columns.values):
+                results[colname].fillna(0)
 
     return results
 
