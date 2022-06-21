@@ -108,7 +108,7 @@ def aggregate_stats(
             if colname in list(aoi.columns.values):
                 colname = colname + "_y"  # try if merged df has colname + _y
             if colname in list(results.columns.values):
-                results[colname].fillna(0)
+                results[colname].fillna(0, inplace=True)
 
     return results
 
