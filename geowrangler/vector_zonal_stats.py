@@ -16,7 +16,7 @@ def fix_agg(
     agg: Dict[str, Any],  # A dict containing at the minimum a 'func' key
 ) -> Dict[str, Any]:
     """
-    Validate and (possibly) fix an aggregation spec.
+    Validate and (possibly) fix an `agg spec`.
 
     It outputs a dict containing the following keys:
       - 'func': a list of aggregation functions (should be a valid 'agg' function)
@@ -57,11 +57,13 @@ def fix_agg(
 
 
 # Cell
-def prep_aoi(aoi: gpd.GeoDataFrame) -> gpd.GeoDataFrame:  # Area of interest
+def prep_aoi(
+    aoi: gpd.GeoDataFrame,  # Area of interest
+) -> gpd.GeoDataFrame:
     """
     Prepare aoi for spatial join
       - split off any existing columns named index and aoi_index and drop them from aoi
-      - create a column 'aoi_index' from aoi index
+      - create a column 'aoi_index' from aoi's index which will be used as grouping key
     """
     # prep for spatial join
     aoi = aoi.copy()
@@ -91,11 +93,11 @@ def prep_aoi(aoi: gpd.GeoDataFrame) -> gpd.GeoDataFrame:  # Area of interest
 
 def aggregate_stats(
     aoi: gpd.GeoDataFrame,  # Area of interest
-    groups: pd.core.groupby.DataFrameGroupBy,  # data aggregated into groups by 'aoi_index'
-    agg: {},  # aggregation to be applied for a given column
+    groups: pd.core.groupby.DataFrameGroupBy,  # Source data aggregated into groups by 'aoi_index'
+    agg: {},  # An agg spec to be applied
 ) -> gpd.GeoDataFrame:
     """Aggregate groups and compute agg functions in agg['func'] for agg['column'], map them to output columns in agg['column']
-    and merge them back to aoi
+    and merge them back to aoi dataframe
     """
     aggregates = groups[agg["column"]].agg(agg["func"])
     renames = {k: v for k, v in zip(agg["func"], agg["output"])}
@@ -119,8 +121,7 @@ def aggregate_stats(
 def create_zonal_stats(
     aoi: gpd.GeoDataFrame,  # Area of interest for which zonal stats are to be computed for
     data: gpd.GeoDataFrame,  # Source gdf containing data to compute zonal stats from
-    # data_type: str
-    aggregations: [],  # a list of aggregation operations, with each agg applied to a column
+    aggregations: [],  # a list of agg specs, with each agg spect applied to a data column
     overlap_method: str = "intersects",  # spatial predicate to used in spatial join of aoi and data
     # categorical_column_options: str = None,
 ) -> gpd.GeoDataFrame:
