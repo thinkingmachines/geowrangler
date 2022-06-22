@@ -4,10 +4,12 @@ __all__ = ["fix_agg", "prep_aoi", "aggregate_stats", "create_zonal_stats"]
 
 
 # Internal Cell
-from typing import Any, Dict
+import warnings
 
-# exporti
-# hide
+warnings.filterwarnings("ignore")
+
+# Internal Cell
+from typing import Any, Dict
 import geopandas as gpd
 import pandas as pd
 
