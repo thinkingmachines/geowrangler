@@ -5,9 +5,14 @@ warnings.filterwarnings(action="ignore", category=UserWarning, module="geopandas
 import geopandas as gpd
 import pandas as pd
 import pytest
-from shapely.geometry import Polygon
+from shapely.geometry import Point, Polygon
 
-from geowrangler.vector_zonal_stats import _fix_agg, _prep_aoi
+from geowrangler.vector_zonal_stats import (
+    _aggregate_stats,
+    _fix_agg,
+    _prep_aoi,
+    create_zonal_stats,
+)
 
 
 @pytest.fixture()
@@ -39,6 +44,35 @@ def simple_aoi():
         )
 
     return gpd.GeoDataFrame(df, geometry=df.apply(square, axis=1), crs="EPSG:4326")
+
+
+@pytest.fixture()
+def simple_data():
+    df = pd.DataFrame(
+        data={
+            "col1": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+            "lat": [
+                0.5,
+                1.5,
+                2.5,
+                0.45,
+                1.45,
+                2.45,
+                0.45,
+                1.45,
+                2.45,
+                0.45,
+                1.45,
+                2.45,
+            ],
+            "lon": [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.45, 0.45, 0.45, 1.45, 1.45, 1.45],
+        }
+    )
+    return gpd.GeoDataFrame(
+        df,
+        geometry=df.apply(lambda row: Point(row.lat, row.lon), axis=1),
+        crs="EPSG:4326",
+    )
 
 
 def test_fix_agg():
@@ -169,3 +203,66 @@ def test_prep_aoi_with_existing_index_and_aoi_index_cols(simple_aoi):
     )
     assert aoi_index_data.equals(simple_aoi.col1)
     assert aoi_col_data.equals(simple_aoi.col1)
+
+
+def test_aggregate_stats(simple_aoi, simple_data):
+    simple_data.to_crs(simple_aoi.crs)
+    aoi, _, _ = _prep_aoi(simple_aoi)
+    features = gpd.sjoin(
+        aoi[["aoi_index", "geometry"]], simple_data, how="inner", predicate="intersects"
+    )
+    groups = features.groupby("aoi_index")
+    agg = _fix_agg({"func": "count"})
+    results = _aggregate_stats(aoi, groups, agg)
+    assert list(results.columns.values) == [
+        *list(aoi.columns.values),
+        "aoi_index_count",
+    ]
+
+
+def test_aggregate_stats_with_existing_aoi_column(simple_aoi, simple_data):
+
+    aoi, _, _ = _prep_aoi(simple_aoi)
+    aoi["pois_count"] = aoi.col1
+    features = gpd.sjoin(
+        aoi[["aoi_index", "geometry"]], simple_data, how="inner", predicate="intersects"
+    )
+    groups = features.groupby("aoi_index")
+    agg = _fix_agg({"func": "count", "output": "pois_count"})
+    results = _aggregate_stats(aoi, groups, agg)
+    assert list(results.columns.values) == [*list(aoi.columns.values), "pois_count_y"]
+
+
+def test_create_zonal_stats(simple_aoi, simple_data):
+    results = create_zonal_stats(
+        simple_aoi, simple_data, aggregations=[{"func": "count"}]
+    )
+    assert list(results.columns.values) == [
+        *list(simple_aoi.columns.values),
+        "aoi_index_count",
+    ]
+
+
+def test_create_zonal_stats_with_mismatched_crs(simple_aoi, simple_data):
+    simple_data = simple_data.to_crs("EPSG:3136")
+    results = create_zonal_stats(
+        simple_aoi, simple_data, aggregations=[{"func": "count"}]
+    )
+    assert list(results.columns.values) == [
+        *list(simple_aoi.columns.values),
+        "aoi_index_count",
+    ]
+
+
+def test_create_zonal_stats_with_aoi_index_columns(simple_aoi, simple_data):
+    # simple_aoi['index'] = simple_aoi.col1
+    # simple_aoi['aoi_index'] = simple_aoi.col1
+    results = create_zonal_stats(
+        simple_aoi, simple_data, aggregations=[{"func": "count"}]
+    )
+    assert list(results.columns.values) == [
+        *list(simple_aoi.columns.values),
+        "aoi_index_count",
+    ]
+    # assert results['index'].equals(simple_aoi.col1)
+    # assert results['aoi_index'].equals(simple_aoi.col1)
