@@ -2,13 +2,14 @@
 
 __all__ = ["_fix_agg", "_prep_aoi", "_aggregate_stats", "create_zonal_stats"]
 
+
 # Internal Cell
 import warnings
 
 warnings.filterwarnings(action="ignore", category=UserWarning, module="geopandas")
 
 # Internal Cell
-from typing import Any, Dict
+from typing import Any, Dict, List
 import geopandas as gpd
 import pandas as pd
 
@@ -127,9 +128,7 @@ def _aggregate_stats(
 def create_zonal_stats(
     aoi: gpd.GeoDataFrame,  # Area of interest for which zonal stats are to be computed for
     data: gpd.GeoDataFrame,  # Source gdf containing data to compute zonal stats from
-    aggregations: [
-        Dict[str, Any]
-    ],  # a list of agg specs, with each agg spect applied to a data column
+    aggregations: List,  # List of agg specs, with each agg spect applied to a data column
     overlap_method: str = "intersects",  # spatial predicate to used in spatial join of aoi and data [geopandas.sjoin](https://geopandas.org/en/stable/docs/user_guide/mergingdata.html#binary-predicate-joins) for more details
     # categorical_column_options: str = None,
 ) -> gpd.GeoDataFrame:
