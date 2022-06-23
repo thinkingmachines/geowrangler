@@ -2,7 +2,6 @@
 
 __all__ = ["_fix_agg", "_prep_aoi", "_aggregate_stats", "create_zonal_stats"]
 
-
 # Internal Cell
 import warnings
 
@@ -101,7 +100,7 @@ def _prep_aoi(
 def _aggregate_stats(
     aoi: gpd.GeoDataFrame,  # Area of interest
     groups: pd.core.groupby.DataFrameGroupBy,  # Source data aggregated into groups by 'aoi_index'
-    agg: {},  # An agg spec to be applied
+    agg: Dict[str, Any],  # An agg spec to be applied
 ) -> gpd.GeoDataFrame:
     """Aggregate groups and compute agg functions in agg['func'] for agg['column'], map them to output columns in agg['column']
     and merge them back to aoi dataframe
@@ -128,7 +127,9 @@ def _aggregate_stats(
 def create_zonal_stats(
     aoi: gpd.GeoDataFrame,  # Area of interest for which zonal stats are to be computed for
     data: gpd.GeoDataFrame,  # Source gdf containing data to compute zonal stats from
-    aggregations: [],  # a list of agg specs, with each agg spect applied to a data column
+    aggregations: [
+        Dict[str, Any]
+    ],  # a list of agg specs, with each agg spect applied to a data column
     overlap_method: str = "intersects",  # spatial predicate to used in spatial join of aoi and data [geopandas.sjoin](https://geopandas.org/en/stable/docs/user_guide/mergingdata.html#binary-predicate-joins) for more details
     # categorical_column_options: str = None,
 ) -> gpd.GeoDataFrame:
@@ -159,9 +160,9 @@ def create_zonal_stats(
 
     # cleanup results
     results.drop(labels="aoi_index", inplace=True, axis=1)
-    if aoi_index_data:
+    if aoi_index_data is not None:
         results["index"] = aoi_index_data
-    if aoi_col_data:
+    if aoi_col_data is not None:
         results["aoi_index"] = aoi_col_data
 
     return results

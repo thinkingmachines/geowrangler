@@ -237,10 +237,10 @@ def test_create_zonal_stats(simple_aoi, simple_data):
     results = create_zonal_stats(
         simple_aoi, simple_data, aggregations=[{"func": "count"}]
     )
-    assert list(results.columns.values) == [
-        *list(simple_aoi.columns.values),
-        "aoi_index_count",
-    ]
+    assert any(
+        item in list(results.columns.values)
+        for item in [*list(simple_aoi.columns.values), "aoi_index_count"]
+    )
 
 
 def test_create_zonal_stats_with_mismatched_crs(simple_aoi, simple_data):
@@ -248,21 +248,23 @@ def test_create_zonal_stats_with_mismatched_crs(simple_aoi, simple_data):
     results = create_zonal_stats(
         simple_aoi, simple_data, aggregations=[{"func": "count"}]
     )
-    assert list(results.columns.values) == [
-        *list(simple_aoi.columns.values),
-        "aoi_index_count",
-    ]
+    assert any(
+        item in list(results.columns.values)
+        for item in [*list(simple_aoi.columns.values), "aoi_index_count"]
+    )
+    assert results.crs == simple_aoi.crs
+    assert simple_data.crs != results.crs
 
 
 def test_create_zonal_stats_with_aoi_index_columns(simple_aoi, simple_data):
-    # simple_aoi['index'] = simple_aoi.col1
-    # simple_aoi['aoi_index'] = simple_aoi.col1
+    simple_aoi["index"] = simple_aoi.col1
+    simple_aoi["aoi_index"] = simple_aoi.col1
     results = create_zonal_stats(
         simple_aoi, simple_data, aggregations=[{"func": "count"}]
     )
-    assert list(results.columns.values) == [
-        *list(simple_aoi.columns.values),
-        "aoi_index_count",
-    ]
-    # assert results['index'].equals(simple_aoi.col1)
-    # assert results['aoi_index'].equals(simple_aoi.col1)
+    assert any(
+        item in list(results.columns.values)
+        for item in [*list(simple_aoi.columns.values), "aoi_index_count"]
+    )
+    assert results["index"].equals(simple_aoi.col1)
+    assert results["aoi_index"].equals(simple_aoi.col1)
