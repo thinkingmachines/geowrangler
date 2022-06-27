@@ -112,7 +112,7 @@ def validate(
 
 
 class OrientationValidator(BaseValidator):
-    """Checks and fixes Orientation of the geometry to ensure it works for multiple systems"""
+    """Checks and fixes Orientation of the geometry to ensure it follows a counter-clockwise orientation"""
 
     validator_column_name = "is_oriented_properly"
     geometry_types = ["MultiPolygon", "Polygon"]
