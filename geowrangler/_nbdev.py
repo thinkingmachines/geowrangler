@@ -26,6 +26,7 @@ index = {
     "NullValidator.fix": "00_validation.ipynb",
     "GeometryValidation": "00_validation.ipynb",
     "GeometryValidation.validate_all": "00_validation.ipynb",
+    "GEO_INDEX_NAME": "02_vector_zonal_stats.ipynb",
     "create_zonal_stats": "02_vector_zonal_stats.ipynb",
 }
 
