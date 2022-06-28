@@ -493,6 +493,8 @@ def test_create_zonal_stats(simple_aoi, simple_data):
         item in list(results.columns.values)
         for item in [*list(simple_aoi.columns.values), "index_count"]
     )
+    assert results.index_count.sum() == 9
+    assert results.iloc[0].index_count == 3
 
 
 def test_create_zonal_stats_with_mismatched_crs(simple_aoi, simple_data):
