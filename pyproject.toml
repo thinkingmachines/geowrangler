@@ -16,6 +16,7 @@ numpy = "^1.21,<2"
 pandas = "^1.2,<2"
 geopandas = "^0.10"
 fastcore = "^1.4,<2"
+pygeos = "^0.12.0"
 [tool.poetry.dev-dependencies]
 nbdev = {git = "https://github.com/butchland/nbdev.git", rev = "add-black-format"}
 pytest = "^7.1.2"

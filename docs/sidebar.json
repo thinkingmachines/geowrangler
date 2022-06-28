@@ -4,10 +4,12 @@
     "": {
       "Tutorials": {
         "Grid Generation": "/tutorial.grids.html",
-        "Geometry Validation": "/tutorial.geometry_validation.html"
+        "Geometry Validation": "/tutorial.geometry_validation.html",
+        "Vector Zonal Stats": "/tutorial.vector_zonal_stats.html"
       }
     },
     "Grids": "grids.html",
-    "Geometry Validation": "validation.html"
+    "Geometry Validation": "validation.html",
+    "Vector Zonal Stats": "vector_zonal_stats.html"
   }
 }

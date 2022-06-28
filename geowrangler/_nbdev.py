@@ -26,9 +26,11 @@ index = {
     "NullValidator.fix": "00_validation.ipynb",
     "GeometryValidation": "00_validation.ipynb",
     "GeometryValidation.validate_all": "00_validation.ipynb",
+    "GEO_INDEX_NAME": "02_vector_zonal_stats.ipynb",
+    "create_zonal_stats": "02_vector_zonal_stats.ipynb",
 }
 
-modules = ["grids.py", "validation.py"]
+modules = ["grids.py", "validation.py", "vector_zonal_stats.py"]
 
 doc_url = "https://geowrangler.web.app/"
 
