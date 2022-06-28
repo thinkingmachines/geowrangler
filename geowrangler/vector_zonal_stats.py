@@ -247,7 +247,9 @@ def _aggregate_stats(
 def create_zonal_stats(
     aoi: gpd.GeoDataFrame,  # Area of interest for which zonal stats are to be computed for
     data: gpd.GeoDataFrame,  # Source gdf containing data to compute zonal stats from
-    aggregations: List,  # List of agg specs, with each agg spec applied to a data column
+    aggregations: List[  # List of agg specs, with each agg spec applied to a data column
+        Dict[str, Any]
+    ],
     overlap_method: str = "intersects",  # spatial predicate to used in spatial join of aoi and data [geopandas.sjoin](https://geopandas.org/en/stable/docs/user_guide/mergingdata.html#binary-predicate-joins) for more details
     # categorical_column_options: str = None,
 ) -> gpd.GeoDataFrame:
