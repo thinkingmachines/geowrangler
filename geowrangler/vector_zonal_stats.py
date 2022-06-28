@@ -14,7 +14,7 @@ __all__ = [
 
 
 # Internal Cell
-GEO_INDEX_NAME = "aoi_index"
+GEO_INDEX_NAME = "__GeoWrangleer_aoi_index"
 
 # Internal Cell
 from typing import Any, Dict, List
