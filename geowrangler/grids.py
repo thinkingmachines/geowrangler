@@ -32,8 +32,8 @@ class SquareGridBoundary:
         """Returns a subset of grids from the orginal boundary based on the boundary and a grid size"""
         xrange = np.arange(self.x_min, self.x_max, cell_size)
         yrange = np.arange(self.y_min, self.y_max, cell_size)
-        x_mask = (xrange >= x_min) & (xrange <= x_max)
-        y_mask = (yrange >= y_min) & (yrange <= y_max)
+        x_mask = (xrange >= x_min) & (xrange <= x_max + cell_size)
+        y_mask = (yrange >= y_min) & (yrange <= y_max + cell_size)
         x_idx_offset = np.nonzero(x_mask)[0][0]
         y_idx_offset = np.nonzero(x_mask)[0][0]
         return (
