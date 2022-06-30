@@ -115,7 +115,7 @@ def generate_grid(self: SquareGridGenerator) -> GeoDataFrame:
                     "geometry": self.create_cell(x, y),
                 }
             )
-    # Cache case where no cell intersect with the aoi
+    # Catch case where no cell intersect with the aoi
     if polygons:
         dest = GeoDataFrame(polygons, geometry="geometry", crs=self.grid_projection)
         dest_reproject = dest.to_crs(self.gdf.crs)
