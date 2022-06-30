@@ -73,3 +73,12 @@ def test_boundary_smaller_then_a_cell():
     _, xrange, _, yrange = boundary.get_range_subset(2.5, 2.5, 5, 5, 10)
     assert len(xrange) == 1
     assert len(yrange) == 1
+
+
+def test_generate_grids_aoi_outside_boundary(sample_gdf):
+    grid_generator = grids.SquareGridGenerator(
+        sample_gdf, 15000, boundary=(10, 10, 20, 20)
+    )
+    grids_gdf = grid_generator.generate_grid()
+
+    assert len(grids_gdf) == 0

@@ -34,8 +34,10 @@ class SquareGridBoundary:
         yrange = np.arange(self.y_min, self.y_max, cell_size)
         x_mask = (xrange >= x_min) & (xrange <= x_max + cell_size)
         y_mask = (yrange >= y_min) & (yrange <= y_max + cell_size)
-        x_idx_offset = np.nonzero(x_mask)[0][0]
-        y_idx_offset = np.nonzero(x_mask)[0][0]
+        x_idx = np.flatnonzero(x_mask)
+        x_idx_offset = None if len(x_idx) == 0 else x_idx[0]
+        y_idx = np.flatnonzero(y_mask)
+        y_idx_offset = None if len(y_idx) == 0 else y_idx[0]
         return (
             x_idx_offset,
             xrange[x_mask],
@@ -114,7 +116,12 @@ def generate_grid(self: SquareGridGenerator) -> GeoDataFrame:
                 }
             )
 
-    dest = GeoDataFrame(polygons, geometry="geometry", crs=self.grid_projection)
-    dest_reproject = dest.to_crs(self.gdf.crs)
-    final = dest_reproject[dest_reproject.intersects(self.gdf.unary_union)]
-    return final
+    if polygons:
+        dest = GeoDataFrame(polygons, geometry="geometry", crs=self.grid_projection)
+        dest_reproject = dest.to_crs(self.gdf.crs)
+        final = dest_reproject[dest_reproject.intersects(self.gdf.unary_union)]
+        return final
+    else:
+        return GeoDataFrame(
+            {"x": [], "y": [], "geometry": []}, geometry="geometry", crs=self.gdf.crs
+        )
