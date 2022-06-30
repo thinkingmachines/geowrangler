@@ -88,7 +88,6 @@ def create_cell(
 
 @patch
 def generate_grid(self: SquareGridGenerator) -> GeoDataFrame:
-    polygons = []
     reprojected_gdf = self.gdf.to_crs(self.grid_projection)
     if self.boundary is None:
         boundary = SquareGridBoundary(*reprojected_gdf.total_bounds)
@@ -106,6 +105,7 @@ def generate_grid(self: SquareGridGenerator) -> GeoDataFrame:
     x_idx_offset, xrange, y_idx_offset, yrange = boundary.get_range_subset(
         *reprojected_gdf.total_bounds, cell_size=self.cell_size
     )
+    polygons = []
     for x_idx, x in enumerate(xrange):
         for y_idx, y in enumerate(yrange):
             polygons.append(
@@ -115,7 +115,7 @@ def generate_grid(self: SquareGridGenerator) -> GeoDataFrame:
                     "geometry": self.create_cell(x, y),
                 }
             )
-
+    # Cache case where no cell intersect with the aoi
     if polygons:
         dest = GeoDataFrame(polygons, geometry="geometry", crs=self.grid_projection)
         dest_reproject = dest.to_crs(self.gdf.crs)
