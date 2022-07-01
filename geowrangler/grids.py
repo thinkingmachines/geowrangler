@@ -32,10 +32,12 @@ class SquareGridBoundary:
         """Returns a subset of grids from the orginal boundary based on the boundary and a grid size"""
         xrange = np.arange(self.x_min, self.x_max, cell_size)
         yrange = np.arange(self.y_min, self.y_max, cell_size)
-        x_mask = (xrange >= x_min) & (xrange <= x_max)
-        y_mask = (yrange >= y_min) & (yrange <= y_max)
-        x_idx_offset = np.nonzero(x_mask)[0][0]
-        y_idx_offset = np.nonzero(x_mask)[0][0]
+        x_mask = (xrange >= x_min) & (xrange <= x_max + cell_size)
+        y_mask = (yrange >= y_min) & (yrange <= y_max + cell_size)
+        x_idx = np.flatnonzero(x_mask)
+        x_idx_offset = None if len(x_idx) == 0 else x_idx[0]
+        y_idx = np.flatnonzero(y_mask)
+        y_idx_offset = None if len(y_idx) == 0 else y_idx[0]
         return (
             x_idx_offset,
             xrange[x_mask],
@@ -86,7 +88,6 @@ def create_cell(
 
 @patch
 def generate_grid(self: SquareGridGenerator) -> GeoDataFrame:
-    polygons = []
     reprojected_gdf = self.gdf.to_crs(self.grid_projection)
     if self.boundary is None:
         boundary = SquareGridBoundary(*reprojected_gdf.total_bounds)
@@ -104,6 +105,7 @@ def generate_grid(self: SquareGridGenerator) -> GeoDataFrame:
     x_idx_offset, xrange, y_idx_offset, yrange = boundary.get_range_subset(
         *reprojected_gdf.total_bounds, cell_size=self.cell_size
     )
+    polygons = []
     for x_idx, x in enumerate(xrange):
         for y_idx, y in enumerate(yrange):
             polygons.append(
@@ -113,8 +115,13 @@ def generate_grid(self: SquareGridGenerator) -> GeoDataFrame:
                     "geometry": self.create_cell(x, y),
                 }
             )
-
-    dest = GeoDataFrame(polygons, geometry="geometry", crs=self.grid_projection)
-    dest_reproject = dest.to_crs(self.gdf.crs)
-    final = dest_reproject[dest_reproject.intersects(self.gdf.unary_union)]
-    return final
+    # Catch case where no cell intersect with the aoi
+    if polygons:
+        dest = GeoDataFrame(polygons, geometry="geometry", crs=self.grid_projection)
+        dest_reproject = dest.to_crs(self.gdf.crs)
+        final = dest_reproject[dest_reproject.intersects(self.gdf.unary_union)]
+        return final
+    else:
+        return GeoDataFrame(
+            {"x": [], "y": [], "geometry": []}, geometry="geometry", crs=self.gdf.crs
+        )
