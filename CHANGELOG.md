@@ -6,3 +6,4 @@
 
 - Implemented `GridGenerator`
 - Implemented `GeometryValidation`
+- Implemented `VectorZonalStats`
