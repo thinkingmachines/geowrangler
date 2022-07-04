@@ -53,12 +53,10 @@ class SquareGridBoundary:
 class SquareGridGenerator:
     def __init__(
         self,
-        gdf: GeoDataFrame,  # a geodataframe to create grids from
         cell_size: float,  # height and width of a square cell in meters
         grid_projection: str = "EPSG:3857",  # projection of grid output
         boundary: Union[SquareGridBoundary, List[float]] = None,  # original boundary
     ):
-        self.gdf = gdf
         self.cell_size = cell_size
         self.grid_projection = grid_projection
         self.boundary = boundary
@@ -88,16 +86,14 @@ def create_cell(
 
 
 @patch
-def generate_grid(self: SquareGridGenerator) -> GeoDataFrame:
-    reprojected_gdf = self.gdf.to_crs(self.grid_projection)
+def generate_grid(self: SquareGridGenerator, gdf: GeoDataFrame) -> GeoDataFrame:
+    reprojected_gdf = gdf.to_crs(self.grid_projection)
     if self.boundary is None:
         boundary = SquareGridBoundary(*reprojected_gdf.total_bounds)
     elif isinstance(self.boundary, SquareGridBoundary):
         boundary = self.boundary
     else:
-        transformer = Transformer.from_crs(
-            self.gdf.crs, reprojected_gdf.crs, always_xy=True
-        )
+        transformer = Transformer.from_crs(gdf.crs, reprojected_gdf.crs, always_xy=True)
         x_min, y_min = transformer.transform(self.boundary[0], self.boundary[1])
         x_max, y_max = transformer.transform(self.boundary[2], self.boundary[3])
         boundary = SquareGridBoundary(x_min, y_min, x_max, y_max)
@@ -119,10 +115,10 @@ def generate_grid(self: SquareGridGenerator) -> GeoDataFrame:
     # Catch case where no cell intersect with the aoi
     if polygons:
         dest = GeoDataFrame(polygons, geometry="geometry", crs=self.grid_projection)
-        dest_reproject = dest.to_crs(self.gdf.crs)
-        final = dest_reproject[dest_reproject.intersects(self.gdf.unary_union)]
+        dest_reproject = dest.to_crs(gdf.crs)
+        final = dest_reproject[dest_reproject.intersects(gdf.unary_union)]
         return final
     else:
         return GeoDataFrame(
-            {"x": [], "y": [], "geometry": []}, geometry="geometry", crs=self.gdf.crs
+            {"x": [], "y": [], "geometry": []}, geometry="geometry", crs=gdf.crs
         )
