@@ -256,7 +256,7 @@ def create_zonal_stats(
     Create zonal stats for area of interest from data using aggregration operations on data columns.
     Returns the same aoi with additional columns containing the computed zonal features.
     """
-
+    _validate_aoi(aoi)
     fixed_aggs = [_fix_agg(agg) for agg in aggregations]
 
     _validate_aggs(fixed_aggs, data)
