@@ -161,9 +161,7 @@ def generate_grid(self: H3GridGenerator, gdf: GeoDataFrame) -> DataFrame:
     df = DataFrame({"hex_id": list(hex_ids)})
     if self.return_geometry is False:
         return df
-    hexes = df.hex_id.apply(
-        lambda id: Polygon(h3.h3_to_geo_boundary(id, geo_json=True))
-    )
+    hexes = df.hex_id.apply(lambda id: Polygon(h3.h3_to_geo_boundary(id)))
     h3_gdf = GeoDataFrame(
         df,
         geometry=hexes,
