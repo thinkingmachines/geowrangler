@@ -17,6 +17,7 @@ from geowrangler.vector_zonal_stats import (
     _fix_agg,
     _prep_aoi,
     _validate_aggs,
+    _validate_aoi,
     create_zonal_stats,
 )
 
@@ -345,6 +346,26 @@ def test_validate_aggs_with_duplicate_output_column():
     e = exc_info.value
 
     assert e.args[0] == "Duplicate output column name found for agg[1] ['pop_mean']"
+
+
+def test_validate_aoi():
+    """Raises value error when AOI contains multindex"""
+    index = pd.MultiIndex.from_product(
+        [
+            [
+                "type1",
+            ],
+            ["type2", "type3"],
+        ],
+    )
+    with pytest.raises(ValueError):
+        _validate_aoi(pd.DataFrame("-", index, ["col1", "col2"]))
+
+
+def test_validate_aoi_valide():
+    """Raises nothing when APOI contains index"""
+    index = pd.RangeIndex(0, 10)
+    _validate_aoi(pd.DataFrame("-", index, ["col1", "col2"]))
 
 
 def test_expand_args():
