@@ -169,5 +169,4 @@ def generate_grid(self: H3GridGenerator, gdf: GeoDataFrame) -> DataFrame:
         geometry=hexes,
         crs="epsg:4326",
     )
-    h3_gdf.to_crs(gdf.crs)
-    return h3_gdf
+    return h3_gdf.to_crs(gdf.crs)
