@@ -1,5 +1,6 @@
 import geopandas as gpd
 import numpy as np
+import pandas as pd
 import pytest
 from shapely.geometry import Polygon
 
@@ -80,3 +81,49 @@ def test_generate_grids_aoi_outside_boundary(sample_gdf):
     grids_gdf = grid_generator.generate_grid(sample_gdf)
 
     assert len(grids_gdf) == 0
+
+
+def test_h3_grid_generator(sample_gdf):
+    grid_generator = grids.H3GridGenerator(5)
+    grids_gdf = grid_generator.generate_grid(sample_gdf)
+    assert "geometry" in grids_gdf
+    assert isinstance(grids_gdf, gpd.GeoDataFrame)
+    assert len(grids_gdf) == 262
+
+
+def test_h3_grid_generator_mutliple_polygons(sample_gdf):
+    grid_generator = grids.H3GridGenerator(5)
+    gdf2 = gpd.GeoDataFrame(
+        geometry=[
+            Polygon(
+                [
+                    (3, 3),
+                    (3, 4),
+                    (4, 3),
+                ]
+            )
+        ],
+        crs="EPSG:4326",
+    )
+    grids_gdf = grid_generator.generate_grid(pd.concat([gdf2, sample_gdf]))
+    assert "geometry" in grids_gdf
+    assert isinstance(grids_gdf, gpd.GeoDataFrame)
+    assert len(grids_gdf) == 292
+
+
+def test_h3_grid_generator_return_geometry_false(
+    sample_gdf,
+):
+    grid_generator = grids.H3GridGenerator(5, return_geometry=False)
+    grids_gdf = grid_generator.generate_grid(sample_gdf)
+    assert "geometry" not in grids_gdf
+    assert isinstance(grids_gdf, pd.DataFrame)
+    assert len(grids_gdf) == 262
+
+
+def test_h3_grid_generator_get_hexes_for_polygon():
+    grid_generator = grids.H3GridGenerator(
+        5,
+    )
+    hex_ids = grid_generator.get_hexes_for_polygon(Polygon([(0, 0.0), (0, 1), (1, 1)]))
+    assert len(hex_ids) == 31
