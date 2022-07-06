@@ -11,6 +11,8 @@ index = {
     "H3GridGenerator": "00_grids.ipynb",
     "H3GridGenerator.get_hexes_for_polygon": "00_grids.ipynb",
     "H3GridGenerator.generate_grid": "00_grids.ipynb",
+    "BingTileGridGenerator": "00_grids.ipynb",
+    "BingTileGridGenerator.generate_grid": "00_grids.ipynb",
     "ValidationError": "00_validation.ipynb",
     "BaseValidator": "00_validation.ipynb",
     "BaseValidator.validate": "00_validation.ipynb",
