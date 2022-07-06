@@ -127,3 +127,41 @@ def test_h3_grid_generator_get_hexes_for_polygon():
     )
     hex_ids = grid_generator.get_hexes_for_polygon(Polygon([(0, 0.0), (0, 1), (1, 1)]))
     assert len(hex_ids) == 31
+
+
+def test_bing_tile_grid_generator(sample_gdf):
+    grid_generator = grids.BingTileGridGenerator(10)
+    grids_gdf = grid_generator.generate_grid(sample_gdf)
+    assert "geometry" in grids_gdf
+    assert isinstance(grids_gdf, gpd.GeoDataFrame)
+    assert len(grids_gdf) == 36
+
+
+def test_bing_tile_grid_generator_mutliple_polygons(sample_gdf):
+    grid_generator = grids.BingTileGridGenerator(10)
+    gdf2 = gpd.GeoDataFrame(
+        geometry=[
+            Polygon(
+                [
+                    (3, 3),
+                    (3, 4),
+                    (4, 3),
+                ]
+            )
+        ],
+        crs="EPSG:4326",
+    )
+    grids_gdf = grid_generator.generate_grid(pd.concat([gdf2, sample_gdf]))
+    assert "geometry" in grids_gdf
+    assert isinstance(grids_gdf, gpd.GeoDataFrame)
+    assert len(grids_gdf) == 46
+
+
+def test_bing_tile_grid_generator_return_geometry_false(
+    sample_gdf,
+):
+    grid_generator = grids.BingTileGridGenerator(10, return_geometry=False)
+    grids_gdf = grid_generator.generate_grid(sample_gdf)
+    assert "geometry" not in grids_gdf
+    assert isinstance(grids_gdf, pd.DataFrame)
+    assert len(grids_gdf) == 36

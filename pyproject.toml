@@ -18,6 +18,7 @@ geopandas = "^0.10"
 fastcore = "^1.4,<2"
 pygeos = "^0.12.0"
 h3 = "^3.7.4"
+morecantile = "^3.1.2"
 [tool.poetry.dev-dependencies]
 nbdev = {git = "https://github.com/butchland/nbdev.git", rev = "add-black-format"}
 pytest = "^7.1.2"
