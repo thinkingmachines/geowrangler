@@ -1001,17 +1001,6 @@ optional = false
 python-versions = "*"
 
 [[package]]
-name = "nb-black"
-version = "1.0.7"
-description = "A simple extension for Jupyter Notebook and Jupyter Lab to beautify Python code automatically using Black."
-category = "dev"
-optional = false
-python-versions = "*"
-
-[package.dependencies]
-ipython = "*"
-
-[[package]]
 name = "nbclassic"
 version = "0.3.7"
 description = "Jupyter Notebook as a Jupyter Server extension."
@@ -1969,7 +1958,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7.1,<4.0"
-content-hash = "d43f258de80aeec9f42ae121ccb650fa0f47938f3666355c16f3be03f17e487d"
+content-hash = "21f4bbc7511de937ee32febe831a8226b27fa26f357e88f9a61ab8978246ec41"
 
 [metadata.files]
 anyio = [
@@ -2572,9 +2561,6 @@ munch = [
 mypy-extensions = [
     {file = "mypy_extensions-0.4.3-py2.py3-none-any.whl", hash = "sha256:090fedd75945a69ae91ce1303b5824f428daf5a028d2f6ab8a299250a846f15d"},
     {file = "mypy_extensions-0.4.3.tar.gz", hash = "sha256:2d82818f5bb3e369420cb3c4060a7970edba416647068eb4c5343488a6c604a8"},
-]
-nb-black = [
-    {file = "nb_black-1.0.7.tar.gz", hash = "sha256:1ca52e3a46675f6a0a6d79ac73a1f8f951bef60f919eced56173e76ab1b6d62b"},
 ]
 nbclassic = [
     {file = "nbclassic-0.3.7-py3-none-any.whl", hash = "sha256:89184baa2d66b8ac3c8d3df57cbcf16f34148954d410a2fb3e897d7c18f2479d"},
