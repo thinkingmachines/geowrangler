@@ -4,6 +4,7 @@ __all__ = [
     "_fix_agg",
     "_check_agg",
     "_validate_aggs",
+    "_validate_aoi",
     "_expand_aggs",
     "_build_agg_args",
     "_prep_aoi",
@@ -131,6 +132,9 @@ def _validate_aggs(
         outputs += agg["output"]
 
 
+# Cell
+# nbdev_comment _all_ = ["_validate_aoi"]
+
 # Internal Cell
 def _validate_aoi(
     aoi: pd.DataFrame,  # Source dataframe
@@ -184,7 +188,6 @@ def _prep_aoi(
 ) -> pd.DataFrame:
     """
     Prepare aoi for spatial join
-      - split off any existing column named index and drop it from aoi
       - create a column  from aoi's index which will be used as grouping key
     """
     if GEO_INDEX_NAME in list(aoi.columns.values):
@@ -193,17 +196,13 @@ def _prep_aoi(
         )
     # prep for spatial join
     aoi = aoi.copy()
-
-    # handle existing col named 'index'
-    aoi_index_data = None
-    if "index" in list(aoi.columns.values):
-        aoi_index_data = aoi["index"]
-        aoi.drop(labels="index", inplace=True, axis=1)
+    aoi.index.name = GEO_INDEX_NAME
 
     # create index col for broadcast to features
-    aoi.reset_index(level=0, inplace=True)
-    aoi.rename(columns={"index": GEO_INDEX_NAME}, inplace=True)
-    return aoi, aoi_index_data
+    aoi.reset_index(
+        level=0, inplace=True
+    )  # index added as new column named GEO_INDEX_NAME
+    return aoi
 
 
 # Cell
@@ -273,7 +272,8 @@ def create_zonal_stats(
     _validate_aggs(fixed_aggs, data)
 
     # prep for spatial join
-    aoi, aoi_index_data = _prep_aoi(aoi)
+    aoi_index_name = aoi.index.name
+    aoi = _prep_aoi(aoi)
 
     if not data.crs.equals(aoi.crs):
         data = data.to_crs(aoi.crs)
@@ -291,8 +291,7 @@ def create_zonal_stats(
     results = _aggregate_stats(aoi, groups, expanded_aggs)
 
     # cleanup results
-    results.drop(labels=GEO_INDEX_NAME, inplace=True, axis=1)
-    if aoi_index_data is not None:
-        results["index"] = aoi_index_data
+    results.set_index(GEO_INDEX_NAME, inplace=True)
+    results.index.name = aoi_index_name
 
     return results
