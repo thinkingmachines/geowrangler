@@ -1,7 +1,3 @@
-import warnings
-
-warnings.filterwarnings(action="ignore", category=UserWarning, module="geopandas")
-
 import geopandas as gpd
 import numpy as np
 import pandas as pd
@@ -194,7 +190,7 @@ def test_check_agg_exception_column_not_numeric():
             {"func": ["mean", "sum"], "column": "population", "output": ["pop_mean"]},
             1,
             ["population"],
-            pd.Series(data={"population": np.dtype(np.object)}),
+            pd.Series(data={"population": np.dtype(object)}),
         )
     e = exc_info.value
 
@@ -362,7 +358,7 @@ def test_validate_aoi():
         _validate_aoi(pd.DataFrame("-", index, ["col1", "col2"]))
 
 
-def test_validate_aoi_valide():
+def test_validate_aoi_valid():
     """Raises nothing when APOI contains index"""
     index = pd.RangeIndex(0, 10)
     _validate_aoi(pd.DataFrame("-", index, ["col1", "col2"]))
@@ -420,24 +416,20 @@ def test_build_add_args():
 
 def test_prep_aoi(simple_aoi):
     """simple aoi adds geo index name to aoi"""
-    new_aoi, aoi_index_data = _prep_aoi(simple_aoi)
+    new_aoi = _prep_aoi(simple_aoi)
     assert GEO_INDEX_NAME in list(new_aoi.columns.values)
     assert len(new_aoi) == len(simple_aoi)
     assert new_aoi.drop(GEO_INDEX_NAME, axis=1).equals(simple_aoi)
     assert new_aoi[GEO_INDEX_NAME].equals(simple_aoi.reset_index(level=0)["index"])
 
-    assert aoi_index_data is None
-
 
 def test_prep_aoi_with_existing_index_cols(simple_aoi):
     """aoi with index as pre-existing column name"""
     simple_aoi["index"] = simple_aoi[["col1"]]
-    new_aoi, aoi_index_data = _prep_aoi(simple_aoi)
+    new_aoi = _prep_aoi(simple_aoi)
     assert GEO_INDEX_NAME in list(new_aoi.columns.values)
     assert len(new_aoi) == len(simple_aoi)
-    assert new_aoi.drop(GEO_INDEX_NAME, axis=1).equals(simple_aoi.drop("index", axis=1))
-
-    assert aoi_index_data.equals(simple_aoi.col1)
+    assert new_aoi.drop(GEO_INDEX_NAME, axis=1).equals(simple_aoi)
 
 
 def test_prep_aoi_with_existing_aoi_index_cols(simple_aoi):
@@ -470,10 +462,7 @@ def test_prep_aoi_with_existing_index_and_aoi_index_cols(simple_aoi):
 def test_aggregate_stats(simple_aoi, simple_data):
     """agg stats for simplest agg spec"""
     simple_data.to_crs(simple_aoi.crs)
-    (
-        aoi,
-        _,
-    ) = _prep_aoi(simple_aoi)
+    aoi = _prep_aoi(simple_aoi)
     features = gpd.sjoin(
         aoi[[GEO_INDEX_NAME, "geometry"]],
         simple_data,
@@ -488,10 +477,7 @@ def test_aggregate_stats(simple_aoi, simple_data):
 
 def test_aggregate_stats_with_existing_aoi_column(simple_aoi, simple_data):
     """agg spec with output col same as preexisting aoi col name"""
-    (
-        aoi,
-        _,
-    ) = _prep_aoi(simple_aoi)
+    aoi = _prep_aoi(simple_aoi)
     aoi["pois_count"] = aoi.col1
     features = gpd.sjoin(
         aoi[[GEO_INDEX_NAME, "geometry"]],
