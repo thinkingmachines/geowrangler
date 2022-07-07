@@ -19,6 +19,7 @@ from geopandas import GeoDataFrame
 from pandas import DataFrame
 from pyproj import Transformer
 from shapely.geometry import Polygon, shape
+from shapely.prepared import prep
 
 logger = logging.getLogger(__name__)
 
@@ -90,6 +91,26 @@ def create_cell(
 
 
 # Cell
+@patch
+def create_grid_for_polygon(self: SquareGridGenerator, boundary, geometry):
+    x_idx_offset, xrange, y_idx_offset, yrange = boundary.get_range_subset(
+        *geometry.bounds, cell_size=self.cell_size
+    )
+    cells = {}
+    prepared_geometry = prep(geometry)
+    for x_idx, x in enumerate(xrange):
+        for y_idx, y in enumerate(yrange):
+            x_col = x_idx + x_idx_offset
+            y_col = y_idx + y_idx_offset
+            cell = self.create_cell(x, y)
+            if prepared_geometry.intersects(cell):
+                cells.update(
+                    {(x_col, y_col): {"x": x_col, "y": y_col, "geometry": cell}}
+                )
+    return cells
+
+
+# Cell
 
 
 @patch
@@ -105,26 +126,19 @@ def generate_grid(self: SquareGridGenerator, gdf: GeoDataFrame) -> GeoDataFrame:
         x_max, y_max = transformer.transform(self.boundary[2], self.boundary[3])
         boundary = SquareGridBoundary(x_min, y_min, x_max, y_max)
 
-    # TODO: Catch case where no geometries are within the boundary
-    x_idx_offset, xrange, y_idx_offset, yrange = boundary.get_range_subset(
-        *reprojected_gdf.total_bounds, cell_size=self.cell_size
-    )
-    polygons = []
-    for x_idx, x in enumerate(xrange):
-        for y_idx, y in enumerate(yrange):
-            polygons.append(
-                {
-                    "x": x_idx + x_idx_offset,
-                    "y": y_idx + y_idx_offset,
-                    "geometry": self.create_cell(x, y),
-                }
-            )
-    # Catch case where no cell intersect with the aoi
+    polygons = {}
+    unary_union = reprojected_gdf.unary_union
+    if isinstance(unary_union, Polygon):
+        polygons.update(self.create_grid_for_polygon(boundary, unary_union))
+    else:
+        for geom in unary_union.geoms:
+            polygons.update(self.create_grid_for_polygon(boundary, geom))
     if polygons:
-        dest = GeoDataFrame(polygons, geometry="geometry", crs=self.grid_projection)
-        dest_reproject = dest.to_crs(gdf.crs)
-        final = dest_reproject[dest_reproject.intersects(gdf.unary_union)]
-        return final
+        dest = GeoDataFrame(
+            list(polygons.values()), geometry="geometry", crs=self.grid_projection
+        )
+        dest.to_crs(gdf.crs, inplace=True)
+        return dest
     else:
         return GeoDataFrame(
             {"x": [], "y": [], "geometry": []}, geometry="geometry", crs=gdf.crs
