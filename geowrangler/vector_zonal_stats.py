@@ -59,7 +59,7 @@ def _fix_agg(
 
     # check matching fillna
     if "fillna" not in agg:
-        agg["fillna"] = [True for _ in agg["func"]]
+        agg["fillna"] = [False for _ in agg["func"]]
 
     if type(agg["fillna"]) == bool:
         agg["fillna"] = [agg["fillna"]]
