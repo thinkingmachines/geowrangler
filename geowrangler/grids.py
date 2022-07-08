@@ -41,8 +41,10 @@ class SquareGridBoundary:
         """Returns a subset of grids from the orginal boundary based on the boundary and a grid size"""
         xrange = np.arange(self.x_min, self.x_max, cell_size)
         yrange = np.arange(self.y_min, self.y_max, cell_size)
-        x_mask = (xrange >= x_min) & (xrange <= x_max + cell_size)
-        y_mask = (yrange >= y_min) & (yrange <= y_max + cell_size)
+        # Add cell_size buffer to catch cases where the bounds of the polygon are slightly outside
+        # the bounds. This might happen to do floating point after reprojection/unary_union
+        x_mask = (xrange >= (x_min - cell_size)) & (xrange <= (x_max + cell_size))
+        y_mask = (yrange >= (y_min - cell_size)) & (yrange <= (y_max + cell_size))
         x_idx = np.flatnonzero(x_mask)
         x_idx_offset = None if len(x_idx) == 0 else x_idx[0]
         y_idx = np.flatnonzero(y_mask)
