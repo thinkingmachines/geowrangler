@@ -91,7 +91,7 @@ def test_fix_agg_output():
             "population_min",
             "population_mean",
         ],
-        "fillna": [True, True, True, True],
+        "fillna": [False, False, False, False],
     }
 
 
@@ -106,7 +106,7 @@ def test_fix_agg_output_default():
         "func": ["count"],
         "column": GEO_INDEX_NAME,
         "output": ["index_count"],
-        "fillna": [True],
+        "fillna": [False],
     }
 
 
@@ -126,7 +126,7 @@ def test_fix_agg_default_column():
         "func": ["count"],
         "column": GEO_INDEX_NAME,
         "output": ["pois_count"],
-        "fillna": [True],
+        "fillna": [False],
     }
 
 
@@ -153,7 +153,7 @@ def test_fix_agg_all_defaults():
         "func": ["count"],
         "column": GEO_INDEX_NAME,
         "output": ["index_count"],
-        "fillna": [True],
+        "fillna": [False],
     }
 
 
