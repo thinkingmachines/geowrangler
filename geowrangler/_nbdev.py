@@ -3,7 +3,7 @@
 __all__ = ["index", "modules", "custom_doc_links", "git_url"]
 
 index = {
-    "logger": "00_validation.ipynb",
+    "logger": "00_grids.ipynb",
     "SquareGridBoundary": "00_grids.ipynb",
     "SquareGridGenerator": "00_grids.ipynb",
     "SquareGridGenerator.create_cell": "00_grids.ipynb",
@@ -33,6 +33,7 @@ index = {
     "GeometryValidation.validate_all": "00_validation.ipynb",
     "GEO_INDEX_NAME": "02_vector_zonal_stats.ipynb",
     "create_zonal_stats": "02_vector_zonal_stats.ipynb",
+    "SquareGridGenerator.create_grid_for_polygon": "00_grids.ipynb",
 }
 
 modules = ["grids.py", "validation.py", "vector_zonal_stats.py"]

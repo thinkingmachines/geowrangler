@@ -72,8 +72,9 @@ def test_generate_grids_w_custom_boundary_2(sample_gdf):
 def test_boundary_smaller_then_a_cell():
     boundary = grids.SquareGridBoundary(0, 0, 5000000, 5000000)
     _, xrange, _, yrange = boundary.get_range_subset(2.5, 2.5, 5, 5, 10)
-    assert len(xrange) == 1
-    assert len(yrange) == 1
+    # 2 because we add a boundary
+    assert len(xrange) == 2
+    assert len(yrange) == 2
 
 
 def test_generate_grids_aoi_outside_boundary(sample_gdf):
