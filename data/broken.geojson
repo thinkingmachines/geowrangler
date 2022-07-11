@@ -169,7 +169,7 @@
     {
       "type": "Feature",
       "properties": {
-        "id": "slither"
+        "id": "sliver"
       },
       "geometry": {
         "type": "Polygon",
