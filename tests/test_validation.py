@@ -166,6 +166,7 @@ def test_validator_skip(mocker):
     gdf = gpd.GeoDataFrame(
         geometry=[
             polygon.Polygon([(0, 0), (1, 0), (0, 1)]),
+            None,
         ]
     )
     TestValidator().validate(gdf)
@@ -365,3 +366,13 @@ def test_null_warning():
     )
     with pytest.warns(UserWarning, match="Found null geometries"):
         validation.NullValidator().validate(gdf)
+
+
+def test_has_area():
+    p = polygon.Polygon([(0, 0), (1, 0), (0, 1)])
+    assert validation.AreaValidator().check(p) is True
+
+
+def test_has_area_invalid():
+    p = polygon.Polygon([(0, 1), (1, 0), (0, 1)])
+    assert validation.AreaValidator().check(p) is False
