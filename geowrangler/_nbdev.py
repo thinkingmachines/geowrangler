@@ -3,10 +3,11 @@
 __all__ = ["index", "modules", "custom_doc_links", "git_url"]
 
 index = {
-    "logger": "00_grids.ipynb",
+    "logger": "00_validation.ipynb",
     "SquareGridBoundary": "00_grids.ipynb",
     "SquareGridGenerator": "00_grids.ipynb",
     "SquareGridGenerator.create_cell": "00_grids.ipynb",
+    "SquareGridGenerator.create_grid_for_polygon": "00_grids.ipynb",
     "SquareGridGenerator.generate_grid": "00_grids.ipynb",
     "H3GridGenerator": "00_grids.ipynb",
     "H3GridGenerator.get_hexes_for_polygon": "00_grids.ipynb",
@@ -29,11 +30,13 @@ index = {
     "NullValidator": "00_validation.ipynb",
     "NullValidator.check": "00_validation.ipynb",
     "NullValidator.fix": "00_validation.ipynb",
+    "AreaValidator": "00_validation.ipynb",
+    "AreaValidator.check": "00_validation.ipynb",
+    "AreaValidator.fix": "00_validation.ipynb",
     "GeometryValidation": "00_validation.ipynb",
     "GeometryValidation.validate_all": "00_validation.ipynb",
     "GEO_INDEX_NAME": "02_vector_zonal_stats.ipynb",
     "create_zonal_stats": "02_vector_zonal_stats.ipynb",
-    "SquareGridGenerator.create_grid_for_polygon": "00_grids.ipynb",
 }
 
 modules = ["grids.py", "validation.py", "vector_zonal_stats.py"]

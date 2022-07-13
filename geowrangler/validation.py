@@ -7,9 +7,9 @@ __all__ = [
     "CrsBoundsValidator",
     "SelfIntersectingValidator",
     "NullValidator",
+    "AreaValidator",
     "GeometryValidation",
 ]
-
 
 # Internal Cell
 import logging
@@ -71,8 +71,11 @@ class BaseValidator(ABC):
 
     def skip(self, geometry: BaseGeometry):
         """Checks whether to skip the check. Used for skipping check that only works for certain types."""
-        # If nothing is specified always, run validator
-        if self.geometry_types is None:
+        # Skip everything not geometry
+        if not isinstance(geometry, BaseGeometry):
+            return True
+        # If nothing is specified always, run validator for all types
+        elif self.geometry_types is None:
             return False
         elif geometry.geom_type in self.geometry_types:
             return False
@@ -186,7 +189,7 @@ def check(
 def fix(
     self: CrsBoundsValidator, geometry: BaseGeometry  # Geometry to fix
 ) -> BaseGeometry:  # pragma: no cover
-    """No fix available for CRS Bounds"""
+    """No fix available"""
     return geometry
 
 
@@ -224,12 +227,17 @@ class NullValidator(BaseValidator):
     validator_column_name = "is_not_null"
     fix_available = False
     warning_message = "Found null geometries"
+    geometry_types = [None]
+
+    # special case where we want to run the validator on non geometries
+    def skip(self, geometry: BaseGeometry):
+        return False
 
 
 # Cell
 @patch
 def check(self: NullValidator, geometry: BaseGeometry) -> bool:  # Geometry to check
-    """Checks if polygon is within bounds of crs"""
+    """Checks if polygon is null"""
     return not pd.isnull(geometry)
 
 
@@ -238,7 +246,33 @@ def check(self: NullValidator, geometry: BaseGeometry) -> bool:  # Geometry to c
 def fix(
     self: NullValidator, geometry: BaseGeometry  # Geometry to fix
 ) -> BaseGeometry:  # pragma: no cover
-    """No fix available for CRS Bounds"""
+    """No fix available"""
+    return geometry
+
+
+# Cell
+class AreaValidator(BaseValidator):
+    """Checks area of the geometry to ensure it greater than 0"""
+
+    validator_column_name = "area_is_not_zero"
+    fix_available = False
+    warning_message = "Found geometries with area equals or less than zero"
+    geometry_types = ["MultiPolygon", "Polygon"]
+
+
+# Cell
+@patch
+def check(self: AreaValidator, geometry: BaseGeometry) -> bool:
+    """Checks if area is greater than 0"""
+    return geometry.area > 0
+
+
+# Cell
+@patch
+def fix(
+    self: AreaValidator, geometry: BaseGeometry  # Geometry to fix
+) -> BaseGeometry:  # pragma: no cover
+    """No fix available"""
     return geometry
 
 
@@ -253,6 +287,7 @@ class GeometryValidation:
         "crs_bounds": CrsBoundsValidator,
         "self_intersecting": SelfIntersectingValidator,
         "null": NullValidator,
+        "area": AreaValidator,
     }
 
     def __init__(
@@ -263,6 +298,7 @@ class GeometryValidation:
             "self_intersecting",
             "orientation",
             "crs_bounds",
+            "area",
         ),
         add_validation_columns: bool = True,  # Add column to show errors
         apply_fixes: bool = True,  # Update geometry
