@@ -14,6 +14,8 @@ from geowrangler.vector_zonal_stats import (
     _prep_aoi,
     _validate_aggs,
     _validate_aoi,
+    compute_quadkey,
+    create_bingtile_zonal_stats,
     create_zonal_stats,
 )
 
@@ -527,3 +529,41 @@ def test_create_zonal_stats_with_aoi_index_columns(simple_aoi, simple_data):
         for item in [*list(simple_aoi.columns.values), "index_count"]
     )
     assert results["index"].equals(simple_aoi.col1)
+
+
+DATA_ZOOM_LEVEL = 19
+AOI_ZOOM_LEVEL = 9
+
+
+def test_compute_quadkey_planar_equivalent(simple_data):
+    simple_data_quadkey = compute_quadkey(simple_data, DATA_ZOOM_LEVEL)
+    simple_data_quadkey2 = compute_quadkey(
+        simple_data.to_crs("EPSG:3857"), DATA_ZOOM_LEVEL
+    )
+    assert (simple_data_quadkey2.quadkey == simple_data_quadkey.quadkey).all(axis=None)
+    assert (simple_data_quadkey.quadkey.apply(len) == DATA_ZOOM_LEVEL).all()
+
+
+def test_compute_quadkey_values(simple_aoi):
+    simple_aoi_quadkey = compute_quadkey(simple_aoi, AOI_ZOOM_LEVEL)
+    assert list(simple_aoi_quadkey.quadkey.values) == [
+        "122222222",
+        "122222232",
+        "122222233",
+    ]
+
+
+def test_create_bingtile_zonal_stats(simple_aoi, simple_data):
+    simple_aoi_quadkey = compute_quadkey(simple_aoi, AOI_ZOOM_LEVEL)
+    simple_data_quadkey = compute_quadkey(simple_data, DATA_ZOOM_LEVEL)
+    bingtile_results = create_bingtile_zonal_stats(
+        simple_aoi_quadkey, simple_data_quadkey, aggregations=[dict(func="count")]
+    )
+
+    assert list(bingtile_results.quadkey.values) == [
+        "122222222",
+        "122222232",
+        "122222233",
+    ]
+
+    assert list(bingtile_results.index_count.values) == [3, 3, 3]
