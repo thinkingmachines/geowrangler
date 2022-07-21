@@ -37,6 +37,9 @@ index = {
     "GeometryValidation.validate_all": "00_validation.ipynb",
     "GEO_INDEX_NAME": "02_vector_zonal_stats.ipynb",
     "create_zonal_stats": "02_vector_zonal_stats.ipynb",
+    "get_quadkey": "02_vector_zonal_stats.ipynb",
+    "compute_quadkey": "02_vector_zonal_stats.ipynb",
+    "tms": "02_vector_zonal_stats.ipynb",
 }
 
 modules = ["grids.py", "validation.py", "vector_zonal_stats.py"]
