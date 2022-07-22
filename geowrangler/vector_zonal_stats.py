@@ -6,7 +6,8 @@ __all__ = ["create_zonal_stats", "compute_quadkey", "create_bingtile_zonal_stats
 # Internal Cell
 GEO_INDEX_NAME = "__GeoWrangleer_aoi_index"
 
-# Internal Cell
+# Cell
+from functools import partial
 from typing import Any, Dict, List
 
 import geopandas as gpd
@@ -273,8 +274,6 @@ def get_quadkey(geometry, zoom_level):
 
 # Cell
 
-from functools import partial
-
 
 def compute_quadkey(
     data: gpd.GeoDataFrame,  # The geodataframe
@@ -283,7 +282,7 @@ def compute_quadkey(
     quadkey_column: str = "quadkey",  # The name of the quadkey output column
 ) -> gpd.GeoDataFrame:
     """
-    Computes the quadkeys for the geometries of the data
+    Computes the quadkeys for the geometries of the data.
     If geometries are not points, the quadkeys are computed
     from the centroids of the geometries.
     """
@@ -305,6 +304,8 @@ def compute_quadkey(
 
 
 # Internal Cell
+
+
 def validate_aoi_quadkey(aoi, aoi_quadkey_column) -> None:
 
     if aoi_quadkey_column not in list(aoi.columns.values):
