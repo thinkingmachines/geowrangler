@@ -495,6 +495,24 @@ def test_aggregate_stats_with_existing_aoi_column(simple_aoi, simple_data):
     assert list(results.columns.values) == [*list(aoi.columns.values), "pois_count_y"]
 
 
+def test_fillnas_with_duplicates(simple_aoi, simple_data):
+    """agg spec with output col same as preexisting aoi col name"""
+    aoi = _prep_aoi(simple_aoi)
+    aoi["pois_count"] = aoi.col1
+    features = gpd.sjoin(
+        aoi[[GEO_INDEX_NAME, "geometry"]],
+        simple_data,
+        how="inner",
+        predicate="intersects",
+    )
+    groups = features.groupby(GEO_INDEX_NAME)
+    aggs = _expand_aggs(
+        [_fix_agg({"func": "count", "output": "pois_count", "fillna": True})]
+    )
+    results = _aggregate_stats(aoi, groups, aggs)
+    assert list(results.columns.values) == [*list(aoi.columns.values), "pois_count_y"]
+
+
 def test_create_zonal_stats(simple_aoi, simple_data):
     """zonal stats for default index col"""
     results = create_zonal_stats(
