@@ -17,6 +17,8 @@ from geowrangler.vector_zonal_stats import (
     compute_quadkey,
     create_bingtile_zonal_stats,
     create_zonal_stats,
+    validate_aoi_quadkey,
+    validate_data_quadkey,
 )
 
 
@@ -535,13 +537,123 @@ DATA_ZOOM_LEVEL = 19
 AOI_ZOOM_LEVEL = 9
 
 
+def test_validate_aoi_quadkey(simple_aoi):
+    """valid aoi with quadkey does not throw exception"""
+    simple_aoi_quadkey = compute_quadkey(simple_aoi, 10)
+    validate_aoi_quadkey(simple_aoi_quadkey, "quadkey")
+
+
+def test_validate_aoi_quadkey_missing_quadkey_column(simple_aoi):
+
+    with pytest.raises(ValueError) as exc_info:
+        validate_aoi_quadkey(simple_aoi, "quadkey")
+
+    e = exc_info.value
+
+    assert (
+        e.args[0]
+        == "aoi_quadkey_column 'quadkey' is not in list of aoi columns: ['col1', 'lat0', 'lon0', 'lat1', 'lon1', 'lat2', 'lon2', 'lat3', 'lon3', 'geometry']"
+    )
+
+
+def test_validate_aoi_quadkey_empty_df(simple_aoi):
+
+    simple_aoi_quadkey_empty = compute_quadkey(simple_aoi, 10).iloc[:0]
+
+    with pytest.raises(ValueError) as exc_info:
+        validate_aoi_quadkey(simple_aoi_quadkey_empty, "quadkey")
+
+    e = exc_info.value
+
+    assert e.args[0] == "aoi dataframe is empty"
+
+
+def test_validate_aoi_quadkey_diff_levels(simple_aoi):
+
+    aoi_quadkey_diff_level = pd.concat(
+        [compute_quadkey(simple_aoi, 10), compute_quadkey(simple_aoi, 11)]
+    )
+
+    with pytest.raises(ValueError) as exc_info:
+        validate_aoi_quadkey(aoi_quadkey_diff_level, "quadkey")
+
+    e = exc_info.value
+
+    assert e.args[0] == "aoi quadkey levels are not all at the same level"
+
+
+def test_validate_data_quadkey(simple_data):
+    """validate valid data with quadkey does not throw exception"""
+    simple_data_quadkey = compute_quadkey(simple_data, 19)
+    validate_data_quadkey(simple_data_quadkey, "quadkey", 10)
+
+
+def test_validate_data_quadkey_multiple_levels(simple_data):
+    """validate valid data with quadkey at multiple levels does not throw exception"""
+    data_quadkey_multiple_levels = pd.concat(
+        [compute_quadkey(simple_data, 19), compute_quadkey(simple_data, 20)]
+    )
+    validate_data_quadkey(data_quadkey_multiple_levels, "quadkey", 10)
+
+
+def test_validate_data_quadkey_missing_quadkey_column(simple_data):
+
+    with pytest.raises(ValueError) as exc_info:
+        validate_data_quadkey(simple_data, "quadkey", 10)
+
+    e = exc_info.value
+
+    assert (
+        e.args[0]
+        == "data_quadkey_column 'quadkey' is not in list of data columns: ['col1', 'lat', 'lon', 'geometry']"
+    )
+
+
+def test_validate_data_quadkey_no_data(simple_data):
+
+    simple_data_quadkey_empty = compute_quadkey(simple_data, 19).iloc[:0]
+
+    with pytest.raises(ValueError) as exc_info:
+        validate_data_quadkey(simple_data_quadkey_empty, "quadkey", 10)
+
+    e = exc_info.value
+
+    assert e.args[0] == "data dataframe is empty"
+
+
+def test_validate_data_quadkey_below_min_zoom_level(simple_data):
+
+    simple_data_quadkey = compute_quadkey(simple_data, 9)
+
+    with pytest.raises(ValueError) as exc_info:
+        validate_data_quadkey(simple_data_quadkey, "quadkey", 10)
+
+    e = exc_info.value
+
+    assert e.args[0] == "data quadkey levels cannot be less than aoi quadkey level 10"
+
+
+def test_validate_data_quadkey_diff_levels_below_min_zoom_level(simple_data):
+
+    data_quadkey_diff_level = pd.concat(
+        [compute_quadkey(simple_data, 9), compute_quadkey(simple_data, 19)]
+    )
+
+    with pytest.raises(ValueError) as exc_info:
+        validate_data_quadkey(data_quadkey_diff_level, "quadkey", 10)
+
+    e = exc_info.value
+
+    assert e.args[0] == "data quadkey levels cannot be less than aoi quadkey level 10"
+
+
 def test_compute_quadkey_planar_equivalent(simple_data):
     simple_data_quadkey = compute_quadkey(simple_data, DATA_ZOOM_LEVEL)
     simple_data_quadkey2 = compute_quadkey(
         simple_data.to_crs("EPSG:3857"), DATA_ZOOM_LEVEL
     )
     assert (simple_data_quadkey2.quadkey == simple_data_quadkey.quadkey).all(axis=None)
-    assert (simple_data_quadkey.quadkey.apply(len) == DATA_ZOOM_LEVEL).all()
+    assert (simple_data_quadkey.quadkey.apply(len) == DATA_ZOOM_LEVEL).all(axis=None)
 
 
 def test_compute_quadkey_values(simple_aoi):
