@@ -4,6 +4,7 @@ import pandas as pd
 import pytest
 from shapely.geometry import Point, Polygon
 
+import geowrangler.grids as gr
 from geowrangler.vector_zonal_stats import (
     GEO_INDEX_NAME,
     _aggregate_stats,
@@ -20,6 +21,9 @@ from geowrangler.vector_zonal_stats import (
     validate_aoi_quadkey,
     validate_data_quadkey,
 )
+
+DATA_ZOOM_LEVEL = 19
+AOI_ZOOM_LEVEL = 9
 
 
 @pytest.fixture()
@@ -80,6 +84,13 @@ def simple_data():
         geometry=df.apply(lambda row: Point(row.lat, row.lon), axis=1),
         crs="EPSG:4326",
     )
+
+
+@pytest.fixture()
+def simple_aoi_bingtiles(simple_aoi):
+    bgtile_generator = gr.BingTileGridGenerator(AOI_ZOOM_LEVEL)
+    simple_aoi_bingtiles = bgtile_generator.generate_grid(simple_aoi)
+    return simple_aoi_bingtiles
 
 
 def test_fix_agg_output():
@@ -551,14 +562,9 @@ def test_create_zonal_stats_with_aoi_index_columns(simple_aoi, simple_data):
     assert results["index"].equals(simple_aoi.col1)
 
 
-DATA_ZOOM_LEVEL = 19
-AOI_ZOOM_LEVEL = 9
-
-
-def test_validate_aoi_quadkey(simple_aoi):
+def test_validate_aoi_quadkey(simple_aoi_bingtiles):
     """valid aoi with quadkey does not throw exception"""
-    simple_aoi_quadkey = compute_quadkey(simple_aoi, 10)
-    validate_aoi_quadkey(simple_aoi_quadkey, "quadkey")
+    validate_aoi_quadkey(simple_aoi_bingtiles, "quadkey")
 
 
 def test_validate_aoi_quadkey_missing_quadkey_column(simple_aoi):
@@ -574,9 +580,9 @@ def test_validate_aoi_quadkey_missing_quadkey_column(simple_aoi):
     )
 
 
-def test_validate_aoi_quadkey_empty_df(simple_aoi):
+def test_validate_aoi_quadkey_empty_df(simple_aoi_bingtiles):
 
-    simple_aoi_quadkey_empty = compute_quadkey(simple_aoi, 10).iloc[:0]
+    simple_aoi_quadkey_empty = simple_aoi_bingtiles.iloc[:0]
 
     with pytest.raises(ValueError) as exc_info:
         validate_aoi_quadkey(simple_aoi_quadkey_empty, "quadkey")
@@ -683,17 +689,58 @@ def test_compute_quadkey_values(simple_aoi):
     ]
 
 
-def test_create_bingtile_zonal_stats(simple_aoi, simple_data):
-    simple_aoi_quadkey = compute_quadkey(simple_aoi, AOI_ZOOM_LEVEL)
+def test_create_bingtile_zonal_stats(simple_aoi_bingtiles, simple_data):
     simple_data_quadkey = compute_quadkey(simple_data, DATA_ZOOM_LEVEL)
     bingtile_results = create_bingtile_zonal_stats(
-        simple_aoi_quadkey, simple_data_quadkey, aggregations=[dict(func="count")]
+        simple_aoi_bingtiles,
+        simple_data_quadkey,
+        aggregations=[dict(func="count", fillna=True)],
     )
 
     assert list(bingtile_results.quadkey.values) == [
+        "122222220",
         "122222222",
+        "122222221",
+        "122222223",
+        "122222230",
         "122222232",
+        "122222231",
         "122222233",
+        "122222320",
+        "122222322",
     ]
 
-    assert list(bingtile_results.index_count.values) == [3, 3, 3]
+    assert list(bingtile_results.index_count.values) == [
+        0.0,
+        3.0,
+        0.0,
+        0.0,
+        0.0,
+        3.0,
+        0.0,
+        3.0,
+        0.0,
+        0.0,
+    ]
+
+
+def test_create_bingtile_zonal_stats2(simple_aoi, simple_data):
+    """zonal stats at higher zoom level misses areas not in same zoom level"""
+    bgtile_generator = gr.BingTileGridGenerator(AOI_ZOOM_LEVEL + 1)
+    simple_aoi_bingtiles = bgtile_generator.generate_grid(simple_aoi)
+    simple_data_quadkey = compute_quadkey(simple_data, DATA_ZOOM_LEVEL)
+    bingtile_results = create_bingtile_zonal_stats(
+        simple_aoi_bingtiles,
+        simple_data_quadkey,
+        aggregations=[dict(func="count", fillna=True)],
+    )
+
+    assert list(bingtile_results[bingtile_results.index_count > 0].quadkey.values) == [
+        "1222222221",
+        "1222222320",
+        "1222222330",
+        "1222222331",
+    ]
+    assert list(
+        bingtile_results[bingtile_results.index_count > 0].index_count.values
+    ) == [3, 3, 2, 1]
