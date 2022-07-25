@@ -4,6 +4,7 @@ import pandas as pd
 import pytest
 from shapely.geometry import Point, Polygon
 
+import geowrangler.grids as gr
 from geowrangler.vector_zonal_stats import (
     GEO_INDEX_NAME,
     _aggregate_stats,
@@ -14,8 +15,15 @@ from geowrangler.vector_zonal_stats import (
     _prep_aoi,
     _validate_aggs,
     _validate_aoi,
+    compute_quadkey,
+    create_bingtile_zonal_stats,
     create_zonal_stats,
+    validate_aoi_quadkey,
+    validate_data_quadkey,
 )
+
+DATA_ZOOM_LEVEL = 19
+AOI_ZOOM_LEVEL = 9
 
 
 @pytest.fixture()
@@ -76,6 +84,13 @@ def simple_data():
         geometry=df.apply(lambda row: Point(row.lat, row.lon), axis=1),
         crs="EPSG:4326",
     )
+
+
+@pytest.fixture()
+def simple_aoi_bingtiles(simple_aoi):
+    bgtile_generator = gr.BingTileGridGenerator(AOI_ZOOM_LEVEL)
+    simple_aoi_bingtiles = bgtile_generator.generate_grid(simple_aoi)
+    return simple_aoi_bingtiles
 
 
 def test_fix_agg_output():
@@ -491,6 +506,24 @@ def test_aggregate_stats_with_existing_aoi_column(simple_aoi, simple_data):
     assert list(results.columns.values) == [*list(aoi.columns.values), "pois_count_y"]
 
 
+def test_fillnas_with_duplicates(simple_aoi, simple_data):
+    """agg spec with output col same as preexisting aoi col name"""
+    aoi = _prep_aoi(simple_aoi)
+    aoi["pois_count"] = aoi.col1
+    features = gpd.sjoin(
+        aoi[[GEO_INDEX_NAME, "geometry"]],
+        simple_data,
+        how="inner",
+        predicate="intersects",
+    )
+    groups = features.groupby(GEO_INDEX_NAME)
+    aggs = _expand_aggs(
+        [_fix_agg({"func": "count", "output": "pois_count", "fillna": True})]
+    )
+    results = _aggregate_stats(aoi, groups, aggs)
+    assert list(results.columns.values) == [*list(aoi.columns.values), "pois_count_y"]
+
+
 def test_create_zonal_stats(simple_aoi, simple_data):
     """zonal stats for default index col"""
     results = create_zonal_stats(
@@ -527,3 +560,187 @@ def test_create_zonal_stats_with_aoi_index_columns(simple_aoi, simple_data):
         for item in [*list(simple_aoi.columns.values), "index_count"]
     )
     assert results["index"].equals(simple_aoi.col1)
+
+
+def test_validate_aoi_quadkey(simple_aoi_bingtiles):
+    """valid aoi with quadkey does not throw exception"""
+    validate_aoi_quadkey(simple_aoi_bingtiles, "quadkey")
+
+
+def test_validate_aoi_quadkey_missing_quadkey_column(simple_aoi):
+
+    with pytest.raises(ValueError) as exc_info:
+        validate_aoi_quadkey(simple_aoi, "quadkey")
+
+    e = exc_info.value
+
+    assert (
+        e.args[0]
+        == "aoi_quadkey_column 'quadkey' is not in list of aoi columns: ['col1', 'lat0', 'lon0', 'lat1', 'lon1', 'lat2', 'lon2', 'lat3', 'lon3', 'geometry']"
+    )
+
+
+def test_validate_aoi_quadkey_empty_df(simple_aoi_bingtiles):
+
+    simple_aoi_quadkey_empty = simple_aoi_bingtiles.iloc[:0]
+
+    with pytest.raises(ValueError) as exc_info:
+        validate_aoi_quadkey(simple_aoi_quadkey_empty, "quadkey")
+
+    e = exc_info.value
+
+    assert e.args[0] == "aoi dataframe is empty"
+
+
+def test_validate_aoi_quadkey_diff_levels(simple_aoi):
+
+    aoi_quadkey_diff_level = pd.concat(
+        [compute_quadkey(simple_aoi, 10), compute_quadkey(simple_aoi, 11)]
+    )
+
+    with pytest.raises(ValueError) as exc_info:
+        validate_aoi_quadkey(aoi_quadkey_diff_level, "quadkey")
+
+    e = exc_info.value
+
+    assert e.args[0] == "aoi quadkey levels are not all at the same level"
+
+
+def test_validate_data_quadkey(simple_data):
+    """validate valid data with quadkey does not throw exception"""
+    simple_data_quadkey = compute_quadkey(simple_data, 19)
+    validate_data_quadkey(simple_data_quadkey, "quadkey", 10)
+
+
+def test_validate_data_quadkey_multiple_levels(simple_data):
+    """validate valid data with quadkey at multiple levels does not throw exception"""
+    data_quadkey_multiple_levels = pd.concat(
+        [compute_quadkey(simple_data, 19), compute_quadkey(simple_data, 20)]
+    )
+    validate_data_quadkey(data_quadkey_multiple_levels, "quadkey", 10)
+
+
+def test_validate_data_quadkey_missing_quadkey_column(simple_data):
+
+    with pytest.raises(ValueError) as exc_info:
+        validate_data_quadkey(simple_data, "quadkey", 10)
+
+    e = exc_info.value
+
+    assert (
+        e.args[0]
+        == "data_quadkey_column 'quadkey' is not in list of data columns: ['col1', 'lat', 'lon', 'geometry']"
+    )
+
+
+def test_validate_data_quadkey_no_data(simple_data):
+
+    simple_data_quadkey_empty = compute_quadkey(simple_data, 19).iloc[:0]
+
+    with pytest.raises(ValueError) as exc_info:
+        validate_data_quadkey(simple_data_quadkey_empty, "quadkey", 10)
+
+    e = exc_info.value
+
+    assert e.args[0] == "data dataframe is empty"
+
+
+def test_validate_data_quadkey_below_min_zoom_level(simple_data):
+
+    simple_data_quadkey = compute_quadkey(simple_data, 9)
+
+    with pytest.raises(ValueError) as exc_info:
+        validate_data_quadkey(simple_data_quadkey, "quadkey", 10)
+
+    e = exc_info.value
+
+    assert e.args[0] == "data quadkey levels cannot be less than aoi quadkey level 10"
+
+
+def test_validate_data_quadkey_diff_levels_below_min_zoom_level(simple_data):
+
+    data_quadkey_diff_level = pd.concat(
+        [compute_quadkey(simple_data, 9), compute_quadkey(simple_data, 19)]
+    )
+
+    with pytest.raises(ValueError) as exc_info:
+        validate_data_quadkey(data_quadkey_diff_level, "quadkey", 10)
+
+    e = exc_info.value
+
+    assert e.args[0] == "data quadkey levels cannot be less than aoi quadkey level 10"
+
+
+def test_compute_quadkey_planar_equivalent(simple_data):
+    simple_data_quadkey = compute_quadkey(simple_data, DATA_ZOOM_LEVEL)
+    simple_data_quadkey2 = compute_quadkey(
+        simple_data.to_crs("EPSG:3857"), DATA_ZOOM_LEVEL
+    )
+    assert (simple_data_quadkey2.quadkey == simple_data_quadkey.quadkey).all(axis=None)
+    assert (simple_data_quadkey.quadkey.apply(len) == DATA_ZOOM_LEVEL).all(axis=None)
+
+
+def test_compute_quadkey_values(simple_aoi):
+    simple_aoi_quadkey = compute_quadkey(simple_aoi, AOI_ZOOM_LEVEL)
+    assert list(simple_aoi_quadkey.quadkey.values) == [
+        "122222222",
+        "122222232",
+        "122222233",
+    ]
+
+
+def test_create_bingtile_zonal_stats(simple_aoi_bingtiles, simple_data):
+    simple_data_quadkey = compute_quadkey(simple_data, DATA_ZOOM_LEVEL)
+    bingtile_results = create_bingtile_zonal_stats(
+        simple_aoi_bingtiles,
+        simple_data_quadkey,
+        aggregations=[dict(func="count", fillna=True)],
+    )
+
+    assert list(bingtile_results.quadkey.values) == [
+        "122222220",
+        "122222222",
+        "122222221",
+        "122222223",
+        "122222230",
+        "122222232",
+        "122222231",
+        "122222233",
+        "122222320",
+        "122222322",
+    ]
+
+    assert list(bingtile_results.index_count.values) == [
+        0.0,
+        3.0,
+        0.0,
+        0.0,
+        0.0,
+        3.0,
+        0.0,
+        3.0,
+        0.0,
+        0.0,
+    ]
+
+
+def test_create_bingtile_zonal_stats2(simple_aoi, simple_data):
+    """zonal stats at higher zoom level misses areas not in same zoom level"""
+    bgtile_generator = gr.BingTileGridGenerator(AOI_ZOOM_LEVEL + 1)
+    simple_aoi_bingtiles = bgtile_generator.generate_grid(simple_aoi)
+    simple_data_quadkey = compute_quadkey(simple_data, DATA_ZOOM_LEVEL)
+    bingtile_results = create_bingtile_zonal_stats(
+        simple_aoi_bingtiles,
+        simple_data_quadkey,
+        aggregations=[dict(func="count", fillna=True)],
+    )
+
+    assert list(bingtile_results[bingtile_results.index_count > 0].quadkey.values) == [
+        "1222222221",
+        "1222222320",
+        "1222222330",
+        "1222222331",
+    ]
+    assert list(
+        bingtile_results[bingtile_results.index_count > 0].index_count.values
+    ) == [3, 3, 2, 1]
