@@ -44,9 +44,15 @@ index = {
     "validate_data_quadkey": "02_vector_zonal_stats.ipynb",
     "quadkey_to_tile": "02_vector_zonal_stats.ipynb",
     "create_bingtile_zonal_stats": "02_vector_zonal_stats.ipynb",
+    "create_raster_zonal_stats": "03_raster_zonal_stats.ipynb",
 }
 
-modules = ["grids.py", "validation.py", "vector_zonal_stats.py"]
+modules = [
+    "grids.py",
+    "validation.py",
+    "vector_zonal_stats.py",
+    "raster_zonal_stats.py",
+]
 
 doc_url = "https://geowrangler.web.app/"
 
