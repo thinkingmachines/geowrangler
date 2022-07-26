@@ -21,8 +21,10 @@ def create_raster_zonal_stats(
         str, gpd.GeoDataFrame
     ],
     data: Union[str, Path],  # The path to the raster data file
-    aggregation: Dict[str, Any],  # a dict specifying the aggregation
-    extra_args: Dict[  # extra arguments passed to `rasterstats.zonal_stats` method
+    aggregation: Dict[  # A dict specifying the aggregation. See `create_zonal_stats` from the `geowrangler.vector_zonal_stats` module for more details
+        str, Any
+    ],
+    extra_args: Dict[  # Extra arguments passed to `rasterstats.zonal_stats` method
         str, Any
     ] = dict(
         layer=0,
