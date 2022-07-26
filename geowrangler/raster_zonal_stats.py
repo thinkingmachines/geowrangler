@@ -17,12 +17,14 @@ from .vector_zonal_stats import _expand_aggs, _fillnas, _fix_agg
 
 # Cell
 def create_raster_zonal_stats(
-    aoi: Union[
+    aoi: Union[  # The area of interest geodataframe, or path to the vector file
         str, gpd.GeoDataFrame
-    ],  # The area of interest geodataframe or path to vector file,
-    data: Union[str, Path],  # a path to the data raster
+    ],
+    data: Union[str, Path],  # The path to the raster data file
     aggregation: Dict[str, Any],  # a dict specifying the aggregation
-    extra_args: Dict[str, Any] = dict(
+    extra_args: Dict[  # extra arguments passed to `rasterstats.zonal_stats` method
+        str, Any
+    ] = dict(
         layer=0,
         band_num=1,
         nodata=None,
