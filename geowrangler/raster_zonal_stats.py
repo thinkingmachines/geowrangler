@@ -48,7 +48,7 @@ def create_raster_zonal_stats(
     if "categorical" in extra_args:
         extra_args.pop("categorical")  # no use for categorical and categorical maps
     if "categorical_map" in extra_args:
-        extra_args.pop("categorical_maps")
+        extra_args.pop("categorical_map")
 
     if "prefix" in extra_args:
         extra_args.pop("prefix")  # use agg['column'] as prefix
