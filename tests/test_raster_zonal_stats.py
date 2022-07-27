@@ -38,37 +38,6 @@ def simple_aoi():
     return gpd.GeoDataFrame(df, geometry=df.apply(square, axis=1), crs="EPSG:4326")
 
 
-@pytest.fixture()
-def simple_aoi():
-    df = pd.DataFrame(
-        data={
-            "col1": [1, 2, 3],
-            "lat0": [0.0, 1.0, 2.0],
-            "lon0": [0.0, 0.0, 0.0],
-            "lat1": [0.0, 1.0, 2.0],
-            "lon1": [1.0, 1.0, 1.0],
-            "lat2": [1.0, 2.0, 3.0],
-            "lon2": [1.0, 1.0, 1.0],
-            "lat3": [1.0, 2.0, 3.0],
-            "lon3": [0.0, 0.0, 0.0],
-        }
-    )
-
-    def square(row):
-        return Polygon(
-            (
-                [
-                    (row.lat0, row.lon0),
-                    (row.lat1, row.lon1),
-                    (row.lat2, row.lon2),
-                    (row.lat3, row.lon3),
-                ]
-            )
-        )
-
-    return gpd.GeoDataFrame(df, geometry=df.apply(square, axis=1), crs="EPSG:4326")
-
-
 def test_create_raster_zonal_stats(simple_aoi):
     terrain_file = "data/sample_terrain.tif"
     results = rzs.create_raster_zonal_stats(
