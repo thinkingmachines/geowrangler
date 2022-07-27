@@ -159,3 +159,4 @@ cython_debug/
 # End of https://www.toptal.com/developers/gitignore/api/python
 /docs
 .firebase/
+data/phl_pop_2020.tif
