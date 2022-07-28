@@ -22,7 +22,11 @@ jobs:
           python-version: "3.9"
           cache: "pip"
           cache-dependency-path: "settings.ini"
-      - run: pip install install -e . && pip install nbdev && nbdev_build_docs --force_all True --mk_readme False
+      - run: sudo apt install -y libgeos-dev
+      - run: pip install install -e . && pip install nbdev==1.2.11
+      - run: pip uninstall pygeos shapely -y
+      - run: pip install pygeos shapely --no-binary shapely --no-binary pygeos 
+      - run: nbdev_build_docs --force_all True --mk_readme False
       - run: cd docs && bundle exec jekyll build
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:

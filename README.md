@@ -9,16 +9,18 @@ We have surveyed our past geospatial projects to extract these solutions for our
 
 Our audience are researchers, analysts and engineers delivering geospatial projects.
 
-We [welcome your comments, suggestions, bug reports and code contributions](https://github.com/thinkingmachines/geowrangler/issues) to make **Geowrangler** better. 
+We [welcome your comments, suggestions, bug reports and code contributions](https://github.com/thinkingmachines/geowrangler/discussions) to make **Geowrangler** better. 
 
 ### Modules
 
 * Grid Tile Generation
 * Geometry Validation 
 * Vector Zonal Stats 
-* Raster Zonal Stats (_planned_)
-* Geometry Simplification (_planned_)
-* Grid Tile Spatial Imputation (_planned_)
+* Raster Zonal Stats
+* Demographic and Health Surveys (DHS) Pre-processing Utilities _(planned)_
+* DHS Wealth Index Calculation _(planned)_
+
+_Check [this page for more details about our Roadmap](https://github.com/orgs/thinkingmachines/projects/17)_
 
 ## Installation
 
@@ -38,15 +40,63 @@ If you want to learn more about **Geowrangler** and explore its inner workings,
 you can setup a local development environment. You can run geowrangler's jupyter notebooks
 to see how the different modules are built and how they work. 
 
-Please ensure you are using python `3.7` or higher
+
+#### Pre-requisites
+
+* OS: Linux, MacOS, Windows Subsystem for Linux (WSL) on Windows
+
+* Requirements:
+   - python 3.7 or higher
+   - virtualenv, venv or conda for python environment virtualization
+   - poetry for dependency management
+
+#### Github Repo Fork
+
+If you plan to make contributions to geowrangler, we encourage you to
+[create your fork](https://github.com/thinkingmachines/geowrangler/fork) of the Geowrangler repo. 
+
+This will then allow you to push commits to your forked repo and 
+then create a Pull Request (PR) from your repo to the main geowrangler 
+repo for approval by geowrangler's maintainers.
+
+#### Development Installation
+
+We recommend creating a virtual python environment via [virtualenv](https://pypi.org/project/virtualenv/) or 
+[conda](https://docs.conda.io/projects/conda/en/latest/user-guide/index.html) for your geowrangler development environment. Please see the relevant
+documentation for more details.
+
+The example below uses `virtualenv` to create a separate environment on Linux or WSL
+using `python3.9`.
+
+This next command will install `libgeos` (required for building pygeos/shapely). See [libgeos documentation](https://libgeos.org/usage/install/) for installation details on other systems.
 
 ```
+sudo apt install libgeos-dev  # skip this if you already have GEOS
+```
+
+Replace the github url below with `git@github.com:<your-github-id>/geowrangler.git` if you created a fork.
+
+```
+git clone https://github.com/thinkingmachines/geowrangler.git
+cd geowrangler
+virtualenv -p /usr/bin/python3.9 .venv
+source .venv/bin/activate
 pip install pre-commit poetry
 pre-commit install
 poetry install
 poetry run pip install pip --upgrade
+poetry run pip uninstall pygeos shapely -y
+poetry run pip install pygeos shapely --no-binary shapely --no-binary pygeos
 poetry run pip install -e .
 ```
+
+This completes the installation and setup of a local geowrangler environment.
+#### Activating the geowrangler environment
+
+To activate the geowrangler environment, you can `cd <your-local-geowrangler-folder>`
+and  run `poetry shell` to activate the environment.
+
+
 ### Jupyter Notebook Development
 
 The code for the **geowrangler** python package resides in Jupyter notebooks located in the `notebooks` folder.
@@ -111,4 +161,9 @@ poetry run pytest tests/test_grids.py
 ### Contributing
 
 Please read [CONTRIBUTING.md](https://github.com/thinkingmachines/geowrangler/blob/master/CONTRIBUTING.md) and [CODE_OF_CONDUCT.md](https://github.com/thinkingmachines/geowrangler/blob/master/CODE_OF_CONDUCT.md) before anything.
+
+### Development Notes
+
+For more details regarding our development standards and processes, please see [our wiki](https://github.com/thinkingmachines/geowrangler/wiki/DeveloperNotes).
+
 

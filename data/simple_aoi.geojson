@@ -1,0 +1,9 @@
+{
+"type": "FeatureCollection",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "col1": 1, "lat0": 0.0, "lon0": 0.0, "lat1": 0.0, "lon1": 1.0, "lat2": 1.0, "lon2": 1.0, "lat3": 1.0, "lon3": 0.0 }, "geometry": { "type": "Polygon", "coordinates": [ [ [ 0.0, 0.0 ], [ 0.0, 1.0 ], [ 1.0, 1.0 ], [ 1.0, 0.0 ], [ 0.0, 0.0 ] ] ] } },
+{ "type": "Feature", "properties": { "col1": 2, "lat0": 1.0, "lon0": 0.0, "lat1": 1.0, "lon1": 1.0, "lat2": 2.0, "lon2": 1.0, "lat3": 2.0, "lon3": 0.0 }, "geometry": { "type": "Polygon", "coordinates": [ [ [ 1.0, 0.0 ], [ 1.0, 1.0 ], [ 2.0, 1.0 ], [ 2.0, 0.0 ], [ 1.0, 0.0 ] ] ] } },
+{ "type": "Feature", "properties": { "col1": 3, "lat0": 2.0, "lon0": 0.0, "lat1": 2.0, "lon1": 1.0, "lat2": 3.0, "lon2": 1.0, "lat3": 3.0, "lon3": 0.0 }, "geometry": { "type": "Polygon", "coordinates": [ [ [ 2.0, 0.0 ], [ 2.0, 1.0 ], [ 3.0, 1.0 ], [ 3.0, 0.0 ], [ 2.0, 0.0 ] ] ] } }
+]
+}
