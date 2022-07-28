@@ -38,7 +38,10 @@ def create_raster_zonal_stats(
     """Compute zonal stats with a vector areas of interest (aoi) from raster data sources.
     This is a thin layer  over the `zonal_stats` method from
     the `rasterstats` python package for compatibility with other geowrangler modules.
-    see https://pythonhosted.org/rasterstats/manual.html#zonal-statistics"""
+    This method currently only supports 1 band for each call, so if you want to create zonal
+    stats for multiple bands with the same raster data, you can call this method for
+    each band (make sure to specify the correct `band_num` in the `extra_args` parameter).
+    See https://pythonhosted.org/rasterstats/manual.html#zonal-statistics for more details"""
     fixed_agg = _fix_agg(aggregation)
 
     if "stats" in extra_args:
