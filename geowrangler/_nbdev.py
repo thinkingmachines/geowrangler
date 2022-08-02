@@ -45,6 +45,8 @@ index = {
     "quadkey_to_tile": "02_vector_zonal_stats.ipynb",
     "create_bingtile_zonal_stats": "02_vector_zonal_stats.ipynb",
     "create_raster_zonal_stats": "03_raster_zonal_stats.ipynb",
+    "get_approximate_col_name": "04_dhs_data.ipynb",
+    "generate_dhs_cluster_data": "04_dhs_data.ipynb",
 }
 
 modules = [
@@ -52,6 +54,7 @@ modules = [
     "validation.py",
     "vector_zonal_stats.py",
     "raster_zonal_stats.py",
+    "dhs.py",
 ]
 
 doc_url = "https://geowrangler.web.app/"
