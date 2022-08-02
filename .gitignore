@@ -160,3 +160,4 @@ cython_debug/
 /docs
 .firebase/
 data/phl_pop_2020.tif
+_data/
