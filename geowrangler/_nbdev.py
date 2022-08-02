@@ -67,7 +67,6 @@ index = {
     "build_agg_area_dicts": "04_area_zonal_stats.ipynb",
     "validate_area_aoi": "04_area_zonal_stats.ipynb",
     "validate_area_data": "04_area_zonal_stats.ipynb",
-    "validate_area_aggs": "04_area_zonal_stats.ipynb",
     "expand_area_aggs": "04_area_zonal_stats.ipynb",
     "compute_intersect_stats": "04_area_zonal_stats.ipynb",
     "compute_imputed_stats": "04_area_zonal_stats.ipynb",

@@ -4,19 +4,12 @@ __all__ = ["create_area_zonal_stats"]
 
 
 # Cell
+from typing import Any, Dict, List
+
 import geopandas as gpd
-
-# import numpy as np
-# import pandas as pd
-# import geowrangler.vector_zonal_stats as vzs
-
-# Internal Cell
-def prep_aoi(aoi):
-    aoi = aoi.copy()
-    aoi.index.name = "aoi_index"
-    aoi.reset_index(level=0, inplace=True)
-    return aoi
-
+import numpy as np
+import geowrangler.vector_zonal_stats as vzs
+from .vector_zonal_stats import GEO_INDEX_NAME
 
 # Internal Cell
 def extract_func(func):
@@ -31,6 +24,8 @@ def extract_func(func):
 
 
 # Internal Cell
+
+
 def fix_area_agg(agg):
     if "func" not in agg:
         return agg  # skip fix as agg spec is invalid
@@ -47,23 +42,7 @@ def fix_area_agg(agg):
     agg["func"] = real_funcs
     agg["extras"] = func_extras
 
-    # optional column, default to index count
-    if "column" not in agg:
-        agg["column"] = "aoi_index"
-
-    if "output" not in agg:
-        column = "index" if agg["column"] == "aoi_index" else agg["column"]
-        agg["output"] = [f"{column}_{f}" for f in agg["func"]]
-
-    if type(agg["output"]) == str:
-        agg["output"] = [agg["output"]]
-
-    # check matching fillna
-    if "fillna" not in agg:
-        agg["fillna"] = [False for _ in agg["func"]]
-
-    if type(agg["fillna"]) == bool:
-        agg["fillna"] = [agg["fillna"]]
+    agg = vzs._fix_agg(agg)
 
     return agg
 
@@ -121,11 +100,6 @@ def validate_area_data(data):
 
 
 # Internal Cell
-def validate_area_aggs(fixed_aggs):
-    pass
-
-
-# Internal Cell
 
 
 def expand_area_aggs(aggs):
@@ -175,7 +149,13 @@ def compute_imputed_stats(results, expanded_aggs):
 
 # Cell
 def create_area_zonal_stats(
-    aoi: gpd.GeoDataFrame, data: gpd.GeoDataFrame, aggregations, include_intersect=True
+    aoi: gpd.GeoDataFrame,  # Area of interest for which zonal stats are to be computed for
+    data: gpd.GeoDataFrame,  # Source gdf of region/areas containing data to compute zonal stats from
+    aggregations: List[  # List of agg specs, with each agg spec applied to a data column
+        Dict[str, Any]
+    ],
+    include_intersect=True,  # Add column 'intersect_area_sum' w/ch computes total area of data areas intersecting aoi
+    fix_min=True,  # Set min to zero if there are areas in aoi w/ch do not containing any intersecting area from the data.
 ):
 
     validate_area_aoi(aoi)
@@ -183,11 +163,12 @@ def create_area_zonal_stats(
 
     fixed_aggs = [fix_area_agg(agg) for agg in aggregations]
 
-    validate_area_aggs(fixed_aggs)
+    # validate_area_aggs(fixed_aggs,data)
+    vzs._validate_aggs(fixed_aggs, data)
 
     # reindex aoi
     aoi_index_name = aoi.index.name
-    aoi = prep_aoi(aoi)
+    aoi = vzs._prep_aoi(aoi)
     data = data.copy()
 
     if not data.crs.equals(aoi.crs):
@@ -201,9 +182,6 @@ def create_area_zonal_stats(
     aoi.geometry.sindex
     data.geometry.sindex
 
-    # dissolve (merge data polygons?)
-    # spatial join (remove non-intersecting aoi? remove non-intersecting data)
-    # overlay defaults = how='intersection', keep_geom_type=None, make_valid=True
     intersect = aoi.overlay(data, keep_geom_type=True)
 
     # compute intersect area and percentages
@@ -214,13 +192,27 @@ def create_area_zonal_stats(
     expanded_aggs = expand_area_aggs(fixed_aggs)
     intersect = compute_intersect_stats(intersect, expanded_aggs)
 
-    groups = intersect.groupby("aoi_index")
+    groups = intersect.groupby(GEO_INDEX_NAME)
 
     agg_area_dicts = build_agg_area_dicts(expanded_aggs)
 
     aggregates = groups.agg(**agg_area_dicts)
 
-    results = aoi.merge(aggregates, how="left", on="aoi_index", suffixes=(None, "_y"))
+    results = aoi.merge(
+        aggregates, how="left", on=GEO_INDEX_NAME, suffixes=(None, "_y")
+    )
+
+    # set min to zero if intersect area is not filled.
+    if fix_min:
+        for col, val in agg_area_dicts.items():
+            if val[1] == "min":
+                results[col] = results.apply(
+                    lambda x, c: x[c]
+                    if np.isclose(x["aoi_area"], x["intersect_area_sum"])
+                    else 0.0,
+                    axis=1,
+                    c=col,  # kwarg to pass to lambda
+                )
 
     compute_imputed_stats(results, expanded_aggs)
     drop_labels = ["aoi_area"]
@@ -228,6 +220,6 @@ def create_area_zonal_stats(
         drop_labels += [INTERSECT_AREA_AGG["output"]]
     results.drop(labels=drop_labels, inplace=True, axis=1)
 
-    results.set_index("aoi_index", inplace=True)
+    results.set_index(GEO_INDEX_NAME, inplace=True)
     results.index.name = aoi_index_name
     return results
