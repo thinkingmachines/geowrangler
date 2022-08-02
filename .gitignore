@@ -161,3 +161,4 @@ cython_debug/
 .firebase/
 data/phl_pop_2020.tif
 _data/
+.vscode/
