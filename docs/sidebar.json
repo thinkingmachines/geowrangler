@@ -11,7 +11,8 @@
     },
     "Grids": "grids.html",
     "Geometry Validation": "validation.html",
+    "Vector Zonal Stats": "vector_zonal_stats.html",
     "Raster Zonal Stats": "raster_zonal_stats.html",
-    "Vector Zonal Stats": "vector_zonal_stats.html"
+    "Area Zonal Stats": "area_zonal_stats.html"
   }
 }
