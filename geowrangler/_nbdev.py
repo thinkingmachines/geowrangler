@@ -71,6 +71,8 @@ index = {
     "compute_intersect_stats": "04_area_zonal_stats.ipynb",
     "compute_imputed_stats": "04_area_zonal_stats.ipynb",
     "create_area_zonal_stats": "04_area_zonal_stats.ipynb",
+    "get_approximate_col_name": "04_dhs_data.ipynb",
+    "generate_dhs_cluster_data": "04_dhs_data.ipynb",
 }
 
 modules = [
@@ -81,6 +83,7 @@ modules = [
     "dhs.py",
     "datasets/geofabrik.py",
     "area_zonal_stats.py",
+    "dhs.py",
 ]
 
 doc_url = "https://geowrangler.web.app/"

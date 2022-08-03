@@ -214,6 +214,8 @@ def create_area_zonal_stats(
                     c=col,  # kwarg to pass to lambda
                 )
 
+    vzs._fillnas(expanded_aggs, results, aoi)
+
     compute_imputed_stats(results, expanded_aggs)
     drop_labels = ["aoi_area"]
     if not include_intersect:
