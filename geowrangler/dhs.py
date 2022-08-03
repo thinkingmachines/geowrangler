@@ -8,6 +8,7 @@ __all__ = [
 ]
 
 
+
 # Internal Cell
 from typing import List
 
@@ -108,6 +109,12 @@ def load_column_config(
             f"Not a valid country. Valid countries are {list(COLUMN_CONFIG.keys())}"
         )
 
+COLUMN_CONFIG = {
+    "ph": PH_COLUMN_CONFIG,
+    "kh": KH_COLUMN_CONFIG,
+    "mm": MM_COLUMN_CONFIG,
+    "tl": TL_COLUMN_CONFIG,
+}
 
 # Cell
 def load_dhs_file(
