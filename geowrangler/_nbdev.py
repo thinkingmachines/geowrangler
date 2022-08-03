@@ -45,9 +45,6 @@ index = {
     "quadkey_to_tile": "02_vector_zonal_stats.ipynb",
     "create_bingtile_zonal_stats": "02_vector_zonal_stats.ipynb",
     "create_raster_zonal_stats": "03_raster_zonal_stats.ipynb",
-    "get_approximate_col_name": "04_dhs_data.ipynb",
-    "generate_dhs_cluster_data": "04_dhs_data.ipynb",
-    "prep_aoi": "04_area_zonal_stats.ipynb",
     "extract_func": "04_area_zonal_stats.ipynb",
     "fix_area_agg": "04_area_zonal_stats.ipynb",
     "get_source_column": "04_area_zonal_stats.ipynb",
@@ -59,6 +56,8 @@ index = {
     "compute_intersect_stats": "04_area_zonal_stats.ipynb",
     "compute_imputed_stats": "04_area_zonal_stats.ipynb",
     "create_area_zonal_stats": "04_area_zonal_stats.ipynb",
+    "get_approximate_col_name": "04_dhs_data.ipynb",
+    "generate_dhs_cluster_data": "04_dhs_data.ipynb",
 }
 
 modules = [
@@ -66,8 +65,8 @@ modules = [
     "validation.py",
     "vector_zonal_stats.py",
     "raster_zonal_stats.py",
-    "dhs.py",
     "area_zonal_stats.py",
+    "dhs.py",
 ]
 
 doc_url = "https://geowrangler.web.app/"
