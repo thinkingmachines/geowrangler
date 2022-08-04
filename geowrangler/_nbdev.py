@@ -78,7 +78,6 @@ modules = [
     "dhs.py",
     "datasets/geofabrik.py",
     "area_zonal_stats.py",
-    "dhs.py",
 ]
 
 doc_url = "https://geowrangler.web.app/"
