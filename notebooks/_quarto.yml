@@ -34,6 +34,31 @@ website:
         href: "https://github.com/thinkingmachines/geowrangler"
   sidebar:
     style: "floating"
+    search: true
+    contents:
+      - file: index.html
+        text: "Overview"
+      - section: "Tutorials"
+        contents:
+          - file: tutorial.grids.html
+            text: "Grids Generation"
+          - file: tutorial.geometry_validation.html
+            text: "Geometry Validation"
+          - file: tutorial.vector_zonal_stats.html
+            text: "Vector Zonal Stats"
+          - file: tutorial.raster_zonal_stats.html
+            text: "Raster Zonal Stats"
+      - file: grids.html
+        text: "Grids"
+      - file: validation.html
+        text: "Geometry Validation"
+      - file: vector_zonal_stats.html
+        text: "Vector Zonal Stats"
+      - file: raster_zonal_stats.html
+        text: "Raster Zonal Stats"
+ 
+
+
 
 metadata-files: 
   - sidebar.yml
