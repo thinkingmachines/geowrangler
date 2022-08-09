@@ -13,7 +13,7 @@
     "Grids": "grids.html",
     "Geometry Validation": "validation.html",
     "Raster Zonal Stats": "raster_zonal_stats.html",
-    "Vector Zonal Stats": "vector_zonal_stats.html"
+    "Vector Zonal Stats": "vector_zonal_stats.html",
     "DHS processing": "dhs.html"
   }
 }
