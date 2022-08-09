@@ -24,14 +24,14 @@ website:
   open-graph: true
   reader-mode: true
   repo-branch: master
-  repo-url: "https://github.com/thinkingmachines/geowrangler/tree/master/"
+  repo-url: "https://github.com/thinkingmachines/geowrangler"
   repo-actions: [issue]
   navbar:
     background: primary
     search: true
     right:
       - icon: github
-        href: "https://github.com/thinkingmachines/geowrangler/tree/master/"
+        href: "https://github.com/thinkingmachines/geowrangler"
   sidebar:
     style: "floating"
 
