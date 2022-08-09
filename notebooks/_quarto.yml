@@ -1,0 +1,65 @@
+ipynb-filters: [nbdev_filter]
+
+project:
+  type: website
+  output-dir: _docs
+  preview:
+    port: 3000
+    browser: false
+
+format:
+  html:
+    theme: cosmo
+    css: styles.css
+    toc: true
+    toc-depth: 4
+
+website:
+  title: "geowrangler"
+  site-url: "https://geowrangler.web.app/"
+  description: "Tools for dealing with geospatial data"
+  execute: 
+    enabled: false
+  twitter-card: true
+  open-graph: true
+  reader-mode: true
+  repo-branch: master
+  repo-url: "https://github.com/thinkingmachines/geowrangler"
+  repo-actions: [issue]
+  navbar:
+    background: primary
+    search: true
+    right:
+      - icon: github
+        href: "https://github.com/thinkingmachines/geowrangler"
+  sidebar:
+    style: "floating"
+    search: true
+    contents:
+      - file: index.html
+        text: "Overview"
+      - section: "Tutorials"
+        contents:
+          - file: tutorial.grids.html
+            text: "Grids Generation"
+          - file: tutorial.geometry_validation.html
+            text: "Geometry Validation"
+          - file: tutorial.vector_zonal_stats.html
+            text: "Vector Zonal Stats"
+          - file: tutorial.raster_zonal_stats.html
+            text: "Raster Zonal Stats"
+      - file: grids.html
+        text: "Grids"
+      - file: validation.html
+        text: "Geometry Validation"
+      - file: vector_zonal_stats.html
+        text: "Vector Zonal Stats"
+      - file: raster_zonal_stats.html
+        text: "Raster Zonal Stats"
+ 
+
+
+
+metadata-files: 
+  - sidebar.yml
+  - custom.yml

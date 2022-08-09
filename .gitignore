@@ -162,3 +162,5 @@ cython_debug/
 data/phl_pop_2020.tif
 _data/
 .vscode/
+_docs/
+sidebar.yml

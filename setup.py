@@ -44,11 +44,14 @@ statuses = [
     "6 - Mature",
     "7 - Inactive",
 ]
-py_versions = "2.0 2.1 2.2 2.3 2.4 2.5 2.6 2.7 3.0 3.1 3.2 3.3 3.4 3.5 3.6 3.7 3.8 3.9 3.10".split()
+py_versions = "3.6 3.7 3.8 3.9 3.10".split()
 
 requirements = cfg.get("requirements", "").split()
+if cfg.get("pip_requirements"):
+    requirements += cfg.get("pip_requirements", "").split()
 min_python = cfg["min_python"]
 lic = licenses.get(cfg["license"].lower(), (cfg["license"], None))
+dev_requirements = (cfg.get("dev_requirements") or "").split()
 
 setuptools.setup(
     name=cfg["lib_name"],
@@ -67,11 +70,15 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     include_package_data=True,
     install_requires=requirements,
+    extras_require={"dev": dev_requirements},
     dependency_links=cfg.get("dep_links", "").split(),
     python_requires=">=" + cfg["min_python"],
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
     zip_safe=False,
-    entry_points={"console_scripts": cfg.get("console_scripts", "").split()},
-    **setup_cfg
+    entry_points={
+        "console_scripts": cfg.get("console_scripts", "").split(),
+        "nbdev": [f'{cfg.get("lib_path")}={cfg.get("lib_path")}._modidx:d'],
+    },
+    **setup_cfg,
 )
