@@ -90,7 +90,16 @@ COLUMN_CONFIG = {
 }
 
 # Cell
-def load_column_config(country: str) -> dict:
+def load_column_config(
+    country: str,  # 2 letter character representing the country
+) -> dict:
+    """Get predined column mapping for some countries.
+    The following countries area supported:
+    - `ph` Philippines
+    - `tl` East Timor
+    - `mm` Myanmar
+    - `kh` Cambodia
+    """
     if country in COLUMN_CONFIG:
         return COLUMN_CONFIG[country]
     else:
@@ -100,7 +109,10 @@ def load_column_config(country: str) -> dict:
 
 
 # Cell
-def load_dhs_file(household_data: str) -> DataFrame:
+def load_dhs_file(
+    household_data: str,  # str or pathlike object to the household data
+) -> DataFrame:
+    """Loads household data and renames columns based on variable labels of the file"""
     dhs_reader = pd.read_stata(
         household_data, convert_categoricals=False, iterator=True
     )
@@ -112,7 +124,12 @@ def load_dhs_file(household_data: str) -> DataFrame:
 
 
 # Cell
-def apply_threshold(df: DataFrame, columns: List[str], config: dict) -> DataFrame:
+def apply_threshold(
+    df: DataFrame,  # Dataframe
+    columns: List[str],  # List of columns to apply the threshold
+    config: dict,  # Config containing the min and max of each columns
+) -> DataFrame:
+    """Applies a threshold to a list of columns"""
     copied = df.copy()
     for col in columns:
         if col in config:
@@ -124,9 +141,8 @@ def apply_threshold(df: DataFrame, columns: List[str], config: dict) -> DataFram
 
 # Cell
 def assign_wealth_index(
-    asset_df: DataFrame,
-    features: List[str],
-    use_pca=True,
+    asset_df: DataFrame,  # Dataframe containg only the features to apply wealth index
+    use_pca=True,  # if calculating wealth index should be done via PCA or via Sigular Value Decomposition
 ):
     if use_pca:
         pca = PCA(1)

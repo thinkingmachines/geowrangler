@@ -45,18 +45,15 @@ index = {
     "quadkey_to_tile": "02_vector_zonal_stats.ipynb",
     "create_bingtile_zonal_stats": "02_vector_zonal_stats.ipynb",
     "create_raster_zonal_stats": "03_raster_zonal_stats.ipynb",
-    "get_approximate_col_name": "04_dhs_data.ipynb",
-    "generate_dhs_cluster_data": "04_dhs_data.ipynb",
-    "process_asset_features": "04_dhs_data.ipynb",
-    "assign_wealth_index": "04_dhs_data.ipynb",
-    "load_dhs_file": "04_dhs_data.ipynb",
-    "load_column_config": "04_dhs_data.ipynb",
     "PH_COLUMN_CONFIG": "04_dhs_data.ipynb",
-    "COLUMN_CONFIG": "04_dhs_data.ipynb",
     "KH_COLUMN_CONFIG": "04_dhs_data.ipynb",
     "MM_COLUMN_CONFIG": "04_dhs_data.ipynb",
     "TL_COLUMN_CONFIG": "04_dhs_data.ipynb",
+    "COLUMN_CONFIG": "04_dhs_data.ipynb",
+    "load_column_config": "04_dhs_data.ipynb",
+    "load_dhs_file": "04_dhs_data.ipynb",
     "apply_threshold": "04_dhs_data.ipynb",
+    "assign_wealth_index": "04_dhs_data.ipynb",
 }
 
 modules = [
