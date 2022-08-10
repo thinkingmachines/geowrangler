@@ -54,6 +54,9 @@ index = {
     "load_dhs_file": "04_dhs.ipynb",
     "apply_threshold": "04_dhs.ipynb",
     "assign_wealth_index": "04_dhs.ipynb",
+    "load_geofabrik_data": "05_data_download.ipynb",
+    "list_geofabrik_regions": "05_data_download.ipynb",
+    "download_geofabrik_region": "05_data_download.ipynb",
 }
 
 modules = [
@@ -62,6 +65,7 @@ modules = [
     "vector_zonal_stats.py",
     "raster_zonal_stats.py",
     "dhs.py",
+    "data_download.py",
 ]
 
 doc_url = "https://geowrangler.web.app/"
