@@ -6,33 +6,23 @@ from shapely.geometry import Point
 from geowrangler import dhs
 
 
-def test_get_approximate_col_name_wealth_index():
-    columns = ["Wealth Index Factor (up to 5 decimal places)", "wealth index"]
-    col_name = "wealth index factor"
-    assert dhs.get_approximate_col_name(columns, col_name) == columns[0]
+def test_load_column_config():
+    assert dhs.load_column_config("ph") == dhs.PH_COLUMN_CONFIG
 
 
-def test_get_approximate_col_name_cluster():
-    columns = ["cluste", "Cluster Name", "cluster id"]
-    col_name = "cluster"
-    assert dhs.get_approximate_col_name(columns, col_name) == columns[1]
-
-
-def test_get_approximate_col_name_no_matches():
-    columns = ["cluste", "Cluster Name", "cluster id"]
-    col_name = "wealth index factor"
-    with pytest.raises(IndexError):
-        dhs.get_approximate_col_name(columns, col_name)
+def test_load_column_config_no_matches():
+    with pytest.raises(ValueError):
+        dhs.load_column_config("gb")
 
 
 @pytest.fixture()
 def household(tmp_path):
     household_df = pd.DataFrame(
         [
-            {"hhid": "00001", "hv000": "1", "hv0001": 100},
-            {"hhid": "00002", "hv000": "1", "hv0001": 150},
-            {"hhid": "00003", "hv000": "2", "hv0001": 50},
-            {"hhid": "00004", "hv000": "3", "hv0001": 200},
+            {"hhid": "00001", "hv000": "1", "hv0003": 12, "hv0002": 10, "hv0001": 100},
+            {"hhid": "00002", "hv000": "1", "hv0003": 21, "hv0002": 15, "hv0001": 150},
+            {"hhid": "00003", "hv000": "2", "hv0003": 31, "hv0002": 5, "hv0001": 50},
+            {"hhid": "00004", "hv000": "3", "hv0003": 91, "hv0002": 20, "hv0001": 200},
         ]
     )
     household_path = tmp_path / "FILE.DTA"
@@ -42,6 +32,8 @@ def household(tmp_path):
             "hhid": "id",
             "hv000": "Cluster",
             "hv0001": "Wealth Index Factor (up to 5 decimals)",
+            "hv0002": "Rooms",
+            "hv0003": "TVs",
         },
     )
     yield household_path
@@ -69,8 +61,25 @@ def gps_coordinates(tmp_path):
     yield gps_path
 
 
-def test_generate_dhs_cluster_data(household, gps_coordinates):
-    summary = dhs.generate_dhs_cluster_data(household, gps_coordinates)
-    assert summary[summary.DHSCLUST == "1"].iloc[0]["Wealth Index"] == 125.0
-    assert summary[summary.DHSCLUST == "2"].iloc[0]["Wealth Index"] == 50.0
-    assert summary[summary.DHSCLUST == "3"].iloc[0]["Wealth Index"] == 200.0
+def test_load_dhs_file(household):
+    df = dhs.load_dhs_file(household)
+    assert "id" in df.columns
+    assert "Cluster" in df.columns
+    assert "Wealth Index Factor (up to 5 decimals)" in df.columns
+
+
+def test_apply_threshold(household):
+    household_df = dhs.load_dhs_file(household)
+    dhs.apply_threshold(
+        household_df, ["TVs", "Rooms"], {"Rooms": [5, 10], "_default": [10, 20]}
+    )
+
+
+def test_wealth_index_pca(household):
+    household_df = dhs.load_dhs_file(household)
+    dhs.assign_wealth_index(household_df[["Rooms", "TVs"]])
+
+
+def test_wealth_index_no_pca(household):
+    household_df = dhs.load_dhs_file(household)
+    dhs.assign_wealth_index(household_df[["Rooms", "TVs"]], use_pca=False)
