@@ -20,13 +20,13 @@ jobs:
           virtualenvs-in-project: false
           virtualenvs-path: ~/.virtualenvs
           installer-parallel: true
-      # - uses: actions/cache@v1
-      #   id: cache
-      #   with:
-      #     path: ~/.virtualenvs
-      #     key: poetry-${{ hashFiles('**/poetry.lock') }}
-      #     restore-keys: |
-      #       poetry-${{ hashFiles('**/poetry.lock') }}
+      - uses: actions/cache@v1
+        id: cache
+        with:
+          path: ~/.virtualenvs
+          key: poetry-${{ hashFiles('**/poetry.lock') }}
+          restore-keys: |
+            poetry-${{ hashFiles('**/poetry.lock') }}
       - run: poetry install
       # Code cove with a min percentage
       # - run: poetry run pytest --cov . --cov-fail-under=80 -n auto
