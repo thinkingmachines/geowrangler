@@ -3,7 +3,7 @@ import shutil
 import pytest
 import requests
 
-from geowrangler import data_download
+from geowrangler.datasets import geofabrik
 
 
 @pytest.fixture
@@ -42,24 +42,25 @@ def mock_geofabrike_req(monkeypatch):
         return MockResponse()
 
     monkeypatch.setattr(requests, "get", mock_get)
+    yield
 
 
 def test_list_geofabrik_regions(mock_geofabrike_req):
-    regions = data_download.list_geofabrik_regions()
+    regions = geofabrik.list_geofabrik_regions()
     assert len(regions.keys()) == 1
     assert "afghanistan" in regions
 
 
 def test_download_geofabrik_region_no_dir(mock_geofabrike_req):
     with pytest.raises(ValueError):
-        data_download.download_geofabrik_region("laos", "this-directory-does-not-exits")
+        geofabrik.download_geofabrik_region("laos", "this-directory-does-not-exits")
 
 
 def test_download_geofabrik_region_no_region(mock_geofabrike_req, tmpdir):
     with pytest.raises(ValueError):
-        data_download.download_geofabrik_region("this-region-does-not-exist", tmpdir)
+        geofabrik.download_geofabrik_region("this-region-does-not-exist", tmpdir)
 
 
 def test_download_geofabrik_regions(mock_geofabrike_req, monkeypatch, mocker, tmpdir):
     monkeypatch.setattr(shutil, "copyfileobj", mocker.MagicMock())
-    data_download.download_geofabrik_region("afghanistan", tmpdir)
+    geofabrik.download_geofabrik_region("afghanistan", tmpdir)
