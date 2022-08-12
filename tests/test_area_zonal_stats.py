@@ -2,6 +2,7 @@ import geopandas as gpd
 import pytest
 from shapely.geometry import Polygon
 
+import geowrangler.vector_zonal_stats as vzs
 from geowrangler.area_zonal_stats import (
     GEO_INDEX_NAME,
     build_agg_area_dicts,
@@ -181,6 +182,23 @@ def test_fix_area_agg_raw_imputed():
     )
 
 
+def test_fix_area_agg_aoi_data_func():
+    assert fix_area_agg(
+        dict(
+            func=["aoi_imputed_count", "imputed_sum", "data_mean"],
+            column="population",
+            output=["samples", "population", "pop_average"],
+            fillna=[True, True, False],
+        )
+    ) == dict(
+        func=["count", "sum", "mean"],
+        column="population",
+        output=["samples", "population", "pop_average"],
+        fillna=[True, True, False],
+        extras=[["aoi", "imputed"], ["imputed"], ["data"]],
+    )
+
+
 def test_get_source_column_count():
 
     assert (
@@ -193,7 +211,7 @@ def test_get_source_column_count():
                 extras=[],
             )
         )
-        == "intersect_data_population"
+        == "population"
     )
 
 
@@ -257,11 +275,11 @@ def test_get_source_column_median():
                 extras=[],
             )
         )
-        == "intersect_aoi_population"
+        == "population"
     )
 
 
-def test_get_source_column_raw_median():
+def test_get_source_column_aoi_median():
 
     assert (
         get_source_column(
@@ -270,10 +288,26 @@ def test_get_source_column_raw_median():
                 column="population",
                 output="samples",
                 fillna=True,
-                extras=["raw"],
+                extras=["aoi"],
             )
         )
-        == "population"
+        == "intersect_aoi_population"
+    )
+
+
+def test_get_source_column_data_median():
+
+    assert (
+        get_source_column(
+            dict(
+                func="median",
+                column="population",
+                output="samples",
+                fillna=True,
+                extras=["data"],
+            )
+        )
+        == "intersect_data_population"
     )
 
 
@@ -313,6 +347,105 @@ def test_validate_geographic_data(simple_data):
     assert (
         e.args[0]
         == "data has geographic crs: EPSG:4326, areas maybe incorrectly computed"
+    )
+
+
+def test_validate_mixed_raw_imputed_agg(simple_data):
+    """Fix area aggs fixes aggs so they pass vzs validate aggs"""
+    fixed_aggs = [
+        fix_area_agg(
+            dict(
+                func=["raw_imputed_count", "imputed_sum", "raw_mean"],
+                column="population",
+                output=["samples", "population", "pop_average"],
+                fillna=[True, True, False],
+            )
+        )
+    ]
+    vzs._validate_aggs(fixed_aggs, simple_data)
+
+
+def test_validate_mixed_data_aoi_imputed_agg(simple_data):
+    """Fix area aggs fixes aggs so they pass vzs validate aggs for data and aoi func modifiers"""
+    fixed_aggs = [
+        fix_area_agg(
+            dict(
+                func=["aoi_imputed_count", "data_imputed_sum", "data_mean"],
+                column="population",
+                output=["samples", "population", "pop_average"],
+                fillna=[True, True, False],
+            )
+        )
+    ]
+    vzs._validate_aggs(fixed_aggs, simple_data)
+
+
+def test_validate_invalid_mixed_data_agg(simple_data):
+
+    fixed_aggs = [
+        fix_area_agg(
+            dict(
+                func=["raw_data_imputed_count", "imputed_sum", "raw_mean"],
+                column="population",
+                output=["samples", "population", "pop_average"],
+                fillna=[True, True, False],
+            )
+        )
+    ]
+
+    with pytest.raises(ValueError) as exc_info:
+        vzs._validate_aggs(fixed_aggs, simple_data)
+
+    e = exc_info.value
+    assert (
+        e.args[0]
+        == "Unknown func 'data_count' in agg[0] {'func': ['data_count', 'sum', 'mean'], 'column': 'population', 'output': ['samples', 'population', 'pop_average'], 'fillna': [True, True, False], 'extras': [['raw', 'imputed'], ['imputed'], ['raw']]}"
+    )
+
+
+def test_validate_invalid_mixed_aoi_agg(simple_data):
+
+    fixed_aggs = [
+        fix_area_agg(
+            dict(
+                func=["raw_aoi_imputed_count", "imputed_sum", "raw_mean"],
+                column="population",
+                output=["samples", "population", "pop_average"],
+                fillna=[True, True, False],
+            )
+        )
+    ]
+
+    with pytest.raises(ValueError) as exc_info:
+        vzs._validate_aggs(fixed_aggs, simple_data)
+
+    e = exc_info.value
+    assert (
+        e.args[0]
+        == "Unknown func 'aoi_count' in agg[0] {'func': ['aoi_count', 'sum', 'mean'], 'column': 'population', 'output': ['samples', 'population', 'pop_average'], 'fillna': [True, True, False], 'extras': [['raw', 'imputed'], ['imputed'], ['raw']]}"
+    )
+
+
+def test_validate_invalid_mixed_data_aoi_agg(simple_data):
+
+    fixed_aggs = [
+        fix_area_agg(
+            dict(
+                func=["data_aoi_imputed_count", "imputed_sum", "raw_mean"],
+                column="population",
+                output=["samples", "population", "pop_average"],
+                fillna=[True, True, False],
+            )
+        )
+    ]
+
+    with pytest.raises(ValueError) as exc_info:
+        vzs._validate_aggs(fixed_aggs, simple_data)
+
+    e = exc_info.value
+    assert (
+        e.args[0]
+        == "Unknown func 'aoi_count' in agg[0] {'func': ['aoi_count', 'sum', 'mean'], 'column': 'population', 'output': ['samples', 'population', 'pop_average'], 'fillna': [True, True, False], 'extras': [['data', 'imputed'], ['imputed'], ['raw']]}"
     )
 
 
