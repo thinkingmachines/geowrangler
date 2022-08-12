@@ -139,7 +139,7 @@ def compute_intersect_stats(intersect, expanded_aggs):
     # optimization - use df.apply to create all new columns simultaneously
     for agg in expanded_aggs:
         if "raw" in agg["extras"]:
-            pass  # dont use intersect stat
+            continue  # skip intersect stat
         intersect_data_column = f"intersect_data_{agg['column']}"
         intersect_aoi_column = f"intersect_aoi_{agg['column']}"
         if intersect_data_column not in intersect.columns.values:
