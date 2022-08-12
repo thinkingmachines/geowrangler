@@ -1,4 +1,5 @@
 import geopandas as gpd
+import pandas as pd
 import pytest
 from shapely.geometry import Polygon
 
@@ -6,6 +7,7 @@ import geowrangler.vector_zonal_stats as vzs
 from geowrangler.area_zonal_stats import (
     GEO_INDEX_NAME,
     build_agg_area_dicts,
+    compute_intersect_stats,
     expand_area_aggs,
     extract_func,
     fix_area_agg,
@@ -474,3 +476,42 @@ def test_expand_area_aggs():
             func="sum", column="population", output="population", fillna=True, extras=[]
         ),
     ]
+
+
+def test_compute_simple_intersect_stats():
+    intersect = pd.DataFrame(
+        dict(
+            pct_data=[1.0, 1.0, 1.0],
+            pct_aoi=[1.0, 1.0, 1.0],
+            population=[100, 200, 400],
+        )
+    )
+    expanded_aggs = [dict(extras=[], column="population")]
+    result = compute_intersect_stats(intersect, expanded_aggs)
+    assert "intersect_data_population" in list(result.columns.values)
+    assert "intersect_aoi_population" in list(result.columns.values)
+    result.equals(
+        pd.DataFrame(
+            dict(
+                pct_data=[1.0, 1.0, 1.0],
+                pct_aoi=[1.0, 1.0, 1.0],
+                population=[100, 200, 400],
+                intersect_aoi_population=[100, 200, 400],
+                intersect_data_population=[100, 200, 400],
+            )
+        )
+    )
+
+
+def test_compute_raw_intersect_stats():
+    intersect = pd.DataFrame()
+    expanded_aggs = [dict(extras=["raw"])]
+    result = compute_intersect_stats(intersect, expanded_aggs)
+    assert result.equals(intersect)
+
+
+def test_compute_empty_intersect_stats():
+    intersect = pd.DataFrame()
+    expanded_aggs = []
+    result = compute_intersect_stats(intersect, expanded_aggs)
+    assert result.equals(intersect)
