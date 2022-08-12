@@ -13,13 +13,23 @@ from .vector_zonal_stats import GEO_INDEX_NAME
 
 # Internal Cell
 def extract_func(func):
+    # extra by default is none
     extra = []
+    # extra can contain either raw, data or aoi
     if func.__contains__("raw_"):
         extra += ["raw"]
         func = func.replace("raw_", "")
+    elif func.__contains__("data_"):
+        extra += ["data"]
+        func = func.replace("data_", "")
+    elif func.__contains__("aoi_"):
+        extra += ["aoi"]
+        func = func.replace("aoi_", "")
+    # extra can have imputed
     if func.__contains__("imputed_"):
         extra += ["imputed"]
         func = func.replace("imputed_", "")
+
     return func, extra
 
 
@@ -58,10 +68,17 @@ def get_source_column(agg):
     intersect_data_column = f"intersect_data_{agg['column']}"
     intersect_aoi_column = f"intersect_aoi_{agg['column']}"
 
-    if agg["func"] in ("sum", "count"):
+    if "data" in agg["extras"]:
         return intersect_data_column
 
-    return intersect_aoi_column
+    if "aoi" in agg["extras"]:
+        return intersect_aoi_column
+    # defaults if not overridden by extra modifier
+    if agg["func"] == "sum":  # sum apportions data area
+        return intersect_data_column
+    if agg["func"] == "mean":  # mean apportions on aoi area
+        return intersect_aoi_column
+    return agg["column"]  # everything else based on raw column
 
 
 # Internal Cell
