@@ -170,7 +170,7 @@ def create_area_zonal_stats(
     data: gpd.GeoDataFrame,  # Source gdf of region/areas containing data to compute zonal stats from
     aggregations: List[  # List of agg specs, with each agg spec applied to a data column
         Dict[str, Any]
-    ],
+    ] = [],
     include_intersect=True,  # Add column 'intersect_area_sum' w/ch computes total area of data areas intersecting aoi
     fix_min=True,  # Set min to zero if there are areas in aoi w/ch do not containing any intersecting area from the data.
 ):
