@@ -160,8 +160,8 @@ def compute_imputed_stats(results, expanded_aggs):
     for agg in expanded_aggs:
         if "imputed" in agg["extras"]:
             results[agg["output"]] = (
-                results[agg["output"]] / results[INTERSECT_AREA_AGG["output"]]
-            )
+                results[agg["output"]] * results["aoi_area"]
+            ) / results[INTERSECT_AREA_AGG["output"]]
 
 
 # Cell
