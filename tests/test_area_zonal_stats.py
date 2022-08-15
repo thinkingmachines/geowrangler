@@ -7,7 +7,9 @@ import geowrangler.vector_zonal_stats as vzs
 from geowrangler.area_zonal_stats import (
     GEO_INDEX_NAME,
     build_agg_area_dicts,
+    compute_imputed_stats,
     compute_intersect_stats,
+    create_area_zonal_stats,
     expand_area_aggs,
     extract_func,
     fix_area_agg,
@@ -92,10 +94,6 @@ def make_df(
     return gpd.GeoDataFrame(d, crs=crs)
 
 
-# simple_aoi = make_df(3, 1, has_internet=False, has_population=False, offset_x=0.0)
-# simple_data = make_df(3, 1)
-
-
 @pytest.fixture()
 def simple_data():
     return make_df(3, 1)
@@ -104,33 +102,6 @@ def simple_data():
 @pytest.fixture()
 def simple_aoi():
     return make_df(3, 1, has_internet=False, has_population=False, offset_x=0.0)
-    # df = pd.DataFrame(
-    #     data={
-    #         "col1": [1, 2, 3],
-    #         "lat0": [0.0, 1.0, 2.0],
-    #         "lon0": [0.0, 0.0, 0.0],
-    #         "lat1": [0.0, 1.0, 2.0],
-    #         "lon1": [1.0, 1.0, 1.0],
-    #         "lat2": [1.0, 2.0, 3.0],
-    #         "lon2": [1.0, 1.0, 1.0],
-    #         "lat3": [1.0, 2.0, 3.0],
-    #         "lon3": [0.0, 0.0, 0.0],
-    #     }
-    # )
-
-    # def square(row):
-    #     return Polygon(
-    #         (
-    #             [
-    #                 (row.lat0, row.lon0),
-    #                 (row.lat1, row.lon1),
-    #                 (row.lat2, row.lon2),
-    #                 (row.lat3, row.lon3),
-    #             ]
-    #         )
-    #     )
-
-    # return gpd.GeoDataFrame(df, geometry=df.apply(square, axis=1), crs="EPSG:4326")
 
 
 def test_extract_func():
@@ -515,3 +486,97 @@ def test_compute_empty_intersect_stats():
     expanded_aggs = []
     result = compute_intersect_stats(intersect, expanded_aggs)
     assert result.equals(intersect)
+
+
+def test_compute_one_intersect_stats():
+    intersect = pd.DataFrame(
+        dict(
+            pct_data=[0.4, 0.1, 0.2, 0.3],
+            pct_aoi=[0.2, 0.3, 0.1, 0.4],
+            population=[100, 200, 300, 400],
+            internet_speed=[10, 20, 30, 100],
+        )
+    )
+    expanded_aggs = [
+        dict(column="population", extras=[]),
+        dict(column="internet_speed", extras=[]),
+    ]
+    result = compute_intersect_stats(intersect, expanded_aggs)
+    result_columns = list(result.columns.values)
+    assert "intersect_data_population" in result_columns
+    assert "intersect_aoi_population" in result_columns
+    assert "intersect_data_internet_speed" in result_columns
+    assert "intersect_aoi_internet_speed" in result_columns
+    assert result["intersect_data_population"].equals(
+        pd.Series([40.0, 20.0, 60.0, 120.0])
+    )
+    assert result["intersect_aoi_population"].equals(
+        pd.Series([20.0, 60.0, 30.0, 160.0])
+    )
+    assert result["intersect_data_internet_speed"].equals(
+        pd.Series([4.0, 2.0, 6.0, 30.0])
+    )
+    assert result["intersect_aoi_internet_speed"].equals(
+        pd.Series([2.0, 6.0, 3.0, 40.0])
+    )
+
+
+def test_compute_imputed_stats():
+    intersect = pd.DataFrame(
+        dict(
+            internet_speed_mean=[10, 20, 30, 40],
+            population_sum=[100, 50, 10, 20],
+            aoi_area=[20.0, 40.0, 30.0, 20.0],
+            intersect_area_sum=[20.0, 20.0, 30.0, 10.0],
+        )
+    )
+    expanded_aggs = [
+        dict(output="internet_speed_mean", extras=["imputed"]),
+        dict(output="population_sum", extras=[]),
+    ]
+    results = compute_imputed_stats(intersect, expanded_aggs)
+    assert results["internet_speed_mean"].equals(pd.Series([10.0, 40.0, 30.0, 80.0]))
+    assert results["population_sum"].equals(pd.Series([100, 50, 10, 20]))
+
+
+def test_create_area_zonal_stats(simple_aoi, simple_data):
+    aggregations = [
+        dict(func="sum", column="population"),
+        dict(func=["min", "max", "imputed_mean"], column="internet_speed"),
+        dict(func="count"),
+    ]
+    results = create_area_zonal_stats(
+        simple_aoi, simple_data, aggregations=aggregations
+    )
+    results_columns = list(results.columns.values)
+    assert "intersect_area_sum" in results_columns
+    assert "index_count" in results_columns
+    assert "population_sum" in results_columns
+    assert "internet_speed_mean" in results_columns
+    assert "internet_speed_min" in results_columns
+    assert "internet_speed_max" in results_columns
+    assert results["index_count"].equals(pd.Series([1, 2, 2]))
+    assert results["intersect_area_sum"].equals(pd.Series([0.75, 1.0, 1.0]))
+    assert results["internet_speed_mean"].equals(pd.Series([20.0, 6.25, 3.125]))
+    assert results["internet_speed_min"].equals(pd.Series([0.0, 10.0, 5.0]))
+    assert results["internet_speed_max"].equals(pd.Series([20.0, 20.0, 10.0]))
+    assert results["population_sum"].equals(pd.Series([75.0, 175.0, 275.0]))
+
+
+def test_create_area_zonal_stats_drop_intersect(simple_aoi, simple_data):
+    aggregations = [
+        dict(func="sum", column="population"),
+        dict(func=["min"], column="internet_speed"),
+        dict(func="count"),
+    ]
+    results = create_area_zonal_stats(
+        simple_aoi,
+        simple_data,
+        aggregations=aggregations,
+        include_intersect=False,
+        fix_min=False,
+    )
+    results_columns = list(results.columns.values)
+    assert "intersect_area_sum" not in results_columns
+    assert "internet_speed_min" in results_columns
+    assert results["internet_speed_min"].equals(pd.Series([20.0, 10.0, 5.0]))

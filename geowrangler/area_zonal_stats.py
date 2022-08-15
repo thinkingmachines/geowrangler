@@ -163,6 +163,8 @@ def compute_imputed_stats(results, expanded_aggs):
                 results[agg["output"]] * results["aoi_area"]
             ) / results[INTERSECT_AREA_AGG["output"]]
 
+    return results
+
 
 # Cell
 def create_area_zonal_stats(
@@ -233,7 +235,7 @@ def create_area_zonal_stats(
 
     vzs._fillnas(expanded_aggs, results, aoi)
 
-    compute_imputed_stats(results, expanded_aggs)
+    results = compute_imputed_stats(results, expanded_aggs)
     drop_labels = ["aoi_area"]
     if not include_intersect:
         drop_labels += [INTERSECT_AREA_AGG["output"]]
