@@ -163,3 +163,4 @@ data/phl_pop_2020.tif
 _data/
 .vscode/
 notebooks/.last_checked
+test_dir/
