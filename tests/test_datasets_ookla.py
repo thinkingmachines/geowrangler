@@ -12,13 +12,12 @@ def mock_ookla_req(monkeypatch):
         def raw(*args, **kwargs):
             return b""
 
-        def raise_for_status():
+        def raise_for_status(self):
             pass
 
         @property
-        def text():
-            return """
-<?xml version="1.0" encoding="UTF-8"?>
+        def text(self):
+            return """<?xml version="1.0" encoding="UTF-8"?>
 <ListBucketResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/">
 <Name>ookla-open-data</Name>
 <Prefix>parquet</Prefix>
@@ -43,21 +42,21 @@ def mock_ookla_req(monkeypatch):
 
 
 def test_list_ookla_file(mock_ookla_req):
-    files = ookla.list_geofabrik_regions()
+    files = ookla.list_ookla_files()
     assert len(files.keys()) == 1
     assert ookla.OoklaFile("fixed", "2019", "1") in files
 
 
-def test_download_geofabrik_region_no_dir(mock_ookla_req):
+def test_download_ookla_file_no_dir(mock_ookla_req):
     with pytest.raises(ValueError):
         ookla.download_ookla_file("fixed", "2019", "1", "this-directory-does-not-exits")
 
 
-def test_download_geofabrik_region_no_region(mock_ookla_req, tmpdir):
+def test_download_ookla_file_no_file(mock_ookla_req, tmpdir):
     with pytest.raises(ValueError):
         ookla.download_ookla_file("fixed", "2020", "1", tmpdir)
 
 
-def test_download_geofabrik_regions(mock_ookla_req, monkeypatch, mocker, tmpdir):
+def test_download_ookla_file(mock_ookla_req, monkeypatch, mocker, tmpdir):
     monkeypatch.setattr(shutil, "copyfileobj", mocker.MagicMock())
     ookla.download_ookla_file("fixed", "2019", "1", tmpdir)
