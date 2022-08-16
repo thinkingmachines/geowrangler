@@ -12,6 +12,9 @@ def mock_ookla_req(monkeypatch):
         def raw(*args, **kwargs):
             return b""
 
+        def raise_for_status():
+            pass
+
         @property
         def text():
             return """
