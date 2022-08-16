@@ -68,6 +68,9 @@ index = {
     "compute_intersect_stats": "06_area_zonal_stats.ipynb",
     "compute_imputed_stats": "06_area_zonal_stats.ipynb",
     "create_area_zonal_stats": "06_area_zonal_stats.ipynb",
+    "build_agg_distance_dicts": "07_distance_zonal_stats.ipynb",
+    "INTERNAL_DISTANCE_COL": "07_distance_zonal_stats.ipynb",
+    "create_distance_zonal_stats": "07_distance_zonal_stats.ipynb",
 }
 
 modules = [
@@ -78,6 +81,7 @@ modules = [
     "dhs.py",
     "datasets/geofabrik.py",
     "area_zonal_stats.py",
+    "distance_zonal_stats.py",
 ]
 
 doc_url = "https://geowrangler.web.app/"
