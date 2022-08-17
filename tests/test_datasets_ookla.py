@@ -1,3 +1,4 @@
+import os
 import shutil
 
 import pytest
@@ -47,16 +48,14 @@ def test_list_ookla_file(mock_ookla_req):
     assert ookla.OoklaFile("fixed", "2019", "1") in files
 
 
-def test_download_ookla_file_no_dir(mock_ookla_req):
-    with pytest.raises(ValueError):
-        ookla.download_ookla_file("fixed", "2019", "1", "this-directory-does-not-exits")
+def test_download_ookla_file_no_dir(mock_ookla_req, monkeypatch, mocker, tmpdir):
+    monkeypatch.setattr(shutil, "copyfileobj", mocker.MagicMock())
+    ookla.download_ookla_file(
+        "fixed", "2019", "1", tmpdir / "this-directory-does-not-exits"
+    )
+    assert os.path.isdir(tmpdir / "this-directory-does-not-exits")
 
 
 def test_download_ookla_file_no_file(mock_ookla_req, tmpdir):
     with pytest.raises(ValueError):
         ookla.download_ookla_file("fixed", "2020", "1", tmpdir)
-
-
-def test_download_ookla_file(mock_ookla_req, monkeypatch, mocker, tmpdir):
-    monkeypatch.setattr(shutil, "copyfileobj", mocker.MagicMock())
-    ookla.download_ookla_file("fixed", "2019", "1", tmpdir)

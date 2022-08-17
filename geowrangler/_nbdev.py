@@ -57,6 +57,9 @@ index = {
     "load_geofabrik_data": "05_datasets_geofabrik.ipynb",
     "list_geofabrik_regions": "05_datasets_geofabrik.ipynb",
     "download_geofabrik_region": "05_datasets_geofabrik.ipynb",
+    "OoklaFile": "05_datasets_ookla.ipynb",
+    "list_ookla_files": "05_datasets_ookla.ipynb",
+    "download_ookla_file": "05_datasets_ookla.ipynb",
     "extract_func": "06_area_zonal_stats.ipynb",
     "fix_area_agg": "06_area_zonal_stats.ipynb",
     "get_source_column": "06_area_zonal_stats.ipynb",
@@ -71,11 +74,6 @@ index = {
     "build_agg_distance_dicts": "07_distance_zonal_stats.ipynb",
     "INTERNAL_DISTANCE_COL": "07_distance_zonal_stats.ipynb",
     "create_distance_zonal_stats": "07_distance_zonal_stats.ipynb",
-    "OoklaFile": "05_datasets_ookla.ipynb",
-    "list_ookla_data": "05_datasets_ookla.ipynb",
-    "download_ookla": "05_datasets_ookla.ipynb",
-    "list_ookla_files": "05_datasets_ookla.ipynb",
-    "download_ookla_file": "05_datasets_ookla.ipynb",
 }
 
 modules = [
@@ -85,9 +83,9 @@ modules = [
     "raster_zonal_stats.py",
     "dhs.py",
     "datasets/geofabrik.py",
+    "datasets/ookla.py",
     "area_zonal_stats.py",
     "distance_zonal_stats.py",
-    "datasets/ookla.py",
 ]
 
 doc_url = "https://geowrangler.web.app/"

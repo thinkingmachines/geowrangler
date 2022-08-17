@@ -2,6 +2,7 @@
 
 __all__ = ["list_ookla_files", "download_ookla_file"]
 
+
 # Internal Cell
 import os
 import shutil
@@ -42,11 +43,15 @@ def list_ookla_files() -> dict:
 
 # Cell
 def download_ookla_file(
-    type_: str, year: str, quarter: str, directory: str = "data/"
+    type_: str,
+    year: str,
+    quarter: str,
+    directory: str = "data/",
+    overwrite=False,
 ) -> List[Path]:
     """Download ookla file to path"""
     if not os.path.isdir(directory):
-        raise ValueError(f"{directory} is not a directory")
+        os.makedirs(directory)
     ookla_info = list_ookla_files()
     key = OoklaFile(type_, str(year), str(quarter))
     if key not in ookla_info:
@@ -57,7 +62,9 @@ def download_ookla_file(
     url = f"https://ookla-open-data.s3.us-west-2.amazonaws.com/parquet/performance/type={type_}/year={year}/quarter={quarter}/{file}"
     parsed_url = urlparse(url)
     filename = Path(os.path.basename(parsed_url.path))
-    response = requests.get(url, stream=True)
-    with open(directory / filename, "wb") as out_file:
-        shutil.copyfileobj(response.raw, out_file)
-    return directory / filename
+    filepath = directory / filename
+    if not filepath.exists() or overwrite:
+        response = requests.get(url, stream=True)
+        with open(filepath, "wb") as out_file:
+            shutil.copyfileobj(response.raw, out_file)
+    return filepath
