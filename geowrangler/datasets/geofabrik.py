@@ -31,7 +31,9 @@ def list_geofabrik_regions() -> dict:
 
 
 # Cell
-def download_geofabrik_region(region: str, directory: str = "data/") -> Path:
+def download_geofabrik_region(
+    region: str, directory: str = "data/", overwrite=False
+) -> Path:
     """Download geofabrik region to path"""
     if not os.path.isdir(directory):
         os.makedirs(directory)
@@ -44,7 +46,7 @@ def download_geofabrik_region(region: str, directory: str = "data/") -> Path:
     parsed_url = urlparse(url)
     filename = Path(os.path.basename(parsed_url.path))
     filepath = directory / filename
-    if not filepath.exists():
+    if not filepath.exists() or overwrite:
         response = requests.get(url, stream=True)
         with open(filepath, "wb") as out_file:
             shutil.copyfileobj(response.raw, out_file)
