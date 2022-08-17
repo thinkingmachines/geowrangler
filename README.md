@@ -71,7 +71,7 @@ documentation for more details.
 The example below uses `virtualenv` to create a separate environment on Linux or WSL
 using `python3.9`.
 
-This next command will install `libgeos` (required for building pygeos/shapely). See [libgeos documentation](https://libgeos.org/usage/install/) for installation details on other systems.
+This next command will install `libgeos` ( version >=3.8 required for building pygeos/shapely). See [libgeos documentation](https://libgeos.org/usage/install/) for installation details on other systems.
 
 ```
 sudo apt install libgeos-dev  # skip this if you already have GEOS
@@ -84,13 +84,10 @@ git clone https://github.com/thinkingmachines/geowrangler.git
 cd geowrangler
 virtualenv -p /usr/bin/python3.9 .venv
 source .venv/bin/activate
-pip install pre-commit poetry
+pip install pre-commit poetry==1.2.0b3
 pre-commit install
+poetry config --local installer.no-binary pygeos,shapely
 poetry install
-poetry run pip install pip --upgrade
-poetry run pip uninstall pygeos shapely -y
-poetry run pip install pygeos shapely --no-binary shapely --no-binary pygeos
-poetry run pip install -e .
 ```
 
 This completes the installation and setup of a local geowrangler environment.
