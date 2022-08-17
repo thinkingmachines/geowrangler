@@ -71,6 +71,11 @@ index = {
     "build_agg_distance_dicts": "07_distance_zonal_stats.ipynb",
     "INTERNAL_DISTANCE_COL": "07_distance_zonal_stats.ipynb",
     "create_distance_zonal_stats": "07_distance_zonal_stats.ipynb",
+    "OoklaFile": "05_datasets_ookla.ipynb",
+    "list_ookla_data": "05_datasets_ookla.ipynb",
+    "download_ookla": "05_datasets_ookla.ipynb",
+    "list_ookla_files": "05_datasets_ookla.ipynb",
+    "download_ookla_file": "05_datasets_ookla.ipynb",
 }
 
 modules = [
@@ -82,6 +87,7 @@ modules = [
     "datasets/geofabrik.py",
     "area_zonal_stats.py",
     "distance_zonal_stats.py",
+    "datasets/ookla.py",
 ]
 
 doc_url = "https://geowrangler.web.app/"
