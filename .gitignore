@@ -164,3 +164,4 @@ _data/
 .vscode/
 notebooks/.last_checked
 test_dir/
+poetry.toml
