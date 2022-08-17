@@ -2,6 +2,7 @@
 
 __all__ = ["list_ookla_files", "download_ookla_file"]
 
+
 # Internal Cell
 import os
 import shutil
@@ -57,7 +58,9 @@ def download_ookla_file(
     url = f"https://ookla-open-data.s3.us-west-2.amazonaws.com/parquet/performance/type={type_}/year={year}/quarter={quarter}/{file}"
     parsed_url = urlparse(url)
     filename = Path(os.path.basename(parsed_url.path))
-    response = requests.get(url, stream=True)
-    with open(directory / filename, "wb") as out_file:
-        shutil.copyfileobj(response.raw, out_file)
-    return directory / filename
+    filepath = directory / filename
+    if not filepath.exists():
+        response = requests.get(url, stream=True)
+        with open(filepath, "wb") as out_file:
+            shutil.copyfileobj(response.raw, out_file)
+    return filepath

@@ -2,6 +2,7 @@
 
 __all__ = ["list_geofabrik_regions", "download_geofabrik_region"]
 
+
 # Internal Cell
 import os
 import shutil
@@ -42,7 +43,9 @@ def download_geofabrik_region(region: str, directory: str = "data/") -> Path:
     url = geofrabik_info[region]
     parsed_url = urlparse(url)
     filename = Path(os.path.basename(parsed_url.path))
-    response = requests.get(url, stream=True)
-    with open(directory / filename, "wb") as out_file:
-        shutil.copyfileobj(response.raw, out_file)
-    return directory / filename
+    filepath = directory / filename
+    if not filepath.exists():
+        response = requests.get(url, stream=True)
+        with open(filepath, "wb") as out_file:
+            shutil.copyfileobj(response.raw, out_file)
+    return filepath
