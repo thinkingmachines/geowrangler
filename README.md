@@ -17,8 +17,11 @@ We [welcome your comments, suggestions, bug reports and code contributions](http
 * Geometry Validation 
 * Vector Zonal Stats 
 * Raster Zonal Stats
-* Demographic and Health Surveys (DHS) Pre-processing Utilities _(planned)_
-* DHS Wealth Index Calculation _(planned)_
+* Area Zonal Stats 
+* Distance Zonal Stats 
+* Demographic and Health Survey (DHS) Processing Utils 
+* Geofabrik (OSM) Data Download
+* Ookla Data Download
 
 _Check [this page for more details about our Roadmap](https://github.com/orgs/thinkingmachines/projects/17)_
 
