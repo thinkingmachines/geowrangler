@@ -46,7 +46,7 @@ def download_ookla_file(
 ) -> List[Path]:
     """Download ookla file to path"""
     if not os.path.isdir(directory):
-        raise ValueError(f"{directory} is not a directory")
+        os.makedirs(directory)
     ookla_info = list_ookla_files()
     key = OoklaFile(type_, str(year), str(quarter))
     if key not in ookla_info:

@@ -2,7 +2,6 @@
 
 __all__ = ["list_geofabrik_regions", "download_geofabrik_region"]
 
-
 # Internal Cell
 import os
 import shutil
@@ -34,7 +33,7 @@ def list_geofabrik_regions() -> dict:
 def download_geofabrik_region(region: str, directory: str = "data/") -> Path:
     """Download geofabrik region to path"""
     if not os.path.isdir(directory):
-        raise ValueError(f"{directory} is not a directory")
+        os.makedirs(directory)
     geofrabik_info = list_geofabrik_regions()
     if region not in geofrabik_info:
         raise ValueError(

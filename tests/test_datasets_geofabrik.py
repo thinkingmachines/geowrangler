@@ -1,3 +1,4 @@
+import os
 import shutil
 
 import pytest
@@ -51,16 +52,16 @@ def test_list_geofabrik_regions(mock_geofabrike_req):
     assert "afghanistan" in regions
 
 
-def test_download_geofabrik_region_no_dir(mock_geofabrike_req):
-    with pytest.raises(ValueError):
-        geofabrik.download_geofabrik_region("laos", "this-directory-does-not-exits")
+def test_download_geofabrik_region_no_dir(
+    mock_geofabrike_req, monkeypatch, mocker, tmpdir
+):
+    monkeypatch.setattr(shutil, "copyfileobj", mocker.MagicMock())
+    geofabrik.download_geofabrik_region(
+        "afghanistan", tmpdir / "this-directory-does-not-exits"
+    )
+    assert os.path.isdir(tmpdir / "this-directory-does-not-exits")
 
 
 def test_download_geofabrik_region_no_region(mock_geofabrike_req, tmpdir):
     with pytest.raises(ValueError):
         geofabrik.download_geofabrik_region("this-region-does-not-exist", tmpdir)
-
-
-def test_download_geofabrik_regions(mock_geofabrike_req, monkeypatch, mocker, tmpdir):
-    monkeypatch.setattr(shutil, "copyfileobj", mocker.MagicMock())
-    geofabrik.download_geofabrik_region("afghanistan", tmpdir)
