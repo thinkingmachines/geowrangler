@@ -334,16 +334,6 @@ def validate_data_quadkey(data, data_quadkey_column, min_zoom_level):
         )
 
 
-# Internal Cell
-
-
-def quadkey_to_tile(quadkey, zoom_level):
-    """Get parent of quadkey for a certain zoom level. Raises an error if target zoom_level is greater than current"""
-    tile = tms.quadkey_to_tile(quadkey)
-    parent = tms.parent(tile, zoom=zoom_level)
-    return tms.quadkey(parent[0])
-
-
 # Cell
 
 
@@ -369,16 +359,24 @@ def create_bingtile_zonal_stats(
     _validate_aggs(fixed_aggs, data)
 
     # create aoi level quad_key for data (apply quadkey_to_tile)
-    quadkey_zoom_tile = partial(quadkey_to_tile, zoom_level=aoi_zoom_level)
+    def quadkey4zoom_level(x):
+        return x[:aoi_zoom_level]
 
-    features = data.copy()
-    features[GEO_INDEX_NAME] = features[data_quadkey_column].apply(quadkey_zoom_tile)
+    data = data.copy()
+    data[GEO_INDEX_NAME] = data[data_quadkey_column].apply(quadkey4zoom_level)
+
+    # filter data to include only those whose quadkeys are in aoi quadkeys
+    features = data.join(
+        aoi[[aoi_quadkey_column]].set_index(aoi_quadkey_column),
+        how="inner",
+        on=GEO_INDEX_NAME,
+    )
+
     # groupby data on aoi level quad key
     groups = features.groupby(GEO_INDEX_NAME)
 
     expanded_aggs = _expand_aggs(fixed_aggs)
     aoi = aoi.copy()
-
     aoi[GEO_INDEX_NAME] = aoi[aoi_quadkey_column]
 
     results = _aggregate_stats(aoi, groups, expanded_aggs)
