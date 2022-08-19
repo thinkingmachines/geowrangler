@@ -42,7 +42,6 @@ index = {
     "compute_quadkey": "02_vector_zonal_stats.ipynb",
     "validate_aoi_quadkey": "02_vector_zonal_stats.ipynb",
     "validate_data_quadkey": "02_vector_zonal_stats.ipynb",
-    "quadkey_to_tile": "02_vector_zonal_stats.ipynb",
     "create_bingtile_zonal_stats": "02_vector_zonal_stats.ipynb",
     "create_raster_zonal_stats": "03_raster_zonal_stats.ipynb",
     "PH_COLUMN_CONFIG": "04_dhs.ipynb",
