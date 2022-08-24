@@ -87,7 +87,7 @@ modules = [
     "distance_zonal_stats.py",
 ]
 
-doc_url = "https://geowrangler.web.app/"
+doc_url = "https://geowrangler.thinkingmachin.es"
 
 git_url = "https://github.com/thinkingmachines/geowrangler/tree/master/"
 

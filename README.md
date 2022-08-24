@@ -33,7 +33,7 @@ pip install git+https://github.com/thinkingmachines/geowrangler.git
 
 ## Documentation
 
-The documentation for [the package is available here](https://geowrangler.web.app)
+The documentation for [the package is available here](https://geowrangler.thinkingmachin.es)
 
 ## Development
 
