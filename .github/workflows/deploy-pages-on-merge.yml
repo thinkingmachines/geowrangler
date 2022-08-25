@@ -31,7 +31,7 @@ jobs:
           restore-keys: |
             poetry-${{ hashFiles('**/poetry.lock') }}
       - run: poetry install
-      - run: nbdev_build_docs --force_all True --mk_readme False
+      - run: poetry run nbdev_build_docs --force_all True --mk_readme False
       - name: Setup Pages
         id: pages
         uses: actions/configure-pages@v1
