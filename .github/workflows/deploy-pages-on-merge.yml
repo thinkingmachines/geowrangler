@@ -21,7 +21,7 @@ jobs:
       - run: sudo apt-get install -y libgeos-dev
       - run: pip install install -e . && pip install git+https://github.com/butchland/nbdev.git@add-black-format
       - run: pip uninstall -y pygeos shapely
-      - run: pip install pygeos shapely --no-binary shapely --no-binary pygeos 
+      - run: pip install pygeos==0.12 shapely==1.8.2 --no-binary shapely --no-binary pygeos 
       - run: nbdev_build_docs --force_all True --mk_readme False
       - name: Setup Pages
         id: pages
