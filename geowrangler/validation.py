@@ -177,7 +177,10 @@ def check(
     geometry: BaseGeometry,  # Geometry to validate
     gdf: gpd.GeoDataFrame,  # GeoDataframe to check
 ) -> bool:
-    """Checks if polygon is within bounds of crs"""
+    """Checks if polygon is within bounds of crs."""
+    # If area of use or crs is not defined, mark check as failed
+    if gdf.crs is None or gdf.crs.area_of_use is None:
+        return False
     xmin, ymin, xmax, ymax = gdf.crs.area_of_use.bounds
     b_xmin, b_ymin, b_xmax, b_ymax = geometry.bounds
     return (

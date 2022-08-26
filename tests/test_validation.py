@@ -305,6 +305,16 @@ def test_crs_bounds_valid():
     assert validation.CrsBoundsValidator().check(p, gdf) is True
 
 
+def test_crs_bounds_no_crs_set():
+    p = polygon.Polygon([(1, 0), (1, 0), (0, 1)])
+    gdf = gpd.GeoDataFrame(
+        geometry=[
+            p,
+        ],
+    )
+    assert validation.CrsBoundsValidator().check(p, gdf) is False
+
+
 def test_crs_bounds_warning():
     p = polygon.Polygon([(200, 0), (1, 0), (0, 1)])
     gdf = gpd.GeoDataFrame(
