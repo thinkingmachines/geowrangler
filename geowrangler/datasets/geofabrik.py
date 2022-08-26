@@ -2,7 +2,6 @@
 
 __all__ = ["list_geofabrik_regions", "download_geofabrik_region"]
 
-
 # Internal Cell
 import os
 import shutil
