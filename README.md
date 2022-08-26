@@ -1,5 +1,13 @@
 # Geowrangler
+[![License: MIT](https://img.shields.io/github/license/thinkingmachines/geowrangler?style=flat-square)](./LICENSE)
+[![Code style: black](https://img.shields.io/badge/code-black-black?style=flat-square)](https://github.com/psf/black)
+[![Code style: isort](https://img.shields.io/badge/style-isort-yellow?style=flat-square)](https://pycqa.github.io/isort/)
+[![Code style: flake8](https://img.shields.io/badge/lint-flake8-orange?style=flat-square)](https://flake8.pycqa.org/en/latest/)
+[![Versions](https://img.shields.io/pypi/pyversions/geowrangler.svg?style=flat-square)](https://pypi.org/project/geowrangler/)
+[![Docs](https://img.shields.io/badge/docs-passing-green?style=flat-square)](https://geowrangler.thinkingmachin.es)
+
 > Tools for wrangling with geospatial data
+
 
 ## Overview
 
