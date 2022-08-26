@@ -23,6 +23,8 @@ jobs:
           virtualenvs-in-project: false
           virtualenvs-path: ~/.virtualenvs
           installer-parallel: true
+      - run: sudo apt-get install -y libgeos-dev
+      - run: poetry config installer.no-binary pygeos,shapely
       - uses: actions/cache@v1
         id: cache
         with:
@@ -30,7 +32,6 @@ jobs:
           key: poetry-${{ hashFiles('**/poetry.lock') }}
           restore-keys: |
             poetry-${{ hashFiles('**/poetry.lock') }}
-      - run: poetry config --local installer.no-binary pygeos,shapely
       - run: poetry install
       - run: poetry run nbdev_build_docs --force_all True --mk_readme False
       - name: Setup Pages
