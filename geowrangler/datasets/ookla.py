@@ -43,11 +43,11 @@ def list_ookla_files() -> dict:
 
 # Cell
 def download_ookla_file(
-    type_: str,
-    year: str,
-    quarter: str,
-    directory: str = "data/",
-    overwrite=False,
+    type_: str,  # Internet connection type: 'fixed' or 'mobile'
+    year: str,  # Year (e.g. '2020')
+    quarter: str,  # Quarter (valid values: '1','2','3','4')
+    directory: str = "data/",  # Download directory
+    overwrite: bool = False,  # Overwrite if existing
 ) -> List[Path]:
     """Download ookla file to path"""
     if not os.path.isdir(directory):
