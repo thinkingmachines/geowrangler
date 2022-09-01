@@ -2,6 +2,7 @@
 
 __all__ = ["list_geofabrik_regions", "download_geofabrik_region"]
 
+
 # Internal Cell
 import os
 import shutil
@@ -36,12 +37,12 @@ def download_geofabrik_region(
     """Download geofabrik region to path"""
     if not os.path.isdir(directory):
         os.makedirs(directory)
-    geofrabik_info = list_geofabrik_regions()
-    if region not in geofrabik_info:
+    geofabrik_info = list_geofabrik_regions()
+    if region not in geofabrik_info:
         raise ValueError(
-            f"{region} not found in geofrabik. Run list_geofabrik_regions() to learn more about available areas"
+            f"{region} not found in geofabrik. Run list_geofabrik_regions() to learn more about available areas"
         )
-    url = geofrabik_info[region]
+    url = geofabrik_info[region]
     parsed_url = urlparse(url)
     filename = Path(os.path.basename(parsed_url.path))
     filepath = directory / filename
