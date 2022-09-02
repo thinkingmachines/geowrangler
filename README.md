@@ -36,7 +36,7 @@ _Check [this page for more details about our Roadmap](https://github.com/orgs/th
 ## Installation
 
 ```
-pip install git+https://github.com/thinkingmachines/geowrangler.git
+pip install geowrangler
 ```
 
 ## Documentation
