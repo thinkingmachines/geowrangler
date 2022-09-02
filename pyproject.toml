@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "geowrangler"
-version = "0.1.0-dev2"
+version = "0.1.0"
 description = "Tools for dealing with geospatial data"
 authors = ["Thinking Machines <geowrangler@thinkingmachin.es>"]
 license = "MIT"
