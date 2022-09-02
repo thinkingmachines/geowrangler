@@ -8,3 +8,7 @@
 - Implemented `GeometryValidation`
 - Implemented `VectorZonalStats`
 - Implemented `RasterZonalStats`
+- Implemented `AreaZonalStats`
+- Implemented `DistanceZonalStats`
+- Implemented dataset download for ookla and geofabrik
+- Implemented DHS utility functions
