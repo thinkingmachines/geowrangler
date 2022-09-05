@@ -11,6 +11,9 @@
         "Distance Zonal Stats": "/tutorial.distance_zonal_stats.html",
         "DHS Processing": "/tutorial.dhs.html",
         "Datasets": "/tutorial.datasets.html"
+      },
+      "Use Case Demos": {
+        "Explore Internet Speeds with Ookla": "/overview.usecase_ookla.html"
       }
     },
     "Grids": "grids.html",
