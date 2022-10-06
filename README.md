@@ -99,11 +99,26 @@ poetry install
 ```
 
 This completes the installation and setup of a local geowrangler environment.
+
+If you're using conda, use these set of instructions instead to create a conda env named `geowrangler`:
+```
+git clone https://github.com/thinkingmachines/geowrangler.git
+cd geowrangler
+conda create -n geowrangler python=3.9
+conda activate geowrangler
+pip install pre-commit poetry==1.2.0b3
+pre-commit install
+poetry config --local installer.no-binary pygeos,shapely
+poetry install
+```
+
+
 #### Activating the geowrangler environment
 
-To activate the geowrangler environment, you can `cd <your-local-geowrangler-folder>`
+To activate the geowrangler environment with virtualenv, you can `cd <your-local-geowrangler-folder>`
 and  run `poetry shell` to activate the environment.
 
+If you're using conda, run `conda activate geowrangler`
 
 ### Jupyter Notebook Development
 
