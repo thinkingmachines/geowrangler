@@ -35,14 +35,14 @@ index = {
     "AreaValidator.fix": "01_validation.ipynb",
     "GeometryValidation": "01_validation.ipynb",
     "GeometryValidation.validate_all": "01_validation.ipynb",
-    "GEO_INDEX_NAME": "02_vector_zonal_stats.ipynb",
-    "create_zonal_stats": "02_vector_zonal_stats.ipynb",
-    "tms": "02_vector_zonal_stats.ipynb",
-    "get_quadkey": "02_vector_zonal_stats.ipynb",
-    "compute_quadkey": "02_vector_zonal_stats.ipynb",
-    "validate_aoi_quadkey": "02_vector_zonal_stats.ipynb",
-    "validate_data_quadkey": "02_vector_zonal_stats.ipynb",
-    "create_bingtile_zonal_stats": "02_vector_zonal_stats.ipynb",
+    "GEO_INDEX_NAME": "08_test_module.ipynb",
+    "create_zonal_stats": "08_test_module.ipynb",
+    "tms": "08_test_module.ipynb",
+    "get_quadkey": "08_test_module.ipynb",
+    "compute_quadkey": "08_test_module.ipynb",
+    "validate_aoi_quadkey": "08_test_module.ipynb",
+    "validate_data_quadkey": "08_test_module.ipynb",
+    "create_bingtile_zonal_stats": "08_test_module.ipynb",
     "create_raster_zonal_stats": "03_raster_zonal_stats.ipynb",
     "PH_COLUMN_CONFIG": "04_dhs.ipynb",
     "KH_COLUMN_CONFIG": "04_dhs.ipynb",
@@ -73,6 +73,8 @@ index = {
     "build_agg_distance_dicts": "07_distance_zonal_stats.ipynb",
     "INTERNAL_DISTANCE_COL": "07_distance_zonal_stats.ipynb",
     "create_distance_zonal_stats": "07_distance_zonal_stats.ipynb",
+    "query_window_by_polygon": "raster_utils.ipynb",
+    "query_window_by_gdf": "raster_utils.ipynb",
 }
 
 modules = [
@@ -85,6 +87,8 @@ modules = [
     "datasets/ookla.py",
     "area_zonal_stats.py",
     "distance_zonal_stats.py",
+    "test_module.py",
+    "raster_process.py",
 ]
 
 doc_url = "https://geowrangler.thinkingmachin.es/"
