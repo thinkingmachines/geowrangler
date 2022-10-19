@@ -3,15 +3,17 @@
 __all__ = ["query_window_by_polygon", "query_window_by_gdf"]
 
 
+# Cell
 from pathlib import PosixPath
 from typing import Union
 
-# Cell
+# hide
 # export
 import rasterio as rio
 import rasterio.mask
 from rasterio.io import DatasetReader
 from shapely.geometry import Polygon
+
 
 # Cell
 
@@ -144,6 +146,8 @@ def query_window_by_gdf(
     if name_col is None:
         name_col = "name"
         gdf[name_col] = "output_" + gdf.reset_index().index.astype(str) + ".tif"
+    else:
+        gdf[name_col] = gdf[name_col] + ".tif"
 
     for i, row in gdf.iterrows():
         polygon = row.geometry
