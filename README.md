@@ -47,9 +47,7 @@ The documentation for [the package is available here](https://geowrangler.thinki
 
 ### Development Setup
 
-If you want to learn more about **Geowrangler** and explore its inner workings,
-you can setup a local development environment. You can run geowrangler's jupyter notebooks
-to see how the different modules are built and how they work. 
+If you want to learn more about **Geowrangler** and explore its inner workings, you can setup a local development environment. You can run geowrangler's jupyter notebooks to see how the different modules are built and how they work. 
 
 
 #### Pre-requisites
@@ -72,23 +70,27 @@ repo for approval by geowrangler's maintainers.
 
 #### Development Installation
 
-We recommend creating a virtual python environment via [virtualenv](https://pypi.org/project/virtualenv/) or 
-[conda](https://docs.conda.io/projects/conda/en/latest/user-guide/index.html) for your geowrangler development environment. Please see the relevant
-documentation for more details.
+We recommend creating a virtual python environment via [virtualenv](https://pypi.org/project/virtualenv/) or [conda](https://docs.conda.io/projects/conda/en/latest/user-guide/index.html) for your development environment. Please see the relevant documentation for more details on installing these python environment managers. Afterward, continue the geowrangler setup instructions below.
 
-The example below uses `virtualenv` to create a separate environment on Linux or WSL
-using `python3.9`.
 
-This next command will install `libgeos` ( version >=3.8 required for building pygeos/shapely). See [libgeos documentation](https://libgeos.org/usage/install/) for installation details on other systems.
+**Set-up with virtualenv**
 
-```
-sudo apt install libgeos-dev  # skip this if you already have GEOS
-```
+First, install `libgeos` ( version >=3.8 required for building pygeos/shapely) through the ff. commands. 
 
-Replace the github url below with `git@github.com:<your-github-id>/geowrangler.git` if you created a fork.
+*See [libgeos documentation](https://libgeos.org/usage/install/) for installation details on other systems.*
 
 ```
-git clone https://github.com/thinkingmachines/geowrangler.git
+sudo apt update # updates package info
+sudo apt install build-essential # installs GCC
+sudo apt install libgeos-dev
+```
+
+Next, set-up your Python env with `virtualenv` and install pre-commits and the necessary python libs by running the following commands.
+
+Remember to replace `<your-github-id>` in the github url below with your GitHub ID to clone from your fork.
+
+```
+git clone https://github.com/<your-github-id>/geowrangler.git
 cd geowrangler
 virtualenv -p /usr/bin/python3.9 .venv
 source .venv/bin/activate
@@ -98,27 +100,33 @@ poetry config --local installer.no-binary pygeos,shapely
 poetry install
 ```
 
-This completes the installation and setup of a local geowrangler environment.
+You're all set! [Run the tests](#running-tests) to make sure everything was installed properly.
 
-If you're using conda, use these set of instructions instead to create a conda env named `geowrangler`:
+Whenever you open a new terminal, you can `cd <your-local-geowrangler-folder>`
+and  run `poetry shell` to activate the geowrangler environment.
+
+**Set-up with conda**
+
+Run the following commands to set-up a conda env and install geos.
+
 ```
-git clone https://github.com/thinkingmachines/geowrangler.git
-cd geowrangler
-conda create -n geowrangler python=3.9
-conda activate geowrangler
+conda create -y -n geowrangler-env python=3.9 # replace geowrangler-env if you prefer a different env name
+conda deactivate # important to ensure libs from other envs aren't used
+conda activate geowrangler-env
+conda install -y geos
+```
+
+Then run the following to install the pre-commits and python libs.
+```
+cd geowrangler # cd into your geowrangler local directory
 pip install pre-commit poetry==1.2.0b3
 pre-commit install
-poetry config --local installer.no-binary pygeos,shapely
 poetry install
 ```
 
+You're all set! [Run the tests](#running-tests) to make sure everything was installed properly.
 
-#### Activating the geowrangler environment
-
-To activate the geowrangler environment with virtualenv, you can `cd <your-local-geowrangler-folder>`
-and  run `poetry shell` to activate the environment.
-
-If you're using conda, run `conda activate geowrangler`
+Whenever you open a new terminal, run `conda deactivate && conda activate geowrangler-env` to deactivate any conda env, and then activate the geowrangler environment.
 
 ### Jupyter Notebook Development
 
