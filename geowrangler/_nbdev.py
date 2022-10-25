@@ -73,8 +73,8 @@ index = {
     "build_agg_distance_dicts": "07_distance_zonal_stats.ipynb",
     "INTERNAL_DISTANCE_COL": "07_distance_zonal_stats.ipynb",
     "create_distance_zonal_stats": "07_distance_zonal_stats.ipynb",
-    "query_window_by_polygon": "raster_utils.ipynb",
-    "query_window_by_gdf": "raster_utils.ipynb",
+    "query_window_by_polygon": "09_raster_utils.ipynb",
+    "query_window_by_gdf": "09_raster_utils.ipynb",
 }
 
 modules = [
