@@ -25,6 +25,7 @@
     "Vector to Raster mask": "vector_to_raster_mask.html",
     "DHS processing": "dhs.html",
     "Dataset Geofabrik": "datasets_geofabrik.html",
-    "Dataset Ookla": "datasets_ookla.html"
+    "Dataset Ookla": "datasets_ookla.html",
+    "Tile Clustering": "tile_clustering.html"
   }
 }

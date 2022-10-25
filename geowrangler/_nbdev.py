@@ -73,6 +73,8 @@ index = {
     "build_agg_distance_dicts": "07_distance_zonal_stats.ipynb",
     "INTERNAL_DISTANCE_COL": "07_distance_zonal_stats.ipynb",
     "create_distance_zonal_stats": "07_distance_zonal_stats.ipynb",
+    "TileClustering": "08_tile_clustering.ipynb",
+    "TileClustering.cluster_tiles": "08_tile_clustering.ipynb",
 }
 
 modules = [
@@ -85,6 +87,7 @@ modules = [
     "datasets/ookla.py",
     "area_zonal_stats.py",
     "distance_zonal_stats.py",
+    "tile_clustering.py",
 ]
 
 doc_url = "https://geowrangler.thinkingmachin.es/"
