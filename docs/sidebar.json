@@ -24,6 +24,7 @@
     "Distance Zonal Stats": "distance_zonal_stats.html",
     "DHS processing": "dhs.html",
     "Dataset Geofabrik": "datasets_geofabrik.html",
-    "Dataset Ookla": "datasets_ookla.html"
+    "Dataset Ookla": "datasets_ookla.html",
+    "Tile Clustering": "tile_clustering.html"
   }
 }
