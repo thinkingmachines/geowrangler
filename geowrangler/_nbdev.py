@@ -76,7 +76,7 @@ index = {
     "query_window_by_polygon": "09_raster_utils.ipynb",
     "query_window_by_gdf": "09_raster_utils.ipynb",
     "TileClustering": "08_tile_clustering.ipynb",
-    "TileClustering.cluster_tiles": "08_tile_clustering.ipynb"
+    "TileClustering.cluster_tiles": "08_tile_clustering.ipynb",
 }
 
 modules = [
@@ -91,7 +91,7 @@ modules = [
     "distance_zonal_stats.py",
     "test_module.py",
     "raster_process.py",
-    "tile_clustering.py"
+    "tile_clustering.py",
 ]
 
 doc_url = "https://geowrangler.thinkingmachin.es/"
