@@ -14,7 +14,6 @@ import rasterstats as rs
 
 from .vector_zonal_stats import _expand_aggs, _fillnas, _fix_agg
 
-
 # Cell
 def create_raster_zonal_stats(
     aoi: Union[  # The area of interest geodataframe, or path to the vector file
