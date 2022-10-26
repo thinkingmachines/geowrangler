@@ -28,6 +28,7 @@
     "DHS processing": "dhs.html",
     "Dataset Geofabrik": "datasets_geofabrik.html",
     "Dataset Ookla": "datasets_ookla.html",
-    "Tile Clustering": "tile_clustering.html"
+    "Tile Clustering": "tile_clustering.html",
+    "Spatial Join Highest Intersection": "spatialjoin_highest_intersection.html"
   }
 }
