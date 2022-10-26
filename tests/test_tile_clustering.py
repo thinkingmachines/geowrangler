@@ -1,19 +1,11 @@
 import geopandas as gpd
-import numpy as np
 import pytest
-
-import geowrangler.grids as grids
 import geowrangler.tile_clustering as tc
 
 
 @pytest.fixture()
 def grid_gdf5k():
-    rs = np.random.default_rng(seed=42)
-    region3_gdf = gpd.read_file("data/region3_admin.geojson")
-    grid_generator5k = grids.SquareGridGenerator(5_000)
-    grid = grid_generator5k.generate_grid(region3_gdf)
-    grid["score"] = rs.random(len(grid))
-    grid["class"] = grid["score"] > 0.7
+    grid = gpd.read_file("data/region3_admin_tile_clusters.geojson")
     yield grid
 
 
