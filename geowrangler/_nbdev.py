@@ -80,6 +80,7 @@ index = {
     "generate_mask": "10_vector_to_raster_mask.ipynb",
     "GRID_ID": "10_vector_to_raster_mask.ipynb",
     "read_bands": "11_raster_to_dataframe.ipynb",
+    "get_highest_intersection": "12_spatialjoin_highest_intersection.ipynb",
 }
 
 modules = [
@@ -96,6 +97,7 @@ modules = [
     "raster_process.py",
     "vector_to_raster_mask.py",
     "raster_to_dataframe.py",
+    "spatialjoin_highest_intersection.py",
 ]
 
 doc_url = "https://geowrangler.thinkingmachin.es/"
