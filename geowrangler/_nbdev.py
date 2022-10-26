@@ -75,10 +75,10 @@ index = {
     "create_distance_zonal_stats": "07_distance_zonal_stats.ipynb",
     "TileClustering": "08_tile_clustering.ipynb",
     "TileClustering.cluster_tiles": "08_tile_clustering.ipynb",
-    "generate_mask": "08_vector_to_raster_mask.ipynb",
-    "GRID_ID": "08_vector_to_raster_mask.ipynb",
     "query_window_by_polygon": "09_raster_process.ipynb",
     "query_window_by_gdf": "09_raster_process.ipynb",
+    "generate_mask": "10_vector_to_raster_mask.ipynb",
+    "GRID_ID": "10_vector_to_raster_mask.ipynb",
     "read_bands": "11_raster_to_dataframe.ipynb",
 }
 
@@ -93,8 +93,8 @@ modules = [
     "area_zonal_stats.py",
     "distance_zonal_stats.py",
     "tile_clustering.py",
-    "vector_to_raster_mask.py",
     "raster_process.py",
+    "vector_to_raster_mask.py",
     "raster_to_dataframe.py",
 ]
 
