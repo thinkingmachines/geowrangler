@@ -23,6 +23,7 @@
     "Area Zonal Stats": "area_zonal_stats.html",
     "Distance Zonal Stats": "distance_zonal_stats.html",
     "Vector to Raster mask": "vector_to_raster_mask.html",
+    "Raster to Dataframe": "raster_to_dataframe.html",
     "Raster Processing": "raster_process.html",
     "DHS processing": "dhs.html",
     "Dataset Geofabrik": "datasets_geofabrik.html",
