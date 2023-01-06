@@ -10,7 +10,10 @@
         "Area Zonal Stats": "/tutorial.area_zonal_stats.html",
         "Distance Zonal Stats": "/tutorial.distance_zonal_stats.html",
         "DHS Processing": "/tutorial.dhs.html",
-        "Datasets": "/tutorial.datasets.html"
+        "Datasets": "/tutorial.datasets.html",
+        "Spatial Join Highest Intersection": "/tutorial.spatialjoin_highest_intersection.html",
+        "Tile Clustering": "/tutorial.tile_clustering.html", 
+        "Raster Processing": "/tutorial.raster_process.html"           
       },
       "Use Case Demos": {
         "Explore Internet Speeds with Ookla": "/overview.usecase_ookla.html"
