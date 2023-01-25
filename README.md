@@ -94,7 +94,7 @@ git clone https://github.com/<your-github-id>/geowrangler.git
 cd geowrangler
 virtualenv -p /usr/bin/python3.9 .venv
 source .venv/bin/activate
-pip install pre-commit poetry==1.2.0b3
+pip install pre-commit poetry>=1.2.0
 pre-commit install
 poetry config --local installer.no-binary pygeos,shapely
 poetry install
@@ -119,7 +119,7 @@ conda install -y geos
 Then run the following to install the pre-commits and python libs.
 ```
 cd geowrangler # cd into your geowrangler local directory
-pip install pre-commit poetry==1.2.0b3
+pip install pre-commit poetry>=1.2.0
 pre-commit install
 poetry install
 ```
