@@ -16,7 +16,8 @@
         "Raster Processing": "/tutorial.raster_process.html"           
       },
       "Use Case Demos": {
-        "Explore Internet Speeds with Ookla": "/overview.usecase_ookla.html"
+        "Explore Internet Speeds with Ookla": "/overview.usecase_ookla.html",
+        "Explore Poverty Mapping Machine Learning Models": "/overview.poverty_mapping_demo.html"
       }
     },
     "Grids": "grids.html",

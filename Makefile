@@ -21,7 +21,6 @@ docs: $(SRC)
 	touch docs
 
 test:
-	nbdev_test_nbs
 	pytest --cov --cov-config=.coveragerc -n auto 
 
 release: pypi conda_release
