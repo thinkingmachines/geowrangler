@@ -81,6 +81,12 @@ index = {
     "GRID_ID": "10_vector_to_raster_mask.ipynb",
     "read_bands": "11_raster_to_dataframe.ipynb",
     "get_highest_intersection": "12_spatialjoin_highest_intersection.ipynb",
+    "urlretrieve": "13_datasets_utils.ipynb",
+    "make_report_hook": "13_datasets_utils.ipynb",
+    "DEFAULT_CACHE_DIR": "05_datasets_geofabrik.ipynb",
+    "get_osm_download_url": "05_datasets_geofabrik.ipynb",
+    "download_osm_country_data": "05_datasets_geofabrik.ipynb",
+    "OsmDataManager": "05_datasets_geofabrik.ipynb",
 }
 
 modules = [
@@ -98,6 +104,7 @@ modules = [
     "vector_to_raster_mask.py",
     "raster_to_dataframe.py",
     "spatialjoin_highest_intersection.py",
+    "datasets/utils.py",
 ]
 
 doc_url = "https://geowrangler.thinkingmachin.es/"
