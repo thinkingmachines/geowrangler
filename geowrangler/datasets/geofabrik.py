@@ -124,7 +124,7 @@ def download_osm_country_data(
     show_progress=True,
 ):
 
-    osm_cache_dir = os.path.join(cache_dir, "osm/")
+    osm_cache_dir = os.path.join(os.path.expanduser(cache_dir), "osm/")
     # TODO consider incorporating year or quarter to automatically avoid using stale data
 
     # Check if the cached data is valid. Otherwise, we have to re-download.
