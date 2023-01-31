@@ -22,11 +22,12 @@ from zipfile import ZipFile
 
 import geopandas as gpd
 import requests
-from fastcore.all import urlcheck
+from fastcore.all import patch, urlcheck
 from loguru import logger
 
 from geowrangler import distance_zonal_stats as dzs
 from geowrangler import vector_zonal_stats as vzs
+
 from .utils import make_report_hook, urlretrieve
 
 # Internal Cell
@@ -208,107 +209,111 @@ class OsmDataManager:
         self.pois_cache = {}
         self.roads_cache = {}
 
-    def load_pois(
-        self,
+
+# Cell
+@patch
+def load_pois(
+    self: OsmDataManager,
+    country,
+    year=None,
+    use_cache=True,
+    chunksize=1024 * 1024,
+    show_progress=True,
+):
+    # Get from RAM cache if already available
+    if year is None:
+        if country in self.pois_cache:
+            logger.debug(f"OSM POIs for {country} found in cache.")
+            return self.pois_cache[country]
+    else:
+        short_year = str(year)[-2:]
+        lookup = f"{country}_{short_year}"
+        if lookup in self.pois_cache:
+            logger.debug(f"OSM POIs for {country} and year {year} found in cache.")
+            return self.pois_cache[lookup]
+
+    # Otherwise, load from file and add to cache
+    country_cache_dir = download_osm_country_data(
         country,
-        year=None,
-        use_cache=True,
-        chunksize=1024 * 1024,
-        show_progress=True,
-    ):
-        # Get from RAM cache if already available
-        if year is None:
-            if country in self.pois_cache:
-                logger.debug(f"OSM POIs for {country} found in cache.")
-                return self.pois_cache[country]
-        else:
-            short_year = str(year)[-2:]
-            lookup = f"{country}_{short_year}"
-            if lookup in self.pois_cache:
-                logger.debug(f"OSM POIs for {country} and year {year} found in cache.")
-                return self.pois_cache[lookup]
+        year=year,
+        cache_dir=self.cache_dir,
+        use_cache=use_cache,
+        chunksize=chunksize,
+        show_progress=show_progress,
+    )
+    if country_cache_dir is None:
+        return None
 
-        # Otherwise, load from file and add to cache
-        country_cache_dir = download_osm_country_data(
-            country,
-            year=year,
-            cache_dir=self.cache_dir,
-            use_cache=use_cache,
-            chunksize=chunksize,
-            show_progress=show_progress,
+    osm_pois_filepath = os.path.join(country_cache_dir, "gis_osm_pois_free_1.shp")
+    if year is None:
+        logger.debug(f"OSM POIs for {country} being loaded from {osm_pois_filepath}")
+    else:
+        logger.debug(
+            f"OSM POIs for {country} and year {year} being loaded from {osm_pois_filepath}"
         )
-        if country_cache_dir is None:
-            return None
+    gdf = gpd.read_file(osm_pois_filepath)
 
-        osm_pois_filepath = os.path.join(country_cache_dir, "gis_osm_pois_free_1.shp")
-        if year is None:
-            logger.debug(
-                f"OSM POIs for {country} being loaded from {osm_pois_filepath}"
-            )
-        else:
-            logger.debug(
-                f"OSM POIs for {country} and year {year} being loaded from {osm_pois_filepath}"
-            )
-        gdf = gpd.read_file(osm_pois_filepath)
+    if year is None:
+        self.pois_cache[country] = gdf
+    else:
+        short_year = str(year)[-2:]
+        lookup = f"{country}_{short_year}"
+        self.pois_cache[lookup] = gdf
 
-        if year is None:
-            self.pois_cache[country] = gdf
-        else:
-            short_year = str(year)[-2:]
-            lookup = f"{country}_{short_year}"
-            self.pois_cache[lookup] = gdf
+    return gdf
 
-        return gdf
 
-    def load_roads(
-        self,
+# Cell
+
+
+@patch
+def load_roads(
+    self: OsmDataManager,
+    country,
+    year=None,
+    use_cache=True,
+    chunksize=1024 * 1024,
+    show_progress=True,
+):
+    # Get from RAM cache if already available
+    if year is None:
+        if country in self.roads_cache:
+            logger.debug(f"OSM POIs for {country} found in cache.")
+            return self.roads_cache[country]
+    else:
+        short_year = str(year)[-2:]
+        lookup = f"{country}_{short_year}"
+        if lookup in self.roads_cache:
+            logger.debug(f"OSM POIs for {country} and year {year} found in cache.")
+            return self.roads_cache[lookup]
+
+    # Otherwise, load from file and add to cache
+    country_cache_dir = download_osm_country_data(
         country,
-        year=None,
-        use_cache=True,
-        chunksize=1024 * 1024,
-        show_progress=True,
-    ):
-        # Get from RAM cache if already available
-        if year is None:
-            if country in self.roads_cache:
-                logger.debug(f"OSM POIs for {country} found in cache.")
-                return self.roads_cache[country]
-        else:
-            short_year = str(year)[-2:]
-            lookup = f"{country}_{short_year}"
-            if lookup in self.roads_cache:
-                logger.debug(f"OSM POIs for {country} and year {year} found in cache.")
-                return self.roads_cache[lookup]
+        year=year,
+        cache_dir=self.cache_dir,
+        use_cache=use_cache,
+        chunksize=chunksize,
+        show_progress=show_progress,
+    )
 
-        # Otherwise, load from file and add to cache
-        country_cache_dir = download_osm_country_data(
-            country,
-            year=year,
-            cache_dir=self.cache_dir,
-            use_cache=use_cache,
-            chunksize=chunksize,
-            show_progress=show_progress,
+    if country_cache_dir is None:
+        return None
+
+    osm_roads_filepath = os.path.join(country_cache_dir, "gis_osm_roads_free_1.shp")
+    if year is None:
+        logger.debug(f"OSM Roads for {country} being loaded from {osm_roads_filepath}")
+    else:
+        logger.debug(
+            f"OSM Roads for {country} and year {year} being loaded from {osm_roads_filepath}"
         )
+    gdf = gpd.read_file(osm_roads_filepath)
 
-        if country_cache_dir is None:
-            return None
+    if year is None:
+        self.roads_cache[country] = gdf
+    else:
+        short_year = str(year)[-2:]
+        lookup = f"{country}_{short_year}"
+        self.roads_cache[lookup] = gdf
 
-        osm_roads_filepath = os.path.join(country_cache_dir, "gis_osm_roads_free_1.shp")
-        if year is None:
-            logger.debug(
-                f"OSM Roads for {country} being loaded from {osm_roads_filepath}"
-            )
-        else:
-            logger.debug(
-                f"OSM Roads for {country} and year {year} being loaded from {osm_roads_filepath}"
-            )
-        gdf = gpd.read_file(osm_roads_filepath)
-
-        if year is None:
-            self.roads_cache[country] = gdf
-        else:
-            short_year = str(year)[-2:]
-            lookup = f"{country}_{short_year}"
-            self.roads_cache[lookup] = gdf
-
-        return gdf
+    return gdf

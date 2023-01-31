@@ -60,6 +60,8 @@ index = {
     "get_osm_download_url": "05_datasets_geofabrik.ipynb",
     "download_osm_country_data": "05_datasets_geofabrik.ipynb",
     "OsmDataManager": "05_datasets_geofabrik.ipynb",
+    "OsmDataManager.load_pois": "05_datasets_geofabrik.ipynb",
+    "OsmDataManager.load_roads": "05_datasets_geofabrik.ipynb",
     "OoklaFile": "05_datasets_ookla.ipynb",
     "list_ookla_files": "05_datasets_ookla.ipynb",
     "download_ookla_file": "05_datasets_ookla.ipynb",
