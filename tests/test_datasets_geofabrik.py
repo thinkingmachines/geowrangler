@@ -1,5 +1,5 @@
 import os
-import shutil
+from pathlib import Path
 
 import pytest
 import requests
@@ -52,16 +52,169 @@ def test_list_geofabrik_regions(mock_geofabrike_req):
     assert "afghanistan" in regions
 
 
-def test_download_geofabrik_region_no_dir(
-    mock_geofabrike_req, monkeypatch, mocker, tmpdir
-):
-    monkeypatch.setattr(shutil, "copyfileobj", mocker.MagicMock())
-    geofabrik.download_geofabrik_region(
-        "afghanistan", tmpdir / "this-directory-does-not-exits"
+def test_download_geofabrik_region_no_dir(mock_geofabrike_req, monkeypatch, tmpdir):
+    def mock_retrieve(url, filename, **kwargs):
+        return filename, None, None
+
+    monkeypatch.setattr(geofabrik, "urlretrieve", mock_retrieve)
+    filepath = geofabrik.download_geofabrik_region(
+        "afghanistan", directory=str(tmpdir / "this-directory-does-not-exist")
     )
-    assert os.path.isdir(tmpdir / "this-directory-does-not-exits")
+    assert os.path.isdir(tmpdir / "this-directory-does-not-exist")
+    assert (
+        Path(filepath)
+        == Path(str(tmpdir))
+        / "this-directory-does-not-exist"
+        / "afghanistan-latest-free.shp.zip"
+    )
+
+
+def test_download_geofabrik_region_year(mock_geofabrike_req, monkeypatch, tmpdir):
+    def mock_retrieve(url, filename, **kwargs):
+        return filename, None, None
+
+    monkeypatch.setattr(geofabrik, "urlretrieve", mock_retrieve)
+    filepath = geofabrik.download_geofabrik_region(
+        "afghanistan", str(tmpdir / "this-directory-does-not-exist"), year="2021"
+    )
+    assert os.path.isdir(tmpdir / "this-directory-does-not-exist")
+    assert (
+        Path(filepath)
+        == Path(str(tmpdir))
+        / "this-directory-does-not-exist"
+        / "afghanistan-210101-free.shp.zip"
+    )
 
 
 def test_download_geofabrik_region_no_region(mock_geofabrike_req, tmpdir):
     with pytest.raises(ValueError):
-        geofabrik.download_geofabrik_region("this-region-does-not-exist", tmpdir)
+        geofabrik.download_geofabrik_region(
+            "this-region-does-not-exist", directory=str(tmpdir)
+        )
+
+
+def test_download_osm_country_data(mock_geofabrike_req, mocker, monkeypatch, tmpdir):
+    def mock_retrieve(url, filename, **kwargs):
+        return filename, None, None
+
+    mocker.patch(
+        "geowrangler.datasets.geofabrik.ZipFile"
+    ).return_value.__enter__.return_value.extractall = mocker.MagicMock()
+    mocker.patch("os.remove", mocker.MagicMock())
+    monkeypatch.setattr(geofabrik, "urlretrieve", mock_retrieve)
+    filepath = geofabrik.download_osm_country_data(
+        "afghanistan", cache_dir=str(tmpdir / "this-directory-does-not-exist")
+    )
+    assert os.path.isdir(tmpdir / "this-directory-does-not-exist")
+    assert filepath == str(
+        Path(str(tmpdir)) / "this-directory-does-not-exist" / "osm" / "afghanistan"
+    )
+
+
+def test_download_osm_country_data_with_year(
+    mock_geofabrike_req, mocker, monkeypatch, tmpdir
+):
+    def mock_retrieve(url, filename, **kwargs):
+        return filename, None, None
+
+    mocker.patch(
+        "geowrangler.datasets.geofabrik.ZipFile"
+    ).return_value.__enter__.return_value.extractall = mocker.MagicMock()
+    mocker.patch("os.remove", mocker.MagicMock())
+    monkeypatch.setattr(geofabrik, "urlretrieve", mock_retrieve)
+    filepath = geofabrik.download_osm_country_data(
+        "afghanistan",
+        year="2021",
+        cache_dir=str(tmpdir / "this-directory-does-not-exist"),
+    )
+    assert os.path.isdir(tmpdir / "this-directory-does-not-exist")
+    assert filepath == str(
+        Path(str(tmpdir))
+        / "this-directory-does-not-exist"
+        / "osm"
+        / "afghanistan-210101"
+    )
+
+
+def test_load_pois(mock_geofabrike_req, mocker, monkeypatch, tmpdir):
+    def mock_retrieve(url, filename, **kwargs):
+        return filename, None, None
+
+    mocker.patch(
+        "geowrangler.datasets.geofabrik.ZipFile"
+    ).return_value.__enter__.return_value.extractall = mocker.MagicMock()
+    mocker.patch("os.remove", mocker.MagicMock())
+    mock_gdf = mocker.MagicMock()
+    mocker.patch("geopandas.read_file", return_value=mock_gdf)
+    monkeypatch.setattr(geofabrik, "urlretrieve", mock_retrieve)
+    osm_data_manager = geofabrik.OsmDataManager(
+        cache_dir=str(tmpdir / "this-directory-does-not-exist")
+    )
+    gdf = osm_data_manager.load_pois("afghanistan")
+    assert os.path.isdir(
+        tmpdir / "this-directory-does-not-exist" / "osm" / "afghanistan"
+    )
+    assert gdf == mock_gdf
+
+
+def test_load_pois_with_year(mock_geofabrike_req, mocker, monkeypatch, tmpdir):
+    def mock_retrieve(url, filename, **kwargs):
+        return filename, None, None
+
+    mocker.patch(
+        "geowrangler.datasets.geofabrik.ZipFile"
+    ).return_value.__enter__.return_value.extractall = mocker.MagicMock()
+    mocker.patch("os.remove", mocker.MagicMock())
+    mock_gdf = mocker.MagicMock()
+    mocker.patch("geopandas.read_file", return_value=mock_gdf)
+    monkeypatch.setattr(geofabrik, "urlretrieve", mock_retrieve)
+    osm_data_manager = geofabrik.OsmDataManager(
+        cache_dir=str(tmpdir / "this-directory-does-not-exist")
+    )
+    gdf = osm_data_manager.load_pois("afghanistan", year="2021")
+    assert os.path.isdir(
+        tmpdir / "this-directory-does-not-exist" / "osm" / "afghanistan-210101"
+    )
+    assert gdf == mock_gdf
+
+
+def test_load_roads(mock_geofabrike_req, mocker, monkeypatch, tmpdir):
+    def mock_retrieve(url, filename, **kwargs):
+        return filename, None, None
+
+    mocker.patch(
+        "geowrangler.datasets.geofabrik.ZipFile"
+    ).return_value.__enter__.return_value.extractall = mocker.MagicMock()
+    mocker.patch("os.remove", mocker.MagicMock())
+    mock_gdf = mocker.MagicMock()
+    mocker.patch("geopandas.read_file", return_value=mock_gdf)
+    monkeypatch.setattr(geofabrik, "urlretrieve", mock_retrieve)
+    osm_data_manager = geofabrik.OsmDataManager(
+        cache_dir=str(tmpdir / "this-directory-does-not-exist")
+    )
+    gdf = osm_data_manager.load_roads("afghanistan")
+    assert os.path.isdir(
+        tmpdir / "this-directory-does-not-exist" / "osm" / "afghanistan"
+    )
+    assert gdf == mock_gdf
+
+
+def test_load_roads_with_year(mock_geofabrike_req, mocker, monkeypatch, tmpdir):
+    def mock_retrieve(url, filename, **kwargs):
+        return filename, None, None
+
+    mocker.patch(
+        "geowrangler.datasets.geofabrik.ZipFile"
+    ).return_value.__enter__.return_value.extractall = mocker.MagicMock()
+    mocker.patch("os.remove", mocker.MagicMock())
+    mock_gdf = mocker.MagicMock()
+    mocker.patch("geopandas.read_file", return_value=mock_gdf)
+    monkeypatch.setattr(geofabrik, "urlretrieve", mock_retrieve)
+    osm_data_manager = geofabrik.OsmDataManager(
+        cache_dir=str(tmpdir / "this-directory-does-not-exist")
+    )
+    gdf = osm_data_manager.load_roads("afghanistan", year="2020")
+    assert os.path.isdir(
+        tmpdir / "this-directory-does-not-exist" / "osm" / "afghanistan-200101"
+    )
+    assert gdf == mock_gdf

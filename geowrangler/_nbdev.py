@@ -53,9 +53,13 @@ index = {
     "load_dhs_file": "04_dhs.ipynb",
     "apply_threshold": "04_dhs.ipynb",
     "assign_wealth_index": "04_dhs.ipynb",
+    "DEFAULT_CACHE_DIR": "05_datasets_geofabrik.ipynb",
     "load_geofabrik_data": "05_datasets_geofabrik.ipynb",
     "list_geofabrik_regions": "05_datasets_geofabrik.ipynb",
     "download_geofabrik_region": "05_datasets_geofabrik.ipynb",
+    "get_osm_download_url": "05_datasets_geofabrik.ipynb",
+    "download_osm_country_data": "05_datasets_geofabrik.ipynb",
+    "OsmDataManager": "05_datasets_geofabrik.ipynb",
     "OoklaFile": "05_datasets_ookla.ipynb",
     "list_ookla_files": "05_datasets_ookla.ipynb",
     "download_ookla_file": "05_datasets_ookla.ipynb",
@@ -83,10 +87,6 @@ index = {
     "get_highest_intersection": "12_spatialjoin_highest_intersection.ipynb",
     "urlretrieve": "13_datasets_utils.ipynb",
     "make_report_hook": "13_datasets_utils.ipynb",
-    "DEFAULT_CACHE_DIR": "05_datasets_geofabrik.ipynb",
-    "get_osm_download_url": "05_datasets_geofabrik.ipynb",
-    "download_osm_country_data": "05_datasets_geofabrik.ipynb",
-    "OsmDataManager": "05_datasets_geofabrik.ipynb",
 }
 
 modules = [
