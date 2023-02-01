@@ -145,7 +145,8 @@ def download_osm_country_data(
         logger.info(
             f"OSM Data: Re-initializing OSM country zip file at {country_zip_file}..."
         )
-        country_zip_file.unlink()
+        if country_zip_file.exists():
+            country_zip_file.unlink()
 
         # This downloads a zip file to the country cache dir
         logger.info(f"OSM Data: Downloading Geofabrik in {country_zip_file}...")
