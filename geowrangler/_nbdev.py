@@ -59,7 +59,7 @@ index = {
     "get_osm_download_url": "05_datasets_geofabrik.ipynb",
     "get_download_filepath": "05_datasets_geofabrik.ipynb",
     "download_geofabrik_region": "05_datasets_geofabrik.ipynb",
-    "download_osm_country_data": "05_datasets_geofabrik.ipynb",
+    "download_osm_region_data": "05_datasets_geofabrik.ipynb",
     "OsmDataManager": "05_datasets_geofabrik.ipynb",
     "OsmDataManager.load_pois": "05_datasets_geofabrik.ipynb",
     "OsmDataManager.load_roads": "05_datasets_geofabrik.ipynb",

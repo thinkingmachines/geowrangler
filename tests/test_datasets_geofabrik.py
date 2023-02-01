@@ -93,13 +93,13 @@ def test_download_geofabrik_region_no_region(mock_geofabrike_req, tmpdir):
         )
 
 
-def test_download_osm_country_data(mock_geofabrike_req, mocker, monkeypatch, tmpdir):
+def test_download_osm_region_data(mock_geofabrike_req, mocker, monkeypatch, tmpdir):
     def mock_retrieve(url, filename, **kwargs):
         return filename, None, None
 
     monkeypatch.setattr(geofabrik, "urlretrieve", mock_retrieve)
     mocker.patch("geowrangler.datasets.geofabrik.urlcheck", return_value=True)
-    filepath = geofabrik.download_osm_country_data(
+    filepath = geofabrik.download_osm_region_data(
         "afghanistan", cache_dir=str(tmpdir / "this-directory-does-not-exist")
     )
     assert os.path.isdir(tmpdir / "this-directory-does-not-exist" / "osm")
@@ -116,7 +116,7 @@ def test_download_osm_country_data(mock_geofabrike_req, mocker, monkeypatch, tmp
     # )
 
 
-def test_download_osm_country_data_with_year(
+def test_download_osm_region_data_with_year(
     mock_geofabrike_req, mocker, monkeypatch, tmpdir
 ):
     def mock_retrieve(url, filename, **kwargs):
@@ -124,7 +124,7 @@ def test_download_osm_country_data_with_year(
 
     monkeypatch.setattr(geofabrik, "urlretrieve", mock_retrieve)
     mocker.patch("geowrangler.datasets.geofabrik.urlcheck", return_value=True)
-    filepath = geofabrik.download_osm_country_data(
+    filepath = geofabrik.download_osm_region_data(
         "afghanistan",
         year="2021",
         cache_dir=str(tmpdir / "this-directory-does-not-exist"),
