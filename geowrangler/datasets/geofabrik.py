@@ -11,7 +11,6 @@ __all__ = [
 # Internal Cell
 import os
 import shutil
-import uuid
 from functools import lru_cache
 from pathlib import Path
 from typing import Union
@@ -24,8 +23,6 @@ import requests
 from fastcore.all import patch, urlcheck
 from loguru import logger
 
-from geowrangler import distance_zonal_stats as dzs
-from geowrangler import vector_zonal_stats as vzs
 from .utils import make_report_hook, urlretrieve
 
 # Internal Cell
