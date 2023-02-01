@@ -12,13 +12,11 @@ __all__ = [
 
 # Internal Cell
 import os
-import shutil
 from functools import lru_cache
 from pathlib import Path
 from typing import Union
 from urllib.parse import urlparse
 from urllib.request import HTTPError
-from zipfile import ZipFile
 
 import geopandas as gpd
 import requests
