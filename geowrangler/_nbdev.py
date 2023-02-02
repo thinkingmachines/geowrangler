@@ -88,8 +88,8 @@ index = {
     "GRID_ID": "10_vector_to_raster_mask.ipynb",
     "read_bands": "11_raster_to_dataframe.ipynb",
     "get_highest_intersection": "12_spatialjoin_highest_intersection.ipynb",
-    "urlretrieve": "13_datasets_utils.ipynb",
-    "make_report_hook": "13_datasets_utils.ipynb",
+    "urlretrieve": "14_datasets_nightlights.ipynb",
+    "make_report_hook": "14_datasets_nightlights.ipynb",
     "get_OoklaFile": "05_datasets_ookla.ipynb",
     "compute_datakey": "05_datasets_ookla.ipynb",
     "write_ookla_metajson": "05_datasets_ookla.ipynb",
@@ -100,6 +100,27 @@ index = {
     "download_ookla_parallel": "05_datasets_ookla.ipynb",
     "download_ookla_year_data": "05_datasets_ookla.ipynb",
     "add_ookla_features": "05_datasets_ookla.ipynb",
+    "DEFAULT_EOG_CREDS_PATH": "14_datasets_nightlights.ipynb",
+    "EOG_ENV_VAR": "14_datasets_nightlights.ipynb",
+    "NIGHTLIGHTS_CACHE_DIR": "14_datasets_nightlights.ipynb",
+    "get_eog_access_token": "14_datasets_nightlights.ipynb",
+    "clear_eog_access_token": "14_datasets_nightlights.ipynb",
+    "setup_eog_auth_headers": "14_datasets_nightlights.ipynb",
+    "download_url": "14_datasets_nightlights.ipynb",
+    "unzip_eog_gzip": "14_datasets_nightlights.ipynb",
+    "get_bounding_polygon": "14_datasets_nightlights.ipynb",
+    "clip_raster": "14_datasets_nightlights.ipynb",
+    "URLFORM": "14_datasets_nightlights.ipynb",
+    "EOG_VIIRS_DATA_TYPE": "14_datasets_nightlights.ipynb",
+    "EOG_PRODUCT": "14_datasets_nightlights.ipynb",
+    "EOG_PRODUCT_VERSION": "14_datasets_nightlights.ipynb",
+    "EOG_COVERAGE": "14_datasets_nightlights.ipynb",
+    "make_url": "14_datasets_nightlights.ipynb",
+    "make_clip_hash": "14_datasets_nightlights.ipynb",
+    "generate_clipped_raster": "14_datasets_nightlights.ipynb",
+    "generate_clipped_metadata": "14_datasets_nightlights.ipynb",
+    "get_clipped_raster": "14_datasets_nightlights.ipynb",
+    "generate_nightlights_feature": "14_datasets_nightlights.ipynb",
 }
 
 modules = [
@@ -118,6 +139,7 @@ modules = [
     "raster_to_dataframe.py",
     "spatialjoin_highest_intersection.py",
     "datasets/utils.py",
+    "datasets/nightlights.py",
 ]
 
 doc_url = "https://geowrangler.thinkingmachin.es/"
