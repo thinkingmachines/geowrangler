@@ -53,7 +53,7 @@ index = {
     "load_dhs_file": "04_dhs.ipynb",
     "apply_threshold": "04_dhs.ipynb",
     "assign_wealth_index": "04_dhs.ipynb",
-    "DEFAULT_CACHE_DIR": "05_datasets_geofabrik.ipynb",
+    "DEFAULT_CACHE_DIR": "05_datasets_ookla.ipynb",
     "load_geofabrik_data": "05_datasets_geofabrik.ipynb",
     "list_geofabrik_regions": "05_datasets_geofabrik.ipynb",
     "get_osm_download_url": "05_datasets_geofabrik.ipynb",
@@ -90,6 +90,16 @@ index = {
     "get_highest_intersection": "12_spatialjoin_highest_intersection.ipynb",
     "urlretrieve": "13_datasets_utils.ipynb",
     "make_report_hook": "13_datasets_utils.ipynb",
+    "get_OoklaFile": "05_datasets_ookla.ipynb",
+    "compute_datakey": "05_datasets_ookla.ipynb",
+    "write_ookla_metajson": "05_datasets_ookla.ipynb",
+    "OoklaDataManager": "05_datasets_ookla.ipynb",
+    "OoklaDataManager.reinitialize_processed_cache": "05_datasets_ookla.ipynb",
+    "OoklaDataManager.load_type_year_data": "05_datasets_ookla.ipynb",
+    "parallel_download": "05_datasets_ookla.ipynb",
+    "download_ookla_parallel": "05_datasets_ookla.ipynb",
+    "download_ookla_year_data": "05_datasets_ookla.ipynb",
+    "add_ookla_features": "05_datasets_ookla.ipynb",
 }
 
 modules = [
