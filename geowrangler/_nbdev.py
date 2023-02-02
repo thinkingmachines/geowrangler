@@ -53,9 +53,16 @@ index = {
     "load_dhs_file": "04_dhs.ipynb",
     "apply_threshold": "04_dhs.ipynb",
     "assign_wealth_index": "04_dhs.ipynb",
+    "DEFAULT_CACHE_DIR": "05_datasets_geofabrik.ipynb",
     "load_geofabrik_data": "05_datasets_geofabrik.ipynb",
     "list_geofabrik_regions": "05_datasets_geofabrik.ipynb",
+    "get_osm_download_url": "05_datasets_geofabrik.ipynb",
+    "get_download_filepath": "05_datasets_geofabrik.ipynb",
     "download_geofabrik_region": "05_datasets_geofabrik.ipynb",
+    "download_osm_region_data": "05_datasets_geofabrik.ipynb",
+    "OsmDataManager": "05_datasets_geofabrik.ipynb",
+    "OsmDataManager.load_pois": "05_datasets_geofabrik.ipynb",
+    "OsmDataManager.load_roads": "05_datasets_geofabrik.ipynb",
     "OoklaFile": "05_datasets_ookla.ipynb",
     "list_ookla_files": "05_datasets_ookla.ipynb",
     "download_ookla_file": "05_datasets_ookla.ipynb",
@@ -81,6 +88,8 @@ index = {
     "GRID_ID": "10_vector_to_raster_mask.ipynb",
     "read_bands": "11_raster_to_dataframe.ipynb",
     "get_highest_intersection": "12_spatialjoin_highest_intersection.ipynb",
+    "urlretrieve": "13_datasets_utils.ipynb",
+    "make_report_hook": "13_datasets_utils.ipynb",
 }
 
 modules = [
@@ -98,6 +107,7 @@ modules = [
     "vector_to_raster_mask.py",
     "raster_to_dataframe.py",
     "spatialjoin_highest_intersection.py",
+    "datasets/utils.py",
 ]
 
 doc_url = "https://geowrangler.thinkingmachin.es/"

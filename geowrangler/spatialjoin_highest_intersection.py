@@ -17,6 +17,7 @@ def get_highest_intersection(
     gdf2: gpd.GeoDataFrame,  # gdf2 data will all be included during intersection
     proj_crs: str,  # metric CRS (e.g., Philippines uses EPSG:32651)
 ) -> gpd.GeoDataFrame:
+    """Gets the intersection based on the largest area joined"""
 
     gdf1 = gdf1.copy()
     gdf2 = gdf2.copy()
