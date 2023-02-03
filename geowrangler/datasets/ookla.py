@@ -2,7 +2,6 @@
 
 __all__ = [
     "list_ookla_files",
-    "download_ookla_file",
     "get_OoklaFile",
     "compute_datakey",
     "write_ookla_metajson",
@@ -37,14 +36,12 @@ from loguru import logger
 
 import geowrangler.area_zonal_stats as azs
 from geowrangler import grids
-
 from .utils import make_report_hook, urlretrieve
 
 # Internal Cell
 
 OoklaFile = namedtuple("OoklaQuarter", ["type", "year", "quarter"])
 DEFAULT_CACHE_DIR = "~/.cache/geowrangler"
-
 
 # Cell
 @lru_cache(maxsize=None)
@@ -68,35 +65,6 @@ def list_ookla_files() -> dict:
         file = path_key.parts[5]
         keys.update({OoklaFile(type_, year, quarter): file})
     return keys
-
-
-# Cell
-def download_ookla_file(
-    type_: str,  # Internet connection type: 'fixed' or 'mobile'
-    year: str,  # Year (e.g. '2020')
-    quarter: str,  # Quarter (valid values: '1','2','3','4')
-    directory: str = "data/",  # Download directory
-    overwrite: bool = False,  # Overwrite if existing
-) -> List[Path]:
-    """Download ookla file to path"""
-    if not os.path.isdir(directory):
-        os.makedirs(directory)
-    ookla_info = list_ookla_files()
-    key = OoklaFile(type_, str(year), str(quarter))
-    if key not in ookla_info:
-        raise ValueError(
-            f"{key} not found in ookla. Run list_ookla_data() to learn more about available files"
-        )
-    file = ookla_info[key]
-    url = f"https://ookla-open-data.s3.us-west-2.amazonaws.com/parquet/performance/type={type_}/year={year}/quarter={quarter}/{file}"
-    parsed_url = urlparse(url)
-    filename = Path(os.path.basename(parsed_url.path))
-    filepath = directory / filename
-    if not filepath.exists() or overwrite:
-        response = requests.get(url, stream=True)
-        with open(filepath, "wb") as out_file:
-            shutil.copyfileobj(response.raw, out_file)
-    return filepath
 
 
 # Cell

@@ -49,7 +49,12 @@ def test_list_ookla_file(mock_ookla_req):
 
 
 def test_download_ookla_file_no_dir(mock_ookla_req, monkeypatch, mocker, tmpdir):
-    monkeypatch.setattr(shutil, "copyfileobj", mocker.MagicMock())
+    # monkeypatch.setattr(shutil, "copyfileobj", mocker.MagicMock())
+    def mock_retrieve(url, filename, **kwargs):
+        return filename, None, None
+
+    monkeypatch.setattr(ookla, "urlretrieve", mock_retrieve)
+
     ookla.download_ookla_file(
         "fixed", "2019", "1", tmpdir / "this-directory-does-not-exits"
     )
