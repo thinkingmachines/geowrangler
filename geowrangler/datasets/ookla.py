@@ -62,8 +62,8 @@ def list_ookla_files() -> dict:
         type_ = path_key.parts[2].rsplit("=")[-1]
         year = path_key.parts[3].rsplit("=")[-1]
         quarter = path_key.parts[4].rsplit("=")[-1]
-        file = path_key.parts[5]
-        keys.update({OoklaFile(type_, year, quarter): file})
+        ookla_file = path_key.parts[5]
+        keys.update({OoklaFile(type_, year, quarter): ookla_file})
     return keys
 
 
