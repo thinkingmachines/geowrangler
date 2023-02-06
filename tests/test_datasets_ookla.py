@@ -1,5 +1,5 @@
 import os
-import shutil
+from pathlib import Path
 
 import pytest
 import requests
@@ -55,10 +55,16 @@ def test_download_ookla_file_no_dir(mock_ookla_req, monkeypatch, mocker, tmpdir)
 
     monkeypatch.setattr(ookla, "urlretrieve", mock_retrieve)
 
-    ookla.download_ookla_file(
-        "fixed", "2019", "1", tmpdir / "this-directory-does-not-exits"
+    filepath = ookla.download_ookla_file(
+        "fixed", "2019", "1", str(tmpdir / "this-directory-does-not-exist")
     )
-    assert os.path.isdir(tmpdir / "this-directory-does-not-exits")
+    assert os.path.isdir(tmpdir / "this-directory-does-not-exist")
+    assert (
+        filepath
+        == Path(str(tmpdir))
+        / "this-directory-does-not-exist"
+        / "2019-01-01_performance_fixed_tiles.parquet"
+    )
 
 
 def test_download_ookla_file_no_file(mock_ookla_req, tmpdir):
