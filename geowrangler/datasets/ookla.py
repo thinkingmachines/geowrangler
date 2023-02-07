@@ -13,7 +13,6 @@ __all__ = [
     "add_ookla_features",
 ]
 
-
 # Internal Cell
 import hashlib
 import json
@@ -75,7 +74,7 @@ def lookup_ookla_file(filename):
     """Get OoklaFile for the given filename"""
     ookla_files = L(list_ookla_files().items())  # use fastcore L as list
     idx = ookla_files.argfirst(lambda o: o[1] == filename)  # find matching entry
-    return ookla_files[idx][0] if idx else None
+    return ookla_files[idx][0] if idx is not None else None
 
 
 # Cell

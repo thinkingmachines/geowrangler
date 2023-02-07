@@ -5,6 +5,13 @@ import pytest
 import requests
 
 from geowrangler.datasets import ookla
+from geowrangler.datasets.ookla import (
+    OoklaDataManager,
+    OoklaFile,
+    add_ookla_features,
+    download_ookla_file,
+    list_ookla_files,
+)
 
 
 @pytest.fixture
@@ -43,9 +50,14 @@ def mock_ookla_req(monkeypatch):
 
 
 def test_list_ookla_file(mock_ookla_req):
-    files = ookla.list_ookla_files()
+    files = list_ookla_files()
     assert len(files.keys()) == 1
-    assert ookla.OoklaFile("fixed", "2019", "1") in files
+    assert OoklaFile("fixed", "2019", "1") in files
+
+
+def test_lookup_ookla_file(mock_ookla_req):
+    ookla_file = ookla.lookup_ookla_file("2019-01-01_performance_fixed_tiles.parquet")
+    assert ookla_file == OoklaFile("fixed", "2019", "1")
 
 
 def test_download_ookla_file_no_dir(mock_ookla_req, monkeypatch, mocker, tmpdir):
