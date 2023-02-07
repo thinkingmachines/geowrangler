@@ -28,7 +28,7 @@ def urlretrieve(
             size = -1
             read = 0
             blocknum = 0
-            if "Content-length" in respheaders:
+            if "Content-Length" in respheaders:
                 size = int(respheaders["Content-Length"])
                 if size < chunksize:
                     chunksize = size
