@@ -13,6 +13,7 @@ __all__ = [
     "add_ookla_features",
 ]
 
+
 # Internal Cell
 import hashlib
 import json
@@ -224,8 +225,8 @@ def load_type_year_data(
             quarter_df["quarter"] = int(ooklaFile.quarter)
             quarter_df_list.append(quarter_df)
 
-        # Free memory after processing
-        del quarter_df
+            # Free memory after processing
+            del quarter_df
 
     logger.debug(
         f"Concatenating quarterly Ookla data for {type_} and {year} into one dataframe"
