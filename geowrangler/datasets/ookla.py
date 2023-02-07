@@ -2,7 +2,7 @@
 
 __all__ = [
     "list_ookla_files",
-    "get_OoklaFile",
+    "lookup_ookla_file",
     "compute_datakey",
     "write_ookla_metajson",
     "OoklaDataManager",
@@ -31,8 +31,7 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 import requests
-from fastcore.basics import patch
-from fastcore.parallel import parallel
+from fastcore.all import L, parallel, patch
 from loguru import logger
 
 import geowrangler.area_zonal_stats as azs
@@ -43,6 +42,7 @@ from .utils import make_report_hook, urlretrieve
 
 OoklaFile = namedtuple("OoklaQuarter", ["type", "year", "quarter"])
 DEFAULT_CACHE_DIR = "~/.cache/geowrangler"
+OOKLA_QUADKEY_LEVEL = 16
 
 # Cell
 @lru_cache(maxsize=None)
@@ -71,15 +71,11 @@ def list_ookla_files() -> dict:
 # Cell
 
 
-def get_OoklaFile(filename):
-    """Get the corresponding OoklaFile tuple given the filename
-    See: https://stackoverflow.com/questions/8023306/get-key-by-value-in-dictionary
-    """
-
-    available_ookla_files = list_ookla_files()
-    for ooklafile_tuple, ooklafile_item in available_ookla_files.items():
-        if ooklafile_item == filename:
-            return ooklafile_tuple
+def lookup_ookla_file(filename):
+    """Get OoklaFile for the given filename"""
+    ookla_files = L(list_ookla_files().items())  # use fastcore L as list
+    idx = ookla_files.argfirst(lambda o: o[1] == filename)  # find matching entry
+    return ookla_files[idx][0] if idx else None
 
 
 # Cell
@@ -207,7 +203,7 @@ def load_type_year_data(
         f"Generating bing tile grids for aoi total bounds {np.array2string(aoi.total_bounds, precision=6)}"
     )
     bing_tile_grid_generator_no_geom = grids.BingTileGridGenerator(
-        16, return_geometry=False
+        OOKLA_QUADKEY_LEVEL, return_geometry=False
     )
     aoi_quadkeys = bing_tile_grid_generator_no_geom.generate_grid(aoi)[
         "quadkey"
@@ -217,15 +213,17 @@ def load_type_year_data(
     # Quarter is inferred from the Ookla filename
     quarter_df_list = []
     for ookla_filename in sorted(os.listdir(type_year_cache_dir)):
-        quarter = int(getattr(get_OoklaFile(ookla_filename), "quarter"))
-        ookla_quarter_filepath = os.path.join(type_year_cache_dir, ookla_filename)
-        logger.debug(
-            f"Ookla data for aoi, {type_} {year} {quarter} being loaded from {ookla_quarter_filepath}"
-        )
-        quarter_df = pd.read_parquet(ookla_quarter_filepath)
-        quarter_df = quarter_df[quarter_df["quadkey"].isin(aoi_quadkeys)]
-        quarter_df["quarter"] = quarter
-        quarter_df_list.append(quarter_df)
+        ooklaFile = lookup_ookla_file(ookla_filename)
+        if ooklaFile:
+            ookla_quarter_filepath = os.path.join(type_year_cache_dir, ookla_filename)
+            logger.debug(
+                f"Ookla data for aoi, {type_} {year} {ooklaFile.quarter} being loaded from {ookla_quarter_filepath}"
+            )
+            quarter_df = pd.read_parquet(ookla_quarter_filepath)
+            # TODO optimize filtering via merge
+            quarter_df = quarter_df[quarter_df["quadkey"].isin(aoi_quadkeys)]
+            quarter_df["quarter"] = int(ooklaFile.quarter)
+            quarter_df_list.append(quarter_df)
 
         # Free memory after processing
         del quarter_df

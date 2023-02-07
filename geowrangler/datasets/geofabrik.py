@@ -151,6 +151,7 @@ def download_osm_region_data(
         region,
         year=year,
         directory=osm_cache_dir,
+        overwrite=not use_cache,
         show_progress=show_progress,
         chunksize=chunksize,
     )
