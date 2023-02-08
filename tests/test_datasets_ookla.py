@@ -10,7 +10,6 @@ from geowrangler.datasets import ookla
 from geowrangler.datasets.ookla import (
     OoklaDataManager,
     OoklaFile,
-    add_ookla_features,
     compute_datakey,
     download_ookla_file,
     download_ookla_year_data,
@@ -393,18 +392,3 @@ def test_aggregate_ookla_features(mock_ookla_req, mock_ookla_data, mocker, tmpdi
     df = odm.aggregate_ookla_features(aoi, "fixed", "2019")
     assert df is not None
     assert len(df) == 3
-
-
-def test_add_ookla_features(mocker, mock_ookla_data):
-
-    aoi = mocker.MagicMock()
-    aoi.copy = mocker.MagicMock(return_value=aoi)
-    aoi.to_crs = mocker.MagicMock(return_value=aoi)
-    aoi.total_bounds = np.array([1.0, 2.0, 3.0, 4.0])
-    odm = mocker.MagicMock()
-    mocker.patch(
-        "geowrangler.area_zonal_stats.create_area_zonal_stats", return_value=aoi
-    )
-    odm.load_type_year_data = mocker.MagicMock(return_value=mock_ookla_data)
-    result = add_ookla_features(aoi, "fixed", "2019", odm)
-    assert result == aoi
