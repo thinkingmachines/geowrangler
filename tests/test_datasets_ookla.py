@@ -208,12 +208,19 @@ def test_ookla_datamanager_load_type_year_data_return_geom(
 def test_ookla_datamanager_load_type_year_data_cached_data_file(tmpdir, mocker):
     aoi = mocker.MagicMock()
     aoi.total_bounds = np.array([1.0, 2.0, 3.0, 4.0])
-    mocker.patch("os.path.exists", return_value=True)
-    aoi_quadkeys_df = pd.DataFrame(dict(quadkey=["11111", "22222", "44444"]))
-    mocker.patch("pandas.read_csv", return_value=aoi_quadkeys_df)
-    odm = OoklaDataManager(str(tmpdir / "this-directory-does-not-exist"))
+    mock_data_key = "401c36c37ff0b73736d6c673afad2325"
+    mock_cache_dir = str(tmpdir / "this-directory-does-not-exist")
+    extension = "csv"
+    mock_pd_file = (
+        Path(mock_cache_dir) / "ookla" / "processed" / f"{mock_data_key}.{extension}"
+    )
+    aoi_quadkeys_df = pd.DataFrame(dict(quadkey=[11111, 22222, 44444]))
+    mock_pd_file.parent.mkdir(parents=True, exist_ok=True)
+    aoi_quadkeys_df.to_csv(mock_pd_file, index=False)
+    odm = OoklaDataManager(mock_cache_dir)
     df = odm.load_type_year_data(aoi, "fixed", "2019")
-    assert df is aoi_quadkeys_df
+    assert len(aoi_quadkeys_df) == len(df)
+    assert list(df["quadkey"].values) == list(aoi_quadkeys_df["quadkey"].values)
 
 
 def test_ookla_datamanager_load_type_year_data_cached_data_file_return_geom(
@@ -221,24 +228,26 @@ def test_ookla_datamanager_load_type_year_data_cached_data_file_return_geom(
 ):
     aoi = mocker.MagicMock()
     aoi.total_bounds = np.array([1.0, 2.0, 3.0, 4.0])
-    mocker.patch("os.path.exists", return_value=True)
+    mock_data_key = "027a5ed231f122bb78715183809ecf89"
+    mock_cache_dir = str(tmpdir / "this-directory-does-not-exist")
+    extension = "geojson"
+    mock_pd_file = (
+        Path(mock_cache_dir) / "ookla" / "processed" / f"{mock_data_key}.{extension}"
+    )
     aoi_quadkeys_df = pd.DataFrame(dict(quadkey=["11111", "22222", "44444"]))
+    mock_pd_file.parent.mkdir(parents=True, exist_ok=True)
+    aoi_quadkeys_df.to_csv(mock_pd_file, index=False)
     mocker.patch("geopandas.read_file", return_value=aoi_quadkeys_df)
     odm = OoklaDataManager(str(tmpdir / "this-directory-does-not-exist"))
     gdf = odm.load_type_year_data(aoi, "fixed", "2019", return_geometry=True)
     assert gdf is aoi_quadkeys_df
 
 
-def test_add_ookla_features(mocker):
-
-    aoi = mocker.MagicMock()
-    aoi.copy = mocker.MagicMock(return_value=aoi)
-    aoi.to_crs = mocker.MagicMock(return_value=aoi)
-    aoi.total_bounds = np.array([1.0, 2.0, 3.0, 4.0])
-    odm = mocker.MagicMock()
+@pytest.fixture()
+def mock_ookla_data():
     mock_wkt = "POLYGON((-160.02685546875 70.6435894914449, -160.021362304688 70.6435894914449, -160.021362304688 70.6417687358462, -160.02685546875 70.6417687358462, -160.02685546875 70.6435894914449))"
     mock_tiles = [mock_wkt] * 12
-    mock_ookla_data = pd.DataFrame(
+    yield pd.DataFrame(
         dict(
             quadkey=[
                 "11111",
@@ -341,6 +350,58 @@ def test_add_ookla_features(mocker):
             tile=mock_tiles,
         )
     )
+
+
+def test_aggregate_ookla_features(mock_ookla_req, mock_ookla_data, mocker, tmpdir):
+
+    fixed_2019_files = {
+        OoklaFile("fixed", "2019", "1"): "2019-01-01_performance_fixed_tiles.parquet",
+        OoklaFile("fixed", "2019", "2"): "2019-04-01_performance_fixed_tiles.parquet",
+        OoklaFile("fixed", "2019", "3"): "2019-07-01_performance_fixed_tiles.parquet",
+        OoklaFile("fixed", "2019", "4"): "2019-10-01_performance_fixed_tiles.parquet",
+    }
+    mocker.patch(
+        "geowrangler.datasets.ookla.list_ookla_files", return_value=fixed_2019_files
+    )
+    aoi = mocker.MagicMock()
+    aoi.total_bounds = np.array([1.0, 2.0, 3.0, 4.0])
+    mocker.patch(
+        "geowrangler.datasets.ookla.download_ookla_year_data",
+        return_value=str(tmpdir / "this-directory-does-not-exist/ookla/fixed/2019"),
+    )
+    aoi_quadkeys_df = pd.DataFrame(dict(quadkey=["11111", "22222", "44444"]))
+    mock_generator = mocker.MagicMock()
+    mock_generator.generate_grid = mocker.MagicMock(return_value=aoi_quadkeys_df)
+    mocker.patch("geowrangler.grids.BingTileGridGenerator", return_value=mock_generator)
+    fixed_2019_files = [
+        "2019-01-01_performance_fixed_tiles.parquet",
+        "2019-04-01_performance_fixed_tiles.parquet",
+        "2019-07-01_performance_fixed_tiles.parquet",
+        "2019-10-01_performance_fixed_tiles.parquet",
+    ]
+
+    mocker.patch("os.listdir", return_value=fixed_2019_files)
+    ookla_df = pd.DataFrame(
+        dict(
+            quadkey=["11111", "22222", "333333"],
+        )
+    )
+    mocker.patch("pandas.read_parquet", return_value=ookla_df)
+    mocker.patch("pandas.concat", return_value=mock_ookla_data)
+
+    odm = OoklaDataManager(str(tmpdir / "this-directory-does-not-exist"))
+    df = odm.aggregate_ookla_features(aoi, "fixed", "2019")
+    assert df is not None
+    assert len(df) == 3
+
+
+def test_add_ookla_features(mocker, mock_ookla_data):
+
+    aoi = mocker.MagicMock()
+    aoi.copy = mocker.MagicMock(return_value=aoi)
+    aoi.to_crs = mocker.MagicMock(return_value=aoi)
+    aoi.total_bounds = np.array([1.0, 2.0, 3.0, 4.0])
+    odm = mocker.MagicMock()
     mocker.patch(
         "geowrangler.area_zonal_stats.create_area_zonal_stats", return_value=aoi
     )
