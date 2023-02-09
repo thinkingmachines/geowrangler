@@ -250,9 +250,7 @@ def download_ookla_year_data(
 
 def lookup_ookla_file(filename):
     """Get OoklaFile for the given filename"""
-    ookla_files = L(list_ookla_files().items())  # use fastcore L as list
-    idx = ookla_files.argfirst(lambda o: o[1] == filename)  # find matching entry
-    return ookla_files[idx][0] if idx is not None else None
+    return next((k for k, v in list_ookla_files().items() if v == filename), None)
 
 
 # Cell
