@@ -46,10 +46,8 @@ def test_clear_eog_access_token(tmpdir):
     assert os.environ.get("EOG_ACCESS_TOKEN", None) == ""
 
 
-def test_generate_nightlights_feature(mocker, tmpdir):
-    aoi = mocker.MagicMock()
-    aoi.copy = mocker.MagicMock(return_value=aoi)
-    aoi.total_bounds = np.array([1.0, 2.0, 3.0, 4.0])
+def test_get_clipped_raster(mocker, tmpdir):
+    total_bounds = np.array([1.0, 2.0, 3.0, 4.0])
     cache_dir = str(tmpdir / "this-directory-does-not-exist")
     filename = Path(cache_dir) / "nightlights" / "testdata.tif.gz"
     filename.parent.mkdir(parents=True, exist_ok=True)
@@ -64,11 +62,11 @@ def test_generate_nightlights_feature(mocker, tmpdir):
     mocker.patch(
         "geowrangler.raster_process.query_window_by_polygon", mocker.MagicMock()
     )
-    mocker.patch(
-        "geowrangler.raster_zonal_stats.create_raster_zonal_stats",
-        mocker.MagicMock(return_value=aoi),
-    )
 
     os.environ["EOG_ACCESS_TOKEN"] = TEST_ACCESS_TOKEN_VALUE
-    aoi_result = ntl.generate_nightlights_feature(aoi, "2017", cache_dir=cache_dir)
-    assert aoi_result is aoi
+    clipped_raster_file = ntl.get_clipped_raster(
+        "2017", total_bounds, cache_dir=cache_dir
+    )
+    assert clipped_raster_file.parent == Path(cache_dir) / "clip"
+    assert clipped_raster_file.stem == "7c11b91cbc62382a848c001e0ad58c2c"
+    assert clipped_raster_file.suffix == ".tif"
