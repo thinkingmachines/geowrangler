@@ -3,7 +3,7 @@
 __all__ = ["index", "modules", "custom_doc_links", "git_url"]
 
 index = {
-    "logger": "01_validation.ipynb",
+    "logger": "00_grids.ipynb",
     "SquareGridBoundary": "00_grids.ipynb",
     "SquareGridGenerator": "00_grids.ipynb",
     "SquareGridGenerator.create_cell": "00_grids.ipynb",
@@ -124,6 +124,10 @@ index = {
     "generate_clipped_metadata": "14_datasets_nightlights.ipynb",
     "get_clipped_raster": "14_datasets_nightlights.ipynb",
     "generate_nightlights_feature": "14_datasets_nightlights.ipynb",
+    "BingTileGridGenerator.generate_grid_join": "00_grids.ipynb",
+    "BingTileGridGenerator.get_all_tiles_for_polygon": "00_grids.ipynb",
+    "get_intersect_partition": "00_grids.ipynb",
+    "get_parallel_intersects": "00_grids.ipynb",
 }
 
 modules = [
