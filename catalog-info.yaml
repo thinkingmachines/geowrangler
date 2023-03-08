@@ -1,0 +1,39 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: geowrangler
+  title: Geowrangler
+  description: An open source python package for wrangling geospatial data.
+  annotations:
+    backstage.io/techdocs-ref: dir:./mkdocs
+    github.com/project-slug: thinkingmachines/geowrangler
+  links:
+    - url: https://geowrangler.thinkingmachin.es
+      title: 'Geowrangler Documentation'      
+      icon: docs
+    - url: https://thinkdatasci.slack.com/archives/C03A569QHDJ
+      title: '[Internal] Slack Channel'
+      icon: slack
+  tags:
+    - geowrangler
+    - python
+    - geospatial
+    - data-wrangling
+    - utilities
+    - gridding
+    - zonal-stats
+    - geometry-validation
+    - datasets
+    - ookla
+    - osm
+    - nightlights
+    - hrsl
+    - geoboundaries
+    - opensource
+    - public
+    - nbdev
+    - pytest
+spec:
+  type: library
+  lifecycle: maintenance
+  owner: user:default/butchtm
