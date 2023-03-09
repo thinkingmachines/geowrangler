@@ -9,11 +9,13 @@ __all__ = [
 
 # Internal Cell
 import logging
+from functools import reduce
 from typing import List, Tuple, Union
 
 import h3
 import morecantile
 import numpy as np
+import pandas as pd
 from fastcore.basics import patch
 from geopandas import GeoDataFrame
 from pandas import DataFrame
@@ -200,13 +202,15 @@ class BingTileGridGenerator:
         self,
         zoom_level: int,  # Zoom level of tile. See: https://docs.microsoft.com/en-us/bingmaps/articles/bing-maps-tile-system for more info
         return_geometry: bool = True,  # If geometry should be returned. Setting this to false will only return quadkeys
+        add_xy_cols: bool = False,  # If quadkey should be converted to their xy values.
     ):
         self.zoom_level = zoom_level
         self.return_geometry = return_geometry
+        self.add_xy_cols = add_xy_cols
         self.tms = morecantile.tms.get("WebMercatorQuad")
 
     def tile_to_polygon(self, tile: morecantile.Tile):
-        """Concerts a tile to geometry"""
+        """Converts a tile to geometry"""
         return shape(self.tms.feature(tile)["geometry"])
 
     def get_tiles_for_polygon(
@@ -214,7 +218,7 @@ class BingTileGridGenerator:
         polygon: Polygon,
         filter: bool = True,
     ):
-        """Get the interseting tiles with polygon for a zoom level. Polygon should be in EPSG:4326"""
+        """Get the intersecting tiles with polygon for a zoom level. Polygon should be in EPSG:4326"""
         x_min, y_min, x_max, y_max = polygon.bounds
         tiles = (
             (self.tms.quadkey(tile), self.tile_to_polygon(tile))
@@ -226,6 +230,26 @@ class BingTileGridGenerator:
         else:
             tiles = {qk: geom for qk, geom in tiles}
         return tiles
+
+    # functions below are for converting quadkey to x,y coordinates
+    def mod_div(self, dividend, divisor):
+        """ "Returns tuple of remainder and quotient"""
+        return reversed(divmod(dividend, divisor))
+
+    # The following is inspired by http://stackoverflow.com/a/12461400/674064
+    def append_bit(self, bits, bit):
+        return (bits << 1) | bit
+
+    def bit_iterable_to_int(self, iterable):
+        return reduce(self.append_bit, iterable, 0)
+
+    def quad_to_xy(self, quadtree_coordinate):
+        """ "Convert quadkey to x,y format"""
+        digits = (int(c) for c in str(quadtree_coordinate))
+        # get tuple of the remainder and quotient after dividing digit by 2
+        quadtree_path = (self.mod_div(digit, 2) for digit in digits)
+        x_path, y_path = zip(*quadtree_path)
+        return [self.bit_iterable_to_int(path) for path in (x_path, y_path)]
 
 
 # Cell
@@ -242,12 +266,30 @@ def generate_grid(self: BingTileGridGenerator, gdf: GeoDataFrame) -> DataFrame:
             tiles.update(_tiles)
     quadkey, geom = zip(*((k, v) for k, v in tiles.items()))
 
+    result = {"quadkey": list(quadkey)}
+
+    if self.add_xy_cols:
+        xy_quad = [self.quad_to_xy(qk) for qk in quadkey]
+        result["x"] = [x[0] for x in xy_quad]
+        result["y"] = [y[1] for y in xy_quad]
+        if self.return_geometry:
+            tiles_gdf = GeoDataFrame(
+                result,
+                geometry=list(geom),
+                crs="epsg:4326",
+            )
+            return tiles_gdf
+
     if self.return_geometry is False:
         df = DataFrame({"quadkey": list(quadkey)})
+        if self.add_xy_cols:
+            df["x"] = result["x"]
+            df["y"] = result["y"]
+            return df
         return df
 
     tiles_gdf = GeoDataFrame(
-        {"quadkey": list(quadkey)},
+        result,
         geometry=list(geom),
         crs="epsg:4326",
     )
