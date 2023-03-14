@@ -221,14 +221,16 @@ class BingTileGridGenerator:
         """Get the intersecting tiles with polygon for a zoom level. Polygon should be in EPSG:4326"""
         x_min, y_min, x_max, y_max = polygon.bounds
         tiles = (
-            (self.tms.quadkey(tile), self.tile_to_polygon(tile))
+            (self.tms.quadkey(tile), self.tile_to_polygon(tile), tile)
             for tile in self.tms.tiles(x_min, y_min, x_max, y_max, self.zoom_level)
         )
         # Return dict to make it easier to deduplicate
         if filter:
-            tiles = {qk: geom for qk, geom in tiles if polygon.intersects(geom)}
+            tiles = {
+                qk: (geom, tile) for qk, geom, tile in tiles if polygon.intersects(geom)
+            }
         else:
-            tiles = {qk: geom for qk, geom in tiles}
+            tiles = {qk: (geom, tile) for qk, geom, tile in tiles}
         return tiles
 
     # functions below are for converting quadkey to x,y coordinates
@@ -244,7 +246,7 @@ class BingTileGridGenerator:
         return reduce(self.append_bit, iterable, 0)
 
     def quad_to_xy(self, quadtree_coordinate):
-        """ "Convert quadkey to x,y format"""
+        """Convert quadkey to x,y format"""
         digits = (int(c) for c in str(quadtree_coordinate))
         # get tuple of the remainder and quotient after dividing digit by 2
         quadtree_path = (self.mod_div(digit, 2) for digit in digits)
@@ -264,14 +266,17 @@ def generate_grid(self: BingTileGridGenerator, gdf: GeoDataFrame) -> DataFrame:
         for geom in reprojected_gdf.unary_union.geoms:
             _tiles = self.get_tiles_for_polygon(geom)
             tiles.update(_tiles)
-    quadkey, geom = zip(*((k, v) for k, v in tiles.items()))
+    quadkey, geom_tile = zip(*((k, v) for k, v in tiles.items()))
+    geom, _ = zip(*geom_tile)
 
     result = {"quadkey": list(quadkey)}
 
     if self.add_xy_cols:
-        xy_quad = [self.quad_to_xy(qk) for qk in quadkey]
-        result["x"] = [x[0] for x in xy_quad]
-        result["y"] = [y[1] for y in xy_quad]
+        # xy_quad = [self.quad_to_xy(qk) for qk in quadkey]
+        _, tile = zip(*geom_tile)
+        result["x"] = [t.x for t in tile]
+        result["y"] = [t.y for t in tile]
+        result["z"] = [t.z for t in tile]
         if self.return_geometry:
             tiles_gdf = GeoDataFrame(
                 result,
@@ -285,6 +290,7 @@ def generate_grid(self: BingTileGridGenerator, gdf: GeoDataFrame) -> DataFrame:
         if self.add_xy_cols:
             df["x"] = result["x"]
             df["y"] = result["y"]
+            df["z"] = result["z"]
             return df
         return df
 
