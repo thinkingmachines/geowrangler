@@ -166,3 +166,15 @@ def test_bing_tile_grid_generator_return_geometry_false(
     assert "geometry" not in grids_gdf
     assert isinstance(grids_gdf, pd.DataFrame)
     assert len(grids_gdf) == 36
+
+
+def test_bing_tile_grid_generator_add_xyz_true(
+    sample_gdf,
+):
+    grid_generator = grids.BingTileGridGenerator(10, add_xyz_cols=True)
+    grids_gdf = grid_generator.generate_grid(sample_gdf)
+    assert "x" in grids_gdf
+    assert "y" in grids_gdf
+    assert "z" in grids_gdf
+    assert isinstance(grids_gdf, pd.DataFrame)
+    assert len(grids_gdf) == 36
