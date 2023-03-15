@@ -202,11 +202,11 @@ class BingTileGridGenerator:
         self,
         zoom_level: int,  # Zoom level of tile. See: https://docs.microsoft.com/en-us/bingmaps/articles/bing-maps-tile-system for more info
         return_geometry: bool = True,  # If geometry should be returned. Setting this to false will only return quadkeys
-        add_xy_cols: bool = False,  # If quadkey should be converted to their xy values.
+        add_xyz_cols: bool = False,  # If quadkey should be converted to their xy values.
     ):
         self.zoom_level = zoom_level
         self.return_geometry = return_geometry
-        self.add_xy_cols = add_xy_cols
+        self.add_xyz_cols = add_xyz_cols
         self.tms = morecantile.tms.get("WebMercatorQuad")
 
     def tile_to_polygon(self, tile: morecantile.Tile):
@@ -271,7 +271,7 @@ def generate_grid(self: BingTileGridGenerator, gdf: GeoDataFrame) -> DataFrame:
 
     result = {"quadkey": list(quadkey)}
 
-    if self.add_xy_cols:
+    if self.add_xyz_cols:
         # xy_quad = [self.quad_to_xy(qk) for qk in quadkey]
         _, tile = zip(*geom_tile)
         result["x"] = [t.x for t in tile]
@@ -287,7 +287,7 @@ def generate_grid(self: BingTileGridGenerator, gdf: GeoDataFrame) -> DataFrame:
 
     if self.return_geometry is False:
         df = DataFrame({"quadkey": list(quadkey)})
-        if self.add_xy_cols:
+        if self.add_xyz_cols:
             df["x"] = result["x"]
             df["y"] = result["y"]
             df["z"] = result["z"]
