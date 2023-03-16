@@ -9,11 +9,13 @@ __all__ = [
 
 # Internal Cell
 import logging
+from functools import reduce
 from typing import List, Tuple, Union
 
 import h3
 import morecantile
 import numpy as np
+import pandas as pd
 from fastcore.basics import patch
 from geopandas import GeoDataFrame
 from pandas import DataFrame
@@ -200,13 +202,15 @@ class BingTileGridGenerator:
         self,
         zoom_level: int,  # Zoom level of tile. See: https://docs.microsoft.com/en-us/bingmaps/articles/bing-maps-tile-system for more info
         return_geometry: bool = True,  # If geometry should be returned. Setting this to false will only return quadkeys
+        add_xyz_cols: bool = False,  # If quadkey should be converted to their xy values.
     ):
         self.zoom_level = zoom_level
         self.return_geometry = return_geometry
+        self.add_xyz_cols = add_xyz_cols
         self.tms = morecantile.tms.get("WebMercatorQuad")
 
     def tile_to_polygon(self, tile: morecantile.Tile):
-        """Concerts a tile to geometry"""
+        """Converts a tile to geometry"""
         return shape(self.tms.feature(tile)["geometry"])
 
     def get_tiles_for_polygon(
@@ -214,17 +218,19 @@ class BingTileGridGenerator:
         polygon: Polygon,
         filter: bool = True,
     ):
-        """Get the interseting tiles with polygon for a zoom level. Polygon should be in EPSG:4326"""
+        """Get the intersecting tiles with polygon for a zoom level. Polygon should be in EPSG:4326"""
         x_min, y_min, x_max, y_max = polygon.bounds
         tiles = (
-            (self.tms.quadkey(tile), self.tile_to_polygon(tile))
+            (self.tms.quadkey(tile), self.tile_to_polygon(tile), tile)
             for tile in self.tms.tiles(x_min, y_min, x_max, y_max, self.zoom_level)
         )
         # Return dict to make it easier to deduplicate
         if filter:
-            tiles = {qk: geom for qk, geom in tiles if polygon.intersects(geom)}
+            tiles = {
+                qk: (geom, tile) for qk, geom, tile in tiles if polygon.intersects(geom)
+            }
         else:
-            tiles = {qk: geom for qk, geom in tiles}
+            tiles = {qk: (geom, tile) for qk, geom, tile in tiles}
         return tiles
 
 
@@ -240,15 +246,25 @@ def generate_grid(self: BingTileGridGenerator, gdf: GeoDataFrame) -> DataFrame:
         for geom in reprojected_gdf.unary_union.geoms:
             _tiles = self.get_tiles_for_polygon(geom)
             tiles.update(_tiles)
-    quadkey, geom = zip(*((k, v) for k, v in tiles.items()))
+    quadkey, geom_tile = zip(*((k, v) for k, v in tiles.items()))
+    geom, tile = zip(*geom_tile)
 
-    if self.return_geometry is False:
-        df = DataFrame({"quadkey": list(quadkey)})
-        return df
+    result = {"quadkey": list(quadkey)}
 
-    tiles_gdf = GeoDataFrame(
-        {"quadkey": list(quadkey)},
-        geometry=list(geom),
-        crs="epsg:4326",
-    )
-    return tiles_gdf.to_crs(gdf.crs)
+    if self.add_xyz_cols:
+        result["x"] = [t.x for t in tile]
+        result["y"] = [t.y for t in tile]
+        result["z"] = [t.z for t in tile]
+
+    if self.return_geometry:
+        tiles_gdf = GeoDataFrame(
+            result,
+            geometry=list(geom),
+            crs="epsg:4326",
+        )
+        tiles_gdf = tiles_gdf.to_crs(gdf.crs)
+        return tiles_gdf
+    else:
+        tiles_gdf = DataFrame(result)
+
+    return tiles_gdf
