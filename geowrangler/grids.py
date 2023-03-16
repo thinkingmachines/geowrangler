@@ -233,26 +233,6 @@ class BingTileGridGenerator:
             tiles = {qk: (geom, tile) for qk, geom, tile in tiles}
         return tiles
 
-    # functions below are for converting quadkey to x,y coordinates
-    def mod_div(self, dividend, divisor):
-        """ "Returns tuple of remainder and quotient"""
-        return reversed(divmod(dividend, divisor))
-
-    # The following is inspired by http://stackoverflow.com/a/12461400/674064
-    def append_bit(self, bits, bit):
-        return (bits << 1) | bit
-
-    def bit_iterable_to_int(self, iterable):
-        return reduce(self.append_bit, iterable, 0)
-
-    def quad_to_xy(self, quadtree_coordinate):
-        """Convert quadkey to x,y format"""
-        digits = (int(c) for c in str(quadtree_coordinate))
-        # get tuple of the remainder and quotient after dividing digit by 2
-        quadtree_path = (self.mod_div(digit, 2) for digit in digits)
-        x_path, y_path = zip(*quadtree_path)
-        return [self.bit_iterable_to_int(path) for path in (x_path, y_path)]
-
 
 # Cell
 @patch
@@ -267,13 +247,11 @@ def generate_grid(self: BingTileGridGenerator, gdf: GeoDataFrame) -> DataFrame:
             _tiles = self.get_tiles_for_polygon(geom)
             tiles.update(_tiles)
     quadkey, geom_tile = zip(*((k, v) for k, v in tiles.items()))
-    geom, _ = zip(*geom_tile)
+    geom, tile = zip(*geom_tile)
 
     result = {"quadkey": list(quadkey)}
 
     if self.add_xyz_cols:
-        # xy_quad = [self.quad_to_xy(qk) for qk in quadkey]
-        _, tile = zip(*geom_tile)
         result["x"] = [t.x for t in tile]
         result["y"] = [t.y for t in tile]
         result["z"] = [t.z for t in tile]
