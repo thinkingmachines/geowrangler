@@ -255,26 +255,16 @@ def generate_grid(self: BingTileGridGenerator, gdf: GeoDataFrame) -> DataFrame:
         result["x"] = [t.x for t in tile]
         result["y"] = [t.y for t in tile]
         result["z"] = [t.z for t in tile]
-        if self.return_geometry:
-            tiles_gdf = GeoDataFrame(
-                result,
-                geometry=list(geom),
-                crs="epsg:4326",
-            )
-            return tiles_gdf
 
-    if self.return_geometry is False:
-        df = DataFrame({"quadkey": list(quadkey)})
-        if self.add_xyz_cols:
-            df["x"] = result["x"]
-            df["y"] = result["y"]
-            df["z"] = result["z"]
-            return df
-        return df
+    if self.return_geometry:
+        tiles_gdf = GeoDataFrame(
+            result,
+            geometry=list(geom),
+            crs="epsg:4326",
+        )
+        tiles_gdf = tiles_gdf.to_crs(gdf.crs)
+        return tiles_gdf
+    else:
+        tiles_gdf = DataFrame(result)
 
-    tiles_gdf = GeoDataFrame(
-        result,
-        geometry=list(geom),
-        crs="epsg:4326",
-    )
-    return tiles_gdf.to_crs(gdf.crs)
+    return tiles_gdf
