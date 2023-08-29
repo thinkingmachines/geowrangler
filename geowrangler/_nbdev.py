@@ -3,7 +3,7 @@
 __all__ = ["index", "modules", "custom_doc_links", "git_url"]
 
 index = {
-    "logger": "00_grids.ipynb",
+    "logger": "01_validation.ipynb",
     "SquareGridBoundary": "00_grids.ipynb",
     "SquareGridGenerator": "00_grids.ipynb",
     "SquareGridGenerator.create_cell": "00_grids.ipynb",
@@ -13,7 +13,11 @@ index = {
     "H3GridGenerator.get_hexes_for_polygon": "00_grids.ipynb",
     "H3GridGenerator.generate_grid": "00_grids.ipynb",
     "BingTileGridGenerator": "00_grids.ipynb",
+    "BingTileGridGenerator.get_all_tiles_for_polygon": "00_grids.ipynb",
     "BingTileGridGenerator.generate_grid": "00_grids.ipynb",
+    "get_intersect_partition": "00_grids.ipynb",
+    "get_parallel_intersects": "00_grids.ipynb",
+    "BingTileGridGenerator.generate_grid_join": "00_grids.ipynb",
     "ValidationError": "01_validation.ipynb",
     "BaseValidator": "01_validation.ipynb",
     "BaseValidator.validate": "01_validation.ipynb",
@@ -78,7 +82,6 @@ index = {
     "OoklaDataManager.reinitialize_aggregated_cache": "05_datasets_ookla.ipynb",
     "OoklaDataManager.load_type_year_data": "05_datasets_ookla.ipynb",
     "OoklaDataManager.aggregate_ookla_features": "05_datasets_ookla.ipynb",
-    "add_ookla_features": "05_datasets_ookla.ipynb",
     "extract_func": "06_area_zonal_stats.ipynb",
     "fix_area_agg": "06_area_zonal_stats.ipynb",
     "get_source_column": "06_area_zonal_stats.ipynb",
@@ -123,11 +126,6 @@ index = {
     "generate_clipped_raster": "14_datasets_nightlights.ipynb",
     "generate_clipped_metadata": "14_datasets_nightlights.ipynb",
     "get_clipped_raster": "14_datasets_nightlights.ipynb",
-    "generate_nightlights_feature": "14_datasets_nightlights.ipynb",
-    "BingTileGridGenerator.generate_grid_join": "00_grids.ipynb",
-    "BingTileGridGenerator.get_all_tiles_for_polygon": "00_grids.ipynb",
-    "get_intersect_partition": "00_grids.ipynb",
-    "get_parallel_intersects": "00_grids.ipynb",
 }
 
 modules = [

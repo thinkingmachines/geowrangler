@@ -282,6 +282,7 @@ def generate_grid(self: BingTileGridGenerator, gdf: GeoDataFrame) -> DataFrame:
 
     return tiles_gdf
 
+
 # Internal Cell
 
 
