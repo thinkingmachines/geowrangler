@@ -16,6 +16,7 @@ import h3
 import morecantile
 import numpy as np
 import pandas as pd
+from fastcore.all import defaults, parallel
 from fastcore.basics import patch
 from geopandas import GeoDataFrame
 from pandas import DataFrame
@@ -236,6 +237,18 @@ class BingTileGridGenerator:
 
 # Cell
 @patch
+def get_all_tiles_for_polygon(self: BingTileGridGenerator, polygon: Polygon):
+    """Get the interseting tiles with polygon for a zoom level. Polygon should be in EPSG:4326"""
+    x_min, y_min, x_max, y_max = polygon.bounds
+    tiles = (
+        (self.tms.quadkey(tile), self.tile_to_polygon(tile))
+        for tile in self.tms.tiles(x_min, y_min, x_max, y_max, self.zoom_level)
+    )
+    return tiles
+
+
+# Cell
+@patch
 def generate_grid(self: BingTileGridGenerator, gdf: GeoDataFrame) -> DataFrame:
     reprojected_gdf = gdf.to_crs("epsg:4326")  # quadkeys hexes are in epsg:4326 CRS
     tiles = {}
@@ -268,3 +281,90 @@ def generate_grid(self: BingTileGridGenerator, gdf: GeoDataFrame) -> DataFrame:
         tiles_gdf = DataFrame(result)
 
     return tiles_gdf
+
+
+# Internal Cell
+
+
+def get_intersect_partition(item):
+    tiles_gdf, reprojected_gdf = item
+    tiles_gdf.sindex
+    reprojected_gdf.sindex
+    intersect_tiles_gdf = tiles_gdf.sjoin(
+        reprojected_gdf, how="inner", predicate="intersects"
+    )
+    return intersect_tiles_gdf
+
+
+# Internal Cell
+def get_parallel_intersects(
+    tiles_gdf, reprojected_gdf, n_workers=defaults.cpus, progress=True
+):
+
+    # split tiles into n chunks (1 chunk per cpu)
+    # see https://stackoverflow.com/questions/17315737/split-a-large-pandas-dataframe
+    tile_items = np.array_split(tiles_gdf, n_workers)
+    items = [(tile_item, reprojected_gdf) for tile_item in tile_items]
+    intersect_dfs = parallel(
+        get_intersect_partition,
+        items,
+        n_workers=n_workers,
+        threadpool=True,
+        progress=progress,
+    )
+    results = pd.concat(intersect_dfs)
+    results.drop_duplicates(subset=["quadkey"], inplace=True)
+    return results
+
+
+# Cell
+@patch
+def generate_grid_join(
+    self: BingTileGridGenerator,
+    gdf: GeoDataFrame,
+    filter: bool = True,
+    n_workers=defaults.cpus,
+    progress=True,
+) -> DataFrame:
+    reprojected_gdf = gdf.to_crs("epsg:4326")[
+        ["geometry"]
+    ]  # quadkeys hexes are in epsg:4326 CRS
+    tiles = []
+    unary_union = reprojected_gdf.unary_union
+    if isinstance(unary_union, Polygon):
+        tiles += self.get_all_tiles_for_polygon(unary_union)
+    else:
+        for geom in reprojected_gdf.unary_union.geoms:
+            tiles += self.get_all_tiles_for_polygon(
+                geom,
+            )
+
+    quadkey, geom = zip(*tiles)
+
+    tiles_gdf = GeoDataFrame(
+        {"quadkey": list(quadkey)},
+        geometry=list(geom),
+        crs="epsg:4326",
+    )
+
+    if filter:
+        # tiles_gdf.sindex
+        # reprojected_gdf.sindex
+        # intersect_tiles_gdf = tiles_gdf.sjoin(
+        #     reprojected_gdf,
+        #     how='inner',
+        #     predicate='intersects')
+        intersect_tiles_gdf = get_parallel_intersects(
+            tiles_gdf, reprojected_gdf, n_workers=n_workers, progress=progress
+        )
+        keep_cols = list(tiles_gdf.columns.values)
+        tiles_gdf = intersect_tiles_gdf[
+            intersect_tiles_gdf.columns.intersection(keep_cols)
+        ]
+        tiles_gdf.reset_index(drop=True, inplace=True)
+
+    if not self.return_geometry:
+        df = DataFrame(tiles_gdf.drop(columns=["geometry"]))
+        return df
+
+    return tiles_gdf.to_crs(gdf.crs)
