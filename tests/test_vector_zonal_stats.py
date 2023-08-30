@@ -506,6 +506,46 @@ def test_aggregate_stats_with_existing_aoi_column(simple_aoi, simple_data):
     assert list(results.columns.values) == [*list(aoi.columns.values), "pois_count_y"]
 
 
+def test_agg_stats_with_nas():
+    expanded_aggs = [
+        {"func": "mean", "column": "population", "output": "pop_mean", "fillna": True},
+        {"func": "sum", "column": "population", "output": "pop_total", "fillna": True},
+        {"func": "mean", "column": "dads", "output": "dad_mean", "fillna": True},
+        {"func": "sum", "column": "dads", "output": "dad_total", "fillna": True},
+    ]
+    aoi = pd.DataFrame(
+        data={
+            GEO_INDEX_NAME: [
+                1,
+                2,
+                3,
+            ],
+            "col1": ["a", "b", "c"],
+        }
+    )
+    features = pd.DataFrame(
+        data={
+            GEO_INDEX_NAME: [1, 1, 1, 2, 2, 2, 3, 3, 3],
+            "population": [1, 2, 3, 4, 5, 6, 7, 8, 9],
+            "dads": [10, 20, 30, 40, 50, 60, pd.NA, pd.NA, pd.NA],
+        }
+    )
+    features["dads"] = pd.to_numeric(features["dads"])
+    groups = features.groupby(GEO_INDEX_NAME)
+    expected_df = pd.DataFrame(
+        data={
+            GEO_INDEX_NAME: [1, 2, 3],
+            "col1": ["a", "b", "c"],
+            "pop_mean": [2.0, 5.0, 8.0],
+            "pop_total": [6, 15, 24],
+            "dad_mean": [20.0, 50.0, 0.0],
+            "dad_total": [60.0, 150, 0],
+        }
+    )
+    actual_df = _aggregate_stats(aoi, groups, expanded_aggs)
+    assert actual_df.equals(expected_df)
+
+
 def test_fillnas_with_duplicates(simple_aoi, simple_data):
     """agg spec with output col same as preexisting aoi col name"""
     aoi = _prep_aoi(simple_aoi)
