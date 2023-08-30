@@ -94,9 +94,8 @@ git clone https://github.com/<your-github-id>/geowrangler.git
 cd geowrangler
 virtualenv -p /usr/bin/python3.9 .venv
 source .venv/bin/activate
-pip install pre-commit poetry>=1.2.0
+pip install pre-commit "poetry>=1.2.0"
 pre-commit install
-poetry config --local installer.no-binary pygeos,shapely
 poetry install
 ```
 

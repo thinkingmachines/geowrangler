@@ -364,10 +364,6 @@ def test_aggregate_ookla_features(mock_ookla_req, mock_ookla_data, mocker, tmpdi
     )
     aoi = mocker.MagicMock()
     aoi.total_bounds = np.array([1.0, 2.0, 3.0, 4.0])
-    mocker.patch(
-        "geowrangler.datasets.ookla.download_ookla_year_data",
-        return_value=str(tmpdir / "this-directory-does-not-exist/ookla/fixed/2019"),
-    )
     aoi_quadkeys_df = pd.DataFrame(dict(quadkey=["11111", "22222", "44444"]))
     mock_generator = mocker.MagicMock()
     mock_generator.generate_grid = mocker.MagicMock(return_value=aoi_quadkeys_df)
@@ -380,15 +376,8 @@ def test_aggregate_ookla_features(mock_ookla_req, mock_ookla_data, mocker, tmpdi
     ]
 
     mocker.patch("os.listdir", return_value=fixed_2019_files)
-    ookla_df = pd.DataFrame(
-        dict(
-            quadkey=["11111", "22222", "333333"],
-        )
-    )
-    mocker.patch("pandas.read_parquet", return_value=ookla_df)
-    mocker.patch("pandas.concat", return_value=mock_ookla_data)
-
     odm = OoklaDataManager(str(tmpdir / "this-directory-does-not-exist"))
+    odm.load_type_year_data = mocker.MagicMock(return_value=mock_ookla_data)
     df = odm.aggregate_ookla_features(aoi, "fixed", "2019")
     assert df is not None
     assert len(df) == 3
