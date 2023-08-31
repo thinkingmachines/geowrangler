@@ -18,13 +18,11 @@ jobs:
           python-version: '3.9'
       - uses: snok/install-poetry@v1
         with:
-          version: 1.2.0b3
+          version: 1.3.2
           virtualenvs-create: true
           virtualenvs-in-project: false
           virtualenvs-path: ~/.virtualenvs
           installer-parallel: true
-      - run: sudo apt-get install -y libgeos-dev
-      - run: poetry config installer.no-binary pygeos,shapely
       - uses: actions/cache@v1
         id: cache
         with:
@@ -33,9 +31,6 @@ jobs:
           restore-keys: |
             poetry-${{ hashFiles('**/poetry.lock') }}
       - run: poetry install
-      - run: poetry run pip install install -e . && pip install nbdev==1.2.11
-      - run: poetry run pip uninstall -y pygeos shapely
-      - run: poetry run pip install pygeos==0.12 shapely==1.8.2 --no-binary shapely --no-binary pygeos 
       - run: poetry run nbdev_build_docs --force_all True --mk_readme False
       - name: Setup Pages
         id: pages

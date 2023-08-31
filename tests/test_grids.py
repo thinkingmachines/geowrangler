@@ -166,3 +166,53 @@ def test_bing_tile_grid_generator_return_geometry_false(
     assert "geometry" not in grids_gdf
     assert isinstance(grids_gdf, pd.DataFrame)
     assert len(grids_gdf) == 36
+
+
+def test_bing_tile_grid_generator_add_xyz_true(
+    sample_gdf,
+):
+    grid_generator = grids.BingTileGridGenerator(10, add_xyz_cols=True)
+    grids_gdf = grid_generator.generate_grid(sample_gdf)
+    assert "x" in grids_gdf
+    assert "y" in grids_gdf
+    assert "z" in grids_gdf
+    assert isinstance(grids_gdf, pd.DataFrame)
+    assert len(grids_gdf) == 36
+
+
+def test_bing_tile_grid_generator_join(sample_gdf):
+    grid_generator = grids.BingTileGridGenerator(10)
+    grids_gdf = grid_generator.generate_grid_join(sample_gdf)
+    assert "geometry" in grids_gdf
+    assert isinstance(grids_gdf, gpd.GeoDataFrame)
+    assert len(grids_gdf) == 36
+
+
+def test_bing_tile_grid_generator_join_mutliple_polygons(sample_gdf):
+    grid_generator = grids.BingTileGridGenerator(10)
+    gdf2 = gpd.GeoDataFrame(
+        geometry=[
+            Polygon(
+                [
+                    (3, 3),
+                    (3, 4),
+                    (4, 3),
+                ]
+            )
+        ],
+        crs="EPSG:4326",
+    )
+    grids_gdf = grid_generator.generate_grid_join(pd.concat([gdf2, sample_gdf]))
+    assert "geometry" in grids_gdf
+    assert isinstance(grids_gdf, gpd.GeoDataFrame)
+    assert len(grids_gdf) == 46
+
+
+def test_bing_tile_grid_generator_join_return_geometry_false(
+    sample_gdf,
+):
+    grid_generator = grids.BingTileGridGenerator(10, return_geometry=False)
+    grids_gdf = grid_generator.generate_grid_join(sample_gdf)
+    assert "geometry" not in grids_gdf
+    assert isinstance(grids_gdf, pd.DataFrame)
+    assert len(grids_gdf) == 36

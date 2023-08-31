@@ -29,7 +29,7 @@ If you are reporting a bug, please include:
 2. Install and enable `pre-commit` and `poetry`
 
 ```
-pip install poetry==1.2.0b3 pre-commit
+pip install poetry>=1.2.0 pre-commit
 pre-commit install
 poetry install
 poetry run pip install pip --upgrade

@@ -4,13 +4,12 @@ __all__ = ["create_raster_zonal_stats"]
 
 
 # Cell
-
-
 from pathlib import Path
 from typing import Any, Dict, Union
 
 import geopandas as gpd
 import pandas as pd
+import rasterio
 import rasterstats as rs
 
 from .vector_zonal_stats import _expand_aggs, _fillnas, _fix_agg
@@ -60,6 +59,13 @@ def create_raster_zonal_stats(
 
     if "add_stats" in extra_args:
         extra_args.pop("add_stats")  # always use stats only
+
+    if "nodata" in extra_args:
+        nodata = extra_args["nodata"]
+        if nodata is None:
+            extra_args.pop("nodata")
+            with rasterio.open(data) as src:
+                extra_args["nodata"] = src.nodata
 
     stats = fixed_agg["func"]
     prefix = fixed_agg["column"] + "_"

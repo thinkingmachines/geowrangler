@@ -1,0 +1,6 @@
+site_name: 'Geowrangler'
+
+nav:
+  - Introduction: 'README.md'
+plugins:
+  - techdocs-core

@@ -160,6 +160,11 @@ cython_debug/
 /docs
 .firebase/
 data/phl_pop_2020.tif
+data/admin3_internet_aoi.geojson
+data/filtered_fixed.geojson
+data/valid_admin3.geojson
+data/vector_to_raster_maks_sample/labels_20220816.tiff
+data
 _data/
 .vscode/
 notebooks/.last_checked
@@ -167,3 +172,6 @@ test_dir/
 poetry.toml
 phl_adminboundaries_candidate_adm3*
 data/2022-04-01_performance*.parquet
+data/gridxy*.tif
+data/output_0.tif
+notebooks/data

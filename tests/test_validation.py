@@ -180,13 +180,11 @@ def test_orientation_validator_geometry_type():
 
 
 def test_orientation_validator_invalid(misoriented_geometry):
-    assert (
-        validation.OrientationValidator().check(geometry=misoriented_geometry) is False
-    )
+    assert not validation.OrientationValidator().check(geometry=misoriented_geometry)
 
 
 def test_orientation_validator_valid(oriented_geometry):
-    assert validation.OrientationValidator().check(geometry=oriented_geometry) is True
+    assert validation.OrientationValidator().check(geometry=oriented_geometry)
 
 
 def test_orientation_validator_fix_invalid(misoriented_geometry, oriented_geometry):

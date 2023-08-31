@@ -98,3 +98,36 @@ def test_create_raster_zonal_stats_from_file():
         "elevation_mean",
         "elevation_std",
     ]
+
+
+def test_raster_zonal_stats_nodata():
+    terrain_file = "data/phl_ppp_2020_constrained.tif"
+    file_aoi = "data/region3_admin.geojson"
+    results = rzs.create_raster_zonal_stats(
+        file_aoi,
+        terrain_file,
+        aggregation=dict(
+            func=["sum"],
+            column="population",
+            output=["population_count"],
+            fillna=[True],
+        ),
+        extra_args=dict(nodata=-99999),
+    )
+    assert results["population_count"].iloc[0] > 0
+
+
+def test_raster_zonal_stats_nodata_default():
+    terrain_file = "data/phl_ppp_2020_constrained.tif"
+    file_aoi = "data/region3_admin.geojson"
+    results = rzs.create_raster_zonal_stats(
+        file_aoi,
+        terrain_file,
+        aggregation=dict(
+            func=["sum"],
+            column="population",
+            output=["population_count"],
+            fillna=[True],
+        ),
+    )
+    assert results["population_count"].iloc[0] > 0

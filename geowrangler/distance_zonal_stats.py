@@ -28,7 +28,7 @@ def create_distance_zonal_stats(
     aoi: gpd.GeoDataFrame,  # Area of interest for which zonal stats are to be computed for
     data: gpd.GeoDataFrame,  # Source gdf of region/areas containing data to compute zonal stats from
     max_distance: float,  # max distance to compute distance for (the larger the slower the join), set to None for no limit
-    aggregations: List[Dict[str, Any]],  # aggregations
+    aggregations: List[Dict[str, Any]] = [],  # aggregations
     distance_col: str = "nearest",  # column name of the distance column, set to None if not wanted in results
 ):
     """Computes zonal stats based on nearest matching data geometry within `max_distance`.

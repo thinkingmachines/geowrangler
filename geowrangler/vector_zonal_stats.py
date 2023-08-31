@@ -347,6 +347,12 @@ def create_bingtile_zonal_stats(
     data_quadkey_column: str = "quadkey",  # Column name of data quadkey
 ) -> pd.DataFrame:
 
+    data = data.copy()
+    aoi = aoi.copy()
+
+    aoi[aoi_quadkey_column] = aoi[aoi_quadkey_column].apply(str)
+    data[data_quadkey_column] = data[data_quadkey_column].apply(str)
+
     # validate aoi zoom level is same for all rows
     validate_aoi_quadkey(aoi, aoi_quadkey_column)
     # get aoi zoom level
@@ -362,7 +368,6 @@ def create_bingtile_zonal_stats(
     def quadkey4zoom_level(x):
         return x[:aoi_zoom_level]
 
-    data = data.copy()
     data[GEO_INDEX_NAME] = data[data_quadkey_column].apply(quadkey4zoom_level)
 
     # filter data to include only those whose quadkeys are in aoi quadkeys
@@ -376,7 +381,6 @@ def create_bingtile_zonal_stats(
     groups = features.groupby(GEO_INDEX_NAME)
 
     expanded_aggs = _expand_aggs(fixed_aggs)
-    aoi = aoi.copy()
     aoi[GEO_INDEX_NAME] = aoi[aoi_quadkey_column]
 
     results = _aggregate_stats(aoi, groups, expanded_aggs)

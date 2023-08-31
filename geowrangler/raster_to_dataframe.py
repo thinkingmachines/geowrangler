@@ -122,6 +122,9 @@ def generate_mask(
 
 # Cell
 def read_bands(image_list: [], mask: str):
+    """
+    Reads the bands for each image in the list and returns a dataframe where each band is one column with the image name as a suffix for column name.
+    """
 
     data = []
 
