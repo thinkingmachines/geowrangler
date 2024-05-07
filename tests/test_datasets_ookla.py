@@ -226,7 +226,7 @@ def test_ookla_datamanager_load_type_year_data_cached_data_file_return_geom(
 ):
     aoi = mocker.MagicMock()
     aoi.total_bounds = np.array([1.0, 2.0, 3.0, 4.0])
-    mock_data_key = "027a5ed231f122bb78715183809ecf89"  # #gitleaks:allow
+    mock_data_key = "027a5ed231f122bb78715183809ecf89"
     mock_cache_dir = str(tmpdir / "this-directory-does-not-exist")
     extension = "geojson"
     mock_pd_file = (
