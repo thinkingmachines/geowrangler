@@ -175,3 +175,4 @@ data/2022-04-01_performance*.parquet
 data/gridxy*.tif
 data/output_0.tif
 notebooks/data
+_proc/
