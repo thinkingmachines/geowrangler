@@ -3,6 +3,16 @@
 # %% auto 0
 __all__ = ['query_window_by_polygon', 'query_window_by_gdf']
 
+# %% ../notebooks/09_raster_process.ipynb 5
+# | include: false
+from pathlib import PosixPath
+from typing import Union
+
+import rasterio as rio
+import rasterio.mask
+from rasterio.io import DatasetReader
+from shapely.geometry import Polygon
+
 # %% ../notebooks/09_raster_process.ipynb 6
 def query_window_by_polygon(
     input_raster: Union[str, DatasetReader, PosixPath],
