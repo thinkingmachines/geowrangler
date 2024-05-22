@@ -3,7 +3,7 @@
 # %% auto 0
 __all__ = ['create_distance_zonal_stats']
 
-# %% ../notebooks/07_distance_zonal_stats.ipynb 7
+# %% ../notebooks/07_distance_zonal_stats.ipynb 9
 from typing import Any, Dict, List
 
 import geopandas as gpd
@@ -12,7 +12,7 @@ import geowrangler.area_zonal_stats as azs
 import geowrangler.vector_zonal_stats as vzs
 from .vector_zonal_stats import GEO_INDEX_NAME
 
-# %% ../notebooks/07_distance_zonal_stats.ipynb 9
+# %% ../notebooks/07_distance_zonal_stats.ipynb 11
 INTERNAL_DISTANCE_COL = "__Geowrangleer_nearest_distance"
 
 
@@ -22,7 +22,7 @@ def build_agg_distance_dicts(expanded_aggs, distance_col):
         agg_dicts[distance_col] = (INTERNAL_DISTANCE_COL, "mean")
     return agg_dicts
 
-# %% ../notebooks/07_distance_zonal_stats.ipynb 10
+# %% ../notebooks/07_distance_zonal_stats.ipynb 12
 def create_distance_zonal_stats(
     aoi: gpd.GeoDataFrame,  # Area of interest for which zonal stats are to be computed for
     data: gpd.GeoDataFrame,  # Source gdf of region/areas containing data to compute zonal stats from

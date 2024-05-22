@@ -4,7 +4,7 @@
 __all__ = ['list_ookla_files', 'download_ookla_file', 'parallel_download', 'download_ookla_parallel', 'download_ookla_year_data',
            'lookup_ookla_file', 'compute_datakey', 'write_ookla_metajson', 'OoklaDataManager']
 
-# %% ../../notebooks/05_datasets_ookla.ipynb 3
+# %% ../../notebooks/05_datasets_ookla.ipynb 4
 import hashlib
 import json
 import os
@@ -28,12 +28,12 @@ import geowrangler.area_zonal_stats as azs
 from geowrangler import grids
 from geowrangler.datasets.utils import make_report_hook, urlretrieve
 
-# %% ../../notebooks/05_datasets_ookla.ipynb 4
+# %% ../../notebooks/05_datasets_ookla.ipynb 5
 OoklaFile = namedtuple("OoklaQuarter", ["type", "year", "quarter"])
 DEFAULT_CACHE_DIR = "~/.cache/geowrangler"
 OOKLA_QUADKEY_LEVEL = 16
 
-# %% ../../notebooks/05_datasets_ookla.ipynb 5
+# %% ../../notebooks/05_datasets_ookla.ipynb 6
 @lru_cache(maxsize=None)
 def list_ookla_files() -> dict:
     """Get list of ookla data"""
@@ -56,7 +56,7 @@ def list_ookla_files() -> dict:
         keys.update({OoklaFile(type_, year, quarter): file})
     return keys
 
-# %% ../../notebooks/05_datasets_ookla.ipynb 7
+# %% ../../notebooks/05_datasets_ookla.ipynb 8
 def download_ookla_file(
     type_: str,  # Internet connection type: 'fixed' or 'mobile'
     year: str,  # Year (e.g. '2020')
@@ -100,7 +100,7 @@ def download_ookla_file(
 
     return filepath
 
-# %% ../../notebooks/05_datasets_ookla.ipynb 8
+# %% ../../notebooks/05_datasets_ookla.ipynb 9
 def parallel_download(item):
     (
         quarter,
@@ -126,7 +126,7 @@ def parallel_download(item):
         reporthook=reporthook,
     )
 
-# %% ../../notebooks/05_datasets_ookla.ipynb 9
+# %% ../../notebooks/05_datasets_ookla.ipynb 10
 def download_ookla_parallel(
     num_expected_ookla_files,
     type_,
@@ -152,7 +152,7 @@ def download_ookla_parallel(
     ]
     parallel(parallel_download, items, threadpool=True, progress=True)
 
-# %% ../../notebooks/05_datasets_ookla.ipynb 10
+# %% ../../notebooks/05_datasets_ookla.ipynb 11
 def download_ookla_year_data(
     type_,
     year,
@@ -225,12 +225,12 @@ def download_ookla_year_data(
 
     return type_year_cache_dir
 
-# %% ../../notebooks/05_datasets_ookla.ipynb 11
+# %% ../../notebooks/05_datasets_ookla.ipynb 12
 def lookup_ookla_file(filename):
     """Get OoklaFile for the given filename"""
     return next((k for k, v in list_ookla_files().items() if v == filename), None)
 
-# %% ../../notebooks/05_datasets_ookla.ipynb 13
+# %% ../../notebooks/05_datasets_ookla.ipynb 14
 def compute_datakey(aoi_bounds, type_, year, return_geometry):
     data_tuple = (
         np.array2string(aoi_bounds, precision=6),
@@ -244,7 +244,7 @@ def compute_datakey(aoi_bounds, type_, year, return_geometry):
     data_key = m.hexdigest()
     return data_key
 
-# %% ../../notebooks/05_datasets_ookla.ipynb 14
+# %% ../../notebooks/05_datasets_ookla.ipynb 15
 def write_ookla_metajson(
     cache_dir, data_key, total_bounds, type_, year, return_geometry
 ):
@@ -262,7 +262,7 @@ def write_ookla_metajson(
             )
         )
 
-# %% ../../notebooks/05_datasets_ookla.ipynb 15
+# %% ../../notebooks/05_datasets_ookla.ipynb 16
 class OoklaDataManager:
     """An instance of this class provides convenience functoins for loading and caching Ookla data"""
 
@@ -276,7 +276,7 @@ class OoklaDataManager:
         self.aggregated_cache_dir = Path(aggregated_cache_dir)
         self.aggregated_cache_dir.mkdir(parents=True, exist_ok=True)
 
-# %% ../../notebooks/05_datasets_ookla.ipynb 16
+# %% ../../notebooks/05_datasets_ookla.ipynb 17
 @patch
 def reinitialize_processed_cache(self: OoklaDataManager):
     "Reinitialize processed_cache_dir to start over from scratch."
@@ -286,7 +286,7 @@ def reinitialize_processed_cache(self: OoklaDataManager):
         f"{self.processed_cache_dir} reintialized. All cached processed data in this folder has been deleted."
     )
 
-# %% ../../notebooks/05_datasets_ookla.ipynb 17
+# %% ../../notebooks/05_datasets_ookla.ipynb 18
 @patch
 def reinitialize_aggregated_cache(self: OoklaDataManager):
     "Reinitialize aggregated_cache_dir to start over from scratch."
@@ -296,7 +296,7 @@ def reinitialize_aggregated_cache(self: OoklaDataManager):
         f"{self.aggregated_cache_dir} reintialized. All cached aggregated data in this folder has been deleted."
     )
 
-# %% ../../notebooks/05_datasets_ookla.ipynb 18
+# %% ../../notebooks/05_datasets_ookla.ipynb 19
 @patch
 def load_type_year_data(
     self: OoklaDataManager,
@@ -399,7 +399,7 @@ def load_type_year_data(
         df.to_file(cached_file_path, driver="GeoJSON")
     return df
 
-# %% ../../notebooks/05_datasets_ookla.ipynb 19
+# %% ../../notebooks/05_datasets_ookla.ipynb 20
 @patch
 def aggregate_ookla_features(
     self: OoklaDataManager,  # Ookla Data Manager Instance

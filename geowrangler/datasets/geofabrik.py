@@ -4,7 +4,7 @@
 __all__ = ['list_geofabrik_regions', 'get_osm_download_url', 'get_download_filepath', 'download_geofabrik_region',
            'download_osm_region_data', 'OsmDataManager']
 
-# %% ../../notebooks/05_datasets_geofabrik.ipynb 3
+# %% ../../notebooks/05_datasets_geofabrik.ipynb 4
 import os
 from functools import lru_cache
 from pathlib import Path
@@ -19,15 +19,15 @@ from loguru import logger
 
 from geowrangler.datasets.utils import make_report_hook, urlretrieve
 
-# %% ../../notebooks/05_datasets_geofabrik.ipynb 4
+# %% ../../notebooks/05_datasets_geofabrik.ipynb 5
 DEFAULT_CACHE_DIR = "~/.cache/geowrangler"
 
-# %% ../../notebooks/05_datasets_geofabrik.ipynb 5
+# %% ../../notebooks/05_datasets_geofabrik.ipynb 6
 @lru_cache(maxsize=None)
 def load_geofabrik_data():
     return requests.get("https://download.geofabrik.de/index-v1-nogeom.json").json()
 
-# %% ../../notebooks/05_datasets_geofabrik.ipynb 6
+# %% ../../notebooks/05_datasets_geofabrik.ipynb 7
 def list_geofabrik_regions() -> dict:
     """Get list of regions from geofabrik index"""
     geofabrik_data = load_geofabrik_data()
@@ -37,7 +37,7 @@ def list_geofabrik_regions() -> dict:
         if k["properties"]["urls"].get("shp")
     }
 
-# %% ../../notebooks/05_datasets_geofabrik.ipynb 7
+# %% ../../notebooks/05_datasets_geofabrik.ipynb 8
 def get_osm_download_url(region, year=None):
     geofabrik_info = list_geofabrik_regions()
     if region not in geofabrik_info:
@@ -51,14 +51,14 @@ def get_osm_download_url(region, year=None):
         url = url.replace("latest", year_prefix)
     return url
 
-# %% ../../notebooks/05_datasets_geofabrik.ipynb 8
+# %% ../../notebooks/05_datasets_geofabrik.ipynb 9
 def get_download_filepath(url, directory):
     parsed_url = urlparse(url)
     filename = Path(os.path.basename(parsed_url.path))
     filepath = directory / filename
     return filepath
 
-# %% ../../notebooks/05_datasets_geofabrik.ipynb 9
+# %% ../../notebooks/05_datasets_geofabrik.ipynb 10
 def download_geofabrik_region(
     region: str,
     directory: str = "data/",
@@ -94,7 +94,7 @@ def download_geofabrik_region(
 
     return filepath
 
-# %% ../../notebooks/05_datasets_geofabrik.ipynb 10
+# %% ../../notebooks/05_datasets_geofabrik.ipynb 11
 def download_osm_region_data(
     region,
     year=None,
@@ -151,7 +151,7 @@ def download_osm_region_data(
 
     return zipfile_path
 
-# %% ../../notebooks/05_datasets_geofabrik.ipynb 11
+# %% ../../notebooks/05_datasets_geofabrik.ipynb 12
 class OsmDataManager:
     """An instance of this class provides convenience functions for loading and caching OSM data"""
 
@@ -160,7 +160,7 @@ class OsmDataManager:
         self.pois_cache = {}
         self.roads_cache = {}
 
-# %% ../../notebooks/05_datasets_geofabrik.ipynb 12
+# %% ../../notebooks/05_datasets_geofabrik.ipynb 13
 @patch
 def load_pois(
     self: OsmDataManager,
@@ -212,7 +212,7 @@ def load_pois(
 
     return gdf
 
-# %% ../../notebooks/05_datasets_geofabrik.ipynb 13
+# %% ../../notebooks/05_datasets_geofabrik.ipynb 14
 @patch
 def load_roads(
     self: OsmDataManager,

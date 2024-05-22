@@ -3,16 +3,17 @@
 # %% auto 0
 __all__ = ['GRID_ID', 'generate_mask']
 
-# %% ../notebooks/10_vector_to_raster_mask.ipynb 8
+# %% ../notebooks/10_vector_to_raster_mask.ipynb 10
 import json
 from typing import Any, Dict
 
 import geopandas as gpd
 import matplotlib.pyplot as plt
+import pandas as pd
 import rasterio as rio
 import rasterio.mask
 
-# %% ../notebooks/10_vector_to_raster_mask.ipynb 10
+# %% ../notebooks/10_vector_to_raster_mask.ipynb 12
 def _explode(gdf):
     """
     Explodes a geodataframe
@@ -25,7 +26,7 @@ def _explode(gdf):
                                  and two new columns: level_0 and level_1
     """
 
-    gs = gdf.explode()
+    gs = gdf.explode(index_parts=True)
     gdf2 = gs.reset_index().rename(columns={0: "geometry"})
     if "class" in gdf2.columns:
         gdf2 = gdf2.drop("class", axis=1)
@@ -37,7 +38,7 @@ def _explode(gdf):
 
     return gdf_out
 
-# %% ../notebooks/10_vector_to_raster_mask.ipynb 11
+# %% ../notebooks/10_vector_to_raster_mask.ipynb 13
 GRID_ID = 1
 
 
@@ -79,7 +80,7 @@ def generate_mask(
         if labels_column in x:
             value = label_values[x[labels_column]]
 
-        gdf_json = json.loads(gpd.GeoDataFrame(x).T.to_json())
+        gdf_json = json.loads(gpd.GeoDataFrame(pd.DataFrame(x).T).to_json())
         feature = [gdf_json["features"][0]["geometry"]][0]
         masks.append((feature, value))
         grids.append((feature, GRID_ID))

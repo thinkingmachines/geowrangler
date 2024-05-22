@@ -3,7 +3,7 @@
 # %% auto 0
 __all__ = ['create_raster_zonal_stats']
 
-# %% ../notebooks/03_raster_zonal_stats.ipynb 7
+# %% ../notebooks/03_raster_zonal_stats.ipynb 8
 from pathlib import Path
 from typing import Any, Dict, Union
 
@@ -14,7 +14,7 @@ import rasterstats as rs
 
 from .vector_zonal_stats import _expand_aggs, _fillnas, _fix_agg
 
-# %% ../notebooks/03_raster_zonal_stats.ipynb 8
+# %% ../notebooks/03_raster_zonal_stats.ipynb 9
 def create_raster_zonal_stats(
     aoi: Union[  # The area of interest geodataframe, or path to the vector file
         str, gpd.GeoDataFrame

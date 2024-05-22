@@ -3,7 +3,7 @@
 # %% auto 0
 __all__ = ['create_area_zonal_stats']
 
-# %% ../notebooks/06_area_zonal_stats.ipynb 7
+# %% ../notebooks/06_area_zonal_stats.ipynb 9
 from typing import Any, Dict, List
 
 import geopandas as gpd
@@ -11,7 +11,7 @@ import numpy as np
 import geowrangler.vector_zonal_stats as vzs
 from .vector_zonal_stats import GEO_INDEX_NAME
 
-# %% ../notebooks/06_area_zonal_stats.ipynb 9
+# %% ../notebooks/06_area_zonal_stats.ipynb 11
 def extract_func(func):
     # extra by default is none
     extra = []
@@ -32,7 +32,7 @@ def extract_func(func):
 
     return func, extra
 
-# %% ../notebooks/06_area_zonal_stats.ipynb 11
+# %% ../notebooks/06_area_zonal_stats.ipynb 13
 def fix_area_agg(agg):
     if "func" not in agg:
         return agg  # skip fix as agg spec is invalid
@@ -53,7 +53,7 @@ def fix_area_agg(agg):
 
     return agg
 
-# %% ../notebooks/06_area_zonal_stats.ipynb 14
+# %% ../notebooks/06_area_zonal_stats.ipynb 16
 def get_source_column(agg):
 
     if "raw" in agg["extras"]:
@@ -74,7 +74,7 @@ def get_source_column(agg):
         return intersect_aoi_column
     return agg["column"]  # everything else based on raw column
 
-# %% ../notebooks/06_area_zonal_stats.ipynb 16
+# %% ../notebooks/06_area_zonal_stats.ipynb 18
 INTERSECT_AREA_AGG = {
     "column": "intersect_area",
     "func": "sum",
@@ -82,27 +82,27 @@ INTERSECT_AREA_AGG = {
     "extras": "raw",
 }
 
-# %% ../notebooks/06_area_zonal_stats.ipynb 17
+# %% ../notebooks/06_area_zonal_stats.ipynb 19
 def build_agg_area_dicts(aggs):
     aggs = [INTERSECT_AREA_AGG, *aggs]
     agg_dicts = {agg["output"]: (get_source_column(agg), agg["func"]) for agg in aggs}
     return agg_dicts
 
-# %% ../notebooks/06_area_zonal_stats.ipynb 20
+# %% ../notebooks/06_area_zonal_stats.ipynb 22
 def validate_area_aoi(aoi):
     if aoi.crs.is_geographic:
         raise ValueError(
             f"aoi has geographic crs: {aoi.crs}, areas maybe incorrectly computed"
         )
 
-# %% ../notebooks/06_area_zonal_stats.ipynb 21
+# %% ../notebooks/06_area_zonal_stats.ipynb 23
 def validate_area_data(data):
     if data.crs.is_geographic:
         raise ValueError(
             f"data has geographic crs: {data.crs}, areas maybe incorrectly computed"
         )
 
-# %% ../notebooks/06_area_zonal_stats.ipynb 22
+# %% ../notebooks/06_area_zonal_stats.ipynb 24
 def expand_area_aggs(aggs):
     expanded_aggs = []
     for agg in aggs:
@@ -117,7 +117,7 @@ def expand_area_aggs(aggs):
             expanded_aggs += [expanded_agg]
     return expanded_aggs
 
-# %% ../notebooks/06_area_zonal_stats.ipynb 23
+# %% ../notebooks/06_area_zonal_stats.ipynb 25
 def compute_intersect_stats(intersect, expanded_aggs):
     # optimization - use df.apply to create all new columns simultaneously
     for agg in expanded_aggs:
@@ -135,7 +135,7 @@ def compute_intersect_stats(intersect, expanded_aggs):
             )
     return intersect
 
-# %% ../notebooks/06_area_zonal_stats.ipynb 24
+# %% ../notebooks/06_area_zonal_stats.ipynb 26
 def compute_imputed_stats(results, expanded_aggs):
     # optimize with df.apply
     # handle when intersect_area_sum is np.nan
@@ -147,7 +147,7 @@ def compute_imputed_stats(results, expanded_aggs):
 
     return results
 
-# %% ../notebooks/06_area_zonal_stats.ipynb 25
+# %% ../notebooks/06_area_zonal_stats.ipynb 27
 def create_area_zonal_stats(
     aoi: gpd.GeoDataFrame,  # Area of interest for which zonal stats are to be computed for
     data: gpd.GeoDataFrame,  # Source gdf of region/areas containing data to compute zonal stats from

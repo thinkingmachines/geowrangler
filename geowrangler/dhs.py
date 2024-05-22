@@ -3,7 +3,7 @@
 # %% auto 0
 __all__ = ['load_column_config', 'load_dhs_file', 'apply_threshold', 'assign_wealth_index']
 
-# %% ../notebooks/04_dhs.ipynb 4
+# %% ../notebooks/04_dhs.ipynb 5
 from typing import List
 
 import numpy as np
@@ -11,7 +11,7 @@ import pandas as pd
 from pandas import DataFrame
 from sklearn.decomposition import PCA
 
-# %% ../notebooks/04_dhs.ipynb 5
+# %% ../notebooks/04_dhs.ipynb 6
 PH_COLUMN_CONFIG = {
     "cluster number": "DHSCLUST",
     "wealth index factor score combined (5 decimals)": "Wealth Index",
@@ -85,7 +85,7 @@ COLUMN_CONFIG = {
     "tl": TL_COLUMN_CONFIG,
 }
 
-# %% ../notebooks/04_dhs.ipynb 6
+# %% ../notebooks/04_dhs.ipynb 7
 def load_column_config(
     country: str,  # 2 letter character representing the country
 ) -> dict:
@@ -103,7 +103,7 @@ def load_column_config(
             f"Not a valid country. Valid countries are {list(COLUMN_CONFIG.keys())}"
         )
 
-# %% ../notebooks/04_dhs.ipynb 7
+# %% ../notebooks/04_dhs.ipynb 8
 def load_dhs_file(
     household_data: str,  # str or pathlike object to the household data
 ) -> DataFrame:
@@ -117,7 +117,7 @@ def load_dhs_file(
     dhs_df.rename(columns=dhs_dict, inplace=True)
     return dhs_df
 
-# %% ../notebooks/04_dhs.ipynb 8
+# %% ../notebooks/04_dhs.ipynb 9
 def apply_threshold(
     df: DataFrame,  # Dataframe
     columns: List[str],  # List of columns to apply the threshold
@@ -132,7 +132,7 @@ def apply_threshold(
             copied[col] = copied[col].clip(*config["_default"])
     return copied
 
-# %% ../notebooks/04_dhs.ipynb 9
+# %% ../notebooks/04_dhs.ipynb 10
 def assign_wealth_index(
     asset_df: DataFrame,  # Dataframe containg only the features to apply wealth index
     use_pca=True,  # if calculating wealth index should be done via PCA or via Sigular Value Decomposition

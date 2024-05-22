@@ -3,7 +3,7 @@
 # %% auto 0
 __all__ = ['SquareGridBoundary', 'SquareGridGenerator', 'H3GridGenerator', 'BingTileGridGenerator']
 
-# %% ../notebooks/00_grids.ipynb 4
+# %% ../notebooks/00_grids.ipynb 5
 import logging
 from functools import reduce
 from typing import List, Tuple, Union
@@ -22,7 +22,7 @@ from shapely.prepared import prep
 
 logger = logging.getLogger(__name__)
 
-# %% ../notebooks/00_grids.ipynb 5
+# %% ../notebooks/00_grids.ipynb 6
 class SquareGridBoundary:
     """Reusing Boundary. x_min, y_min, x_max, and y_max are in the the target crs"""
 
@@ -53,7 +53,7 @@ class SquareGridBoundary:
             yrange[y_mask],
         )
 
-# %% ../notebooks/00_grids.ipynb 6
+# %% ../notebooks/00_grids.ipynb 7
 class SquareGridGenerator:
     def __init__(
         self,
@@ -65,7 +65,7 @@ class SquareGridGenerator:
         self.grid_projection = grid_projection
         self.boundary = boundary
 
-# %% ../notebooks/00_grids.ipynb 7
+# %% ../notebooks/00_grids.ipynb 8
 @patch
 def create_cell(
     self: SquareGridGenerator,
@@ -82,7 +82,7 @@ def create_cell(
         ]
     )
 
-# %% ../notebooks/00_grids.ipynb 8
+# %% ../notebooks/00_grids.ipynb 9
 @patch
 def create_grid_for_polygon(self: SquareGridGenerator, boundary, geometry):
     x_idx_offset, xrange, y_idx_offset, yrange = boundary.get_range_subset(
@@ -101,7 +101,7 @@ def create_grid_for_polygon(self: SquareGridGenerator, boundary, geometry):
                 )
     return cells
 
-# %% ../notebooks/00_grids.ipynb 9
+# %% ../notebooks/00_grids.ipynb 10
 @patch
 def generate_grid(self: SquareGridGenerator, gdf: GeoDataFrame) -> GeoDataFrame:
     reprojected_gdf = gdf.to_crs(self.grid_projection)
@@ -133,7 +133,7 @@ def generate_grid(self: SquareGridGenerator, gdf: GeoDataFrame) -> GeoDataFrame:
             {"x": [], "y": [], "geometry": []}, geometry="geometry", crs=gdf.crs
         )
 
-# %% ../notebooks/00_grids.ipynb 10
+# %% ../notebooks/00_grids.ipynb 11
 class H3GridGenerator:
     def __init__(
         self,
@@ -143,7 +143,7 @@ class H3GridGenerator:
         self.resolution = resolution
         self.return_geometry = return_geometry
 
-# %% ../notebooks/00_grids.ipynb 11
+# %% ../notebooks/00_grids.ipynb 12
 @patch
 def get_hexes_for_polygon(self: H3GridGenerator, poly: Polygon):
     return h3.polyfill(
@@ -152,7 +152,7 @@ def get_hexes_for_polygon(self: H3GridGenerator, poly: Polygon):
         geo_json_conformant=True,
     )
 
-# %% ../notebooks/00_grids.ipynb 12
+# %% ../notebooks/00_grids.ipynb 13
 @patch
 def generate_grid(self: H3GridGenerator, gdf: GeoDataFrame) -> DataFrame:
     reprojected_gdf = gdf.to_crs("epsg:4326")  # h3 hexes are in epsg:4326 CRS
@@ -177,7 +177,7 @@ def generate_grid(self: H3GridGenerator, gdf: GeoDataFrame) -> DataFrame:
     )
     return h3_gdf.to_crs(gdf.crs)
 
-# %% ../notebooks/00_grids.ipynb 13
+# %% ../notebooks/00_grids.ipynb 14
 class BingTileGridGenerator:
     def __init__(
         self,
@@ -214,18 +214,18 @@ class BingTileGridGenerator:
             tiles = {qk: (geom, tile) for qk, geom, tile in tiles}
         return tiles
 
-# %% ../notebooks/00_grids.ipynb 14
+# %% ../notebooks/00_grids.ipynb 15
 @patch
 def get_all_tiles_for_polygon(self: BingTileGridGenerator, polygon: Polygon):
     """Get the interseting tiles with polygon for a zoom level. Polygon should be in EPSG:4326"""
     x_min, y_min, x_max, y_max = polygon.bounds
     tiles = (
-        (self.tms.quadkey(tile), self.tile_to_polygon(tile))
+        (self.tms.quadkey(tile), self.tile_to_polygon(tile), tile)
         for tile in self.tms.tiles(x_min, y_min, x_max, y_max, self.zoom_level)
     )
     return tiles
 
-# %% ../notebooks/00_grids.ipynb 15
+# %% ../notebooks/00_grids.ipynb 16
 @patch
 def generate_grid(self: BingTileGridGenerator, gdf: GeoDataFrame) -> DataFrame:
     reprojected_gdf = gdf.to_crs("epsg:4326")  # quadkeys hexes are in epsg:4326 CRS
@@ -260,7 +260,7 @@ def generate_grid(self: BingTileGridGenerator, gdf: GeoDataFrame) -> DataFrame:
 
     return tiles_gdf
 
-# %% ../notebooks/00_grids.ipynb 16
+# %% ../notebooks/00_grids.ipynb 17
 def get_intersect_partition(item):
     tiles_gdf, reprojected_gdf = item
     tiles_gdf.sindex
@@ -270,7 +270,7 @@ def get_intersect_partition(item):
     )
     return intersect_tiles_gdf
 
-# %% ../notebooks/00_grids.ipynb 17
+# %% ../notebooks/00_grids.ipynb 18
 def get_parallel_intersects(
     tiles_gdf, reprojected_gdf, n_workers=defaults.cpus, progress=True
 ):
@@ -290,7 +290,7 @@ def get_parallel_intersects(
     results.drop_duplicates(subset=["quadkey"], inplace=True)
     return results
 
-# %% ../notebooks/00_grids.ipynb 18
+# %% ../notebooks/00_grids.ipynb 19
 @patch
 def generate_grid_join(
     self: BingTileGridGenerator,
@@ -312,10 +312,17 @@ def generate_grid_join(
                 geom,
             )
 
-    quadkey, geom = zip(*tiles)
+    quadkey, geom, tile = zip(*tiles)
+
+    result = {"quadkey": list(quadkey)}
+
+    if self.add_xyz_cols:
+        result["x"] = [t.x for t in tile]
+        result["y"] = [t.y for t in tile]
+        result["z"] = [t.z for t in tile]
 
     tiles_gdf = GeoDataFrame(
-        {"quadkey": list(quadkey)},
+        result,
         geometry=list(geom),
         crs="epsg:4326",
     )

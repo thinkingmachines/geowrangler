@@ -3,7 +3,7 @@
 # %% auto 0
 __all__ = ['urlretrieve', 'make_report_hook']
 
-# %% ../../notebooks/13_datasets_utils.ipynb 4
+# %% ../../notebooks/13_datasets_utils.ipynb 5
 import contextlib
 from urllib.error import ContentTooShortError
 
@@ -11,7 +11,7 @@ from fastcore.net import urlopen
 from fastprogress.fastprogress import progress_bar
 from loguru import logger
 
-# %% ../../notebooks/13_datasets_utils.ipynb 5
+# %% ../../notebooks/13_datasets_utils.ipynb 6
 # from https://github.com/fastai/fastcore/blob/86337bad16a65f23c5335286ab73cd4d6425c586/fastcore/net.py#L147
 # add headers to urlwrap call (to allow auth)
 def urlretrieve(
@@ -49,7 +49,7 @@ def urlretrieve(
         )
     return filename, respheaders, fp
 
-# %% ../../notebooks/13_datasets_utils.ipynb 6
+# %% ../../notebooks/13_datasets_utils.ipynb 7
 def make_report_hook(show_progress):
     if not show_progress:
         return None
