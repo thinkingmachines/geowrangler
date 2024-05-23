@@ -1,0 +1,34 @@
+website:
+  sidebar:
+    contents:
+      - index.ipynb
+      - 00_grids.ipynb
+      - 01_validation.ipynb
+      - 02_vector_zonal_stats.ipynb
+      - 03_raster_zonal_stats.ipynb
+      - 04_dhs.ipynb
+      - 05_datasets_geofabrik.ipynb
+      - 05_datasets_ookla.ipynb
+      - 06_area_zonal_stats.ipynb
+      - 07_distance_zonal_stats.ipynb
+      - 08_raster_to_dataframe.ipynb
+      - 08_tile_clustering.ipynb
+      - 09_raster_process.ipynb
+      - 10_vector_to_raster_mask.ipynb
+      - 12_spatialjoin_highest_intersection.ipynb
+      - 13_datasets_utils.ipynb
+      - 14_datasets_nightlights.ipynb
+      - overview.poverty_mapping_demo.ipynb
+      - overview.usecase_ookla.ipynb
+      - tutorial.area_zonal_stats.ipynb
+      - tutorial.datasets.ipynb
+      - tutorial.dhs.ipynb
+      - tutorial.distance_zonal_stats.ipynb
+      - tutorial.geometry_validation.ipynb
+      - tutorial.grids.ipynb
+      - tutorial.raster_process.ipynb
+      - tutorial.raster_to_df.ipynb
+      - tutorial.raster_zonal_stats.ipynb
+      - tutorial.spatialjoin_highest_intersection.ipynb
+      - tutorial.tile_clustering.ipynb
+      - tutorial.vector_zonal_stats.ipynb

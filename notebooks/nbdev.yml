@@ -1,0 +1,9 @@
+project:
+  output-dir: _docs
+
+website:
+  title: "geowrangler"
+  site-url: "https://geowrangler.thinkingmachin.es/"
+  description: "🌏 A python package for wrangling geospatial datasets"
+  repo-branch: master
+  repo-url: "https://github.com/thinkingmachines/geowrangler"

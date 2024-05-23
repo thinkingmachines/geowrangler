@@ -608,7 +608,6 @@ def test_validate_aoi_quadkey(simple_aoi_bingtiles):
 
 
 def test_validate_aoi_quadkey_missing_quadkey_column(simple_aoi):
-
     with pytest.raises(ValueError) as exc_info:
         validate_aoi_quadkey(simple_aoi, "quadkey")
 
@@ -621,7 +620,6 @@ def test_validate_aoi_quadkey_missing_quadkey_column(simple_aoi):
 
 
 def test_validate_aoi_quadkey_empty_df(simple_aoi_bingtiles):
-
     simple_aoi_quadkey_empty = simple_aoi_bingtiles.iloc[:0]
 
     with pytest.raises(ValueError) as exc_info:
@@ -633,7 +631,6 @@ def test_validate_aoi_quadkey_empty_df(simple_aoi_bingtiles):
 
 
 def test_validate_aoi_quadkey_diff_levels(simple_aoi):
-
     aoi_quadkey_diff_level = pd.concat(
         [compute_quadkey(simple_aoi, 10), compute_quadkey(simple_aoi, 11)]
     )
@@ -661,7 +658,6 @@ def test_validate_data_quadkey_multiple_levels(simple_data):
 
 
 def test_validate_data_quadkey_missing_quadkey_column(simple_data):
-
     with pytest.raises(ValueError) as exc_info:
         validate_data_quadkey(simple_data, "quadkey", 10)
 
@@ -674,7 +670,6 @@ def test_validate_data_quadkey_missing_quadkey_column(simple_data):
 
 
 def test_validate_data_quadkey_no_data(simple_data):
-
     simple_data_quadkey_empty = compute_quadkey(simple_data, 19).iloc[:0]
 
     with pytest.raises(ValueError) as exc_info:
@@ -686,7 +681,6 @@ def test_validate_data_quadkey_no_data(simple_data):
 
 
 def test_validate_data_quadkey_below_min_zoom_level(simple_data):
-
     simple_data_quadkey = compute_quadkey(simple_data, 9)
 
     with pytest.raises(ValueError) as exc_info:
@@ -698,7 +692,6 @@ def test_validate_data_quadkey_below_min_zoom_level(simple_data):
 
 
 def test_validate_data_quadkey_diff_levels_below_min_zoom_level(simple_data):
-
     data_quadkey_diff_level = pd.concat(
         [compute_quadkey(simple_data, 9), compute_quadkey(simple_data, 19)]
     )
@@ -737,27 +730,31 @@ def test_create_bingtile_zonal_stats(simple_aoi_bingtiles, simple_data):
         aggregations=[dict(func="count", fillna=True)],
     )
 
-    assert list(bingtile_results.quadkey.values) == [
-        "122222220",
-        "122222222",
-        "122222221",
-        "122222223",
-        "122222230",
-        "122222232",
-        "122222231",
-        "122222233",
-        "122222320",
-        "122222322",
-    ]
+    bingtile_results_sorted = bingtile_results.sort_values(by=["quadkey"])
 
-    assert list(bingtile_results.index_count.values) == [
+    assert list(bingtile_results_sorted.quadkey.values) == sorted(
+        [
+            "122222220",
+            "122222222",
+            "122222221",
+            "122222223",
+            "122222230",
+            "122222232",
+            "122222231",
+            "122222233",
+            "122222320",
+            "122222322",
+        ]
+    )
+
+    assert list(bingtile_results_sorted.index_count.values) == [
+        0.0,
         0.0,
         3.0,
         0.0,
         0.0,
         0.0,
         3.0,
-        0.0,
         3.0,
         0.0,
         0.0,
