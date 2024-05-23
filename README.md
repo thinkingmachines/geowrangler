@@ -79,7 +79,7 @@ Colab notebook.
 
 <div>
 
-[![](https://colab.research.google.com/assets/colab-badge.svg "Open in Colab button")](https://colab.research.google.com/github/thinkingmachines/geowrangler/blob/feat/upgrade-nbdev2/notebooks/index.ipynb)
+[![](https://colab.research.google.com/assets/colab-badge.svg "Open in Colab button")](https://colab.research.google.com/github/thinkingmachines/geowrangler/blob/master/notebooks/index.ipynb)
 
 </div>
 
