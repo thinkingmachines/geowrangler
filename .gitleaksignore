@@ -1,5 +1,6 @@
 71f2a7fac3ac80fc87ffb9fbcf38c9d337a1284a:tests/test_datasets_ookla.py:generic-api-key:231
 a859ea89e24e9b2caeebb05ab53b4c67f204ca16:tests/test_datasets_ookla.py:generic-api-key:229
 0bb8d0d1da3ce107777727c5e8b0963aae14c03a:geowrangler/datasets/nightlights.py:generic-api-key:46
+298b59b09185e74f985015d12cfb5b8dd6b7134b:geowrangler/datasets/nightlights.py:generic-api-key:46
 00291fb7df3c2d7974f66aad631c4244a5876fa8:geowrangler/datasets/nightlights.py:generic-api-key:68
 6d62247927340e3f42c35c24bd52c7106504a4bb:notebooks/tutorial.raster_process.ipynb:easypost-api-token:1298

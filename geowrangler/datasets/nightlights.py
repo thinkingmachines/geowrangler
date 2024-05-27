@@ -43,7 +43,7 @@ def get_eog_access_token(
 ):
     params = {
         "client_id": "eogdata_oidc",
-        "client_secret": "2677ad81-521b-4869-8480-6d05b9e57d48",
+        "client_secret": "2677ad81-521b-4869-8480-6d05b9e57d48",  ##gitleaks:allow
         "username": username,
         "password": password,
         "grant_type": "password",
