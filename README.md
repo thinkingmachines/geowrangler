@@ -6,6 +6,10 @@
 
 ### Overview
 
+[![License:MIT](https://img.shields.io/github/license/thinkingmachines/geowrangler?style=flat-square.png)](https://github.com/thinkingmachines/geowrangler/blob/master/LICENSE)
+[![Versions](https://img.shields.io/pypi/pyversions/geowrangler.svg?style=flat-square)](https://pypi.org/project/geowrangler/)
+[![Docs](https://img.shields.io/badge/docs-passing-green?style=flat-square.png)](https://geowrangler.thinkingmachin.es)
+
 **Geowrangler** is a python package for geodata wrangling. It helps you
 build data transformation workflows that have no out-of-the-box
 solutions from other geospatial libraries.
@@ -20,119 +24,18 @@ We [welcome your comments, suggestions, bug reports and code
 contributions](https://github.com/thinkingmachines/geowrangler/discussions)
 to make **Geowrangler** better.
 
-### Context
-
-**Geowrangler** was borne out of our efforts to reduce the amount of
-boilerplate code in wrangling geospatial data. It builds on top of
-existing geospatial libraries such as geopandas, rasterio, rasterstats,
-morecantile and others. Our goals are centered on the following tasks:
-
-- Extracting area of interest zonal statistics from vector and raster
-  data
-- Gridding areas of interest
-- Validating geospatial datasets
-- Downloading of publically available geospatial datasets (e.g. OSM,
-  Ookla, Nightlights)
-- Other geospatial vector and raster data processing tasks
-
-To make it easy to document, maintain and extend the package, we opted
-to maintain the source code, tests and documentation on Jupyter
-notebooks. We use [nbdev](https://nbdev.fast.ai) to generate the python
-package and documentation from the notebooks. See this document to learn
-more about our development workflow.
-
-By doing this, we hope to make it easy for geospatial analysts,
-scientists and engineers to learn, explore and extend this package for
-their geospatial processing needs.
-
-Aside from providing reference documentation for each module, we have
-included extensive tutorials and use case examples in order to make it
-easy to learn and use.
-
-### Modules
-
-- Grid Tile Generation
-- Geometry Validation
-- Vector Zonal Stats
-- Raster Zonal Stats
-- Area Zonal Stats
-- Distance Zonal Stats
-- Demographic and Health Survey (DHS) Processing Utils
-- Geofabrik (OSM) Data Download
-- Ookla Data Download
-
-*Check [this page for more details about our
-Roadmap](https://github.com/orgs/thinkingmachines/projects/17).*
-
 ### Installation
 
     pip install geowrangler
 
-### Exploring the Documentation
+### Documentation
 
-We develop the package modules alongside their documentation. Each page
-comes with an *Open in Colab* button that will open the jupyter notebook
-in Colab for exploration (including this page).
+Please visit our [**Documentation
+site**](https://geowrangler.thinkingmachin.es) to give you an
+introduction to Geowrangler.
 
-Click on the *Open in Colab* button below to open this page as a Google
-Colab notebook.
+### Development and Contributing
 
-<div>
-
-[![](https://colab.research.google.com/assets/colab-badge.svg "Open in Colab button")](https://colab.research.google.com/github/thinkingmachines/geowrangler/blob/master/notebooks/index.ipynb)
-
-</div>
-
-``` python
-# view the source of a grid component
-gdf = gpd.GeoDataFrame()
-grid = geowrangler.grids.SquareGridGenerator(gdf, 1)
-grid??
-```
-
-    Type:        SquareGridGenerator
-    String form: <geowrangler.grids.SquareGridGenerator object at 0x7fc284380880>
-    File:        ~/work/unicef-ai4d/geowrangler-1/geowrangler/grids.py
-    Source:     
-    class SquareGridGenerator:
-        def __init__(
-            self,
-            cell_size: float,  # height and width of a square cell in meters
-            grid_projection: str = "EPSG:3857",  # projection of grid output
-            boundary: Union[SquareGridBoundary, List[float]] = None,  # original boundary
-        ):
-            self.cell_size = cell_size
-            self.grid_projection = grid_projection
-            self.boundary = boundary
-
-#### Tutorials
-
-- [Grids Generation](tutorial.grids.html)
-- [Geometry Validation](tutorial.geometry_validation.html)
-- [Vector Zonal Stats](tutorial.vector_zonal_stats.html)
-- [Raster Zonal Stats](tutorial.raster_zonal_stats.html)
-- [Area Zonal Stats](tutorial.area_zonal_stats.html)
-- [Distance Zonal Stats](tutorial.distance_zonal_stats.html)
-- [DHS Processing Utils](tutorial.dhs.html)
-- [Dataset Downloads](tutorial.datasets.html)
-
-#### Reference
-
-- [Grids Generation](grids.html)
-- [Geometry Validation](validation.html)
-- [Vector Zonal Stats](vector_zonal_stats.html)
-- [Raster Zonal Stats](raster_zonal_stats.html)
-- [Area Zonal Stats](area_zonal_stats.html)
-- [Distance Zonal Stats](distance_zonal_stats.html)
-- [DHS Processing Utils](dhs.html)
-- [Dataset Geofabrik (OSM)](datasets_geofabrik.html)
-- [Dataset Ookla](datasets_ookla.html)
-
-<div>
-
-> **Note**
->
-> All the documentation pages (including the references) are executable
-> Jupyter notebooks.
-
-</div>
+Please checkout the [DEVELOPMENT](./DEVELOPMENT.md) and the
+[CONTRIBUTING](./CONTRIBUTING.md) sections to learn how to contribute,
+enhance, fix Geowrangler
