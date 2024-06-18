@@ -19,6 +19,7 @@ import pandas as pd
 from fastcore.all import defaults, parallel
 from fastcore.basics import patch
 from geopandas import GeoDataFrame
+from IPython.display import clear_output, display
 from pandas import DataFrame
 from pyproj import Transformer
 from shapely.geometry import Polygon, shape
@@ -217,7 +218,7 @@ class BingTileGridGenerator:
     def get_tiles_for_polygon(
         self,
         polygon: Polygon,
-        filter: bool = True,
+        filter: bool = False,
     ):
         """Get the intersecting tiles with polygon for a zoom level. Polygon should be in EPSG:4326"""
         x_min, y_min, x_max, y_max = polygon.bounds
@@ -256,7 +257,11 @@ def generate_grid(self: BingTileGridGenerator, gdf: GeoDataFrame) -> DataFrame:
     if isinstance(unary_union, Polygon):
         tiles.update(self.get_tiles_for_polygon(unary_union))
     else:
-        for geom in reprojected_gdf.unary_union.geoms:
+        len_geoms = len(reprojected_gdf.unary_union.geoms)
+        for index, geom in enumerate(reprojected_gdf.unary_union.geoms):
+            clear_output(wait=True)
+            display(f"{index}/{len_geoms}")
+            display("geom", geom)
             _tiles = self.get_tiles_for_polygon(geom)
             tiles.update(_tiles)
     quadkey, geom_tile = zip(*((k, v) for k, v in tiles.items()))
@@ -290,8 +295,9 @@ def get_intersect_partition(item):
     tiles_gdf, reprojected_gdf = item
     tiles_gdf.sindex
     reprojected_gdf.sindex
+    tiles_gdf.set_geometry("centroid")
     intersect_tiles_gdf = tiles_gdf.sjoin(
-        reprojected_gdf, how="inner", predicate="intersects"
+        reprojected_gdf, how="inner", predicate="within"
     )
     return intersect_tiles_gdf
 
@@ -334,7 +340,12 @@ def generate_grid_join(
     if isinstance(unary_union, Polygon):
         tiles += self.get_all_tiles_for_polygon(unary_union)
     else:
-        for geom in reprojected_gdf.unary_union.geoms:
+        len_geoms = len(reprojected_gdf.unary_union.geoms)
+
+        for index, geom in enumerate(reprojected_gdf.unary_union.geoms):
+            clear_output(wait=True)
+            display(f"{index}/{len_geoms}")
+            display("geom", geom)
             tiles += self.get_all_tiles_for_polygon(
                 geom,
             )
@@ -348,12 +359,6 @@ def generate_grid_join(
     )
 
     if filter:
-        # tiles_gdf.sindex
-        # reprojected_gdf.sindex
-        # intersect_tiles_gdf = tiles_gdf.sjoin(
-        #     reprojected_gdf,
-        #     how='inner',
-        #     predicate='intersects')
         intersect_tiles_gdf = get_parallel_intersects(
             tiles_gdf, reprojected_gdf, n_workers=n_workers, progress=progress
         )
