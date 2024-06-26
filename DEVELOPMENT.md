@@ -33,7 +33,6 @@ We recommend creating a virtual python environment via [virtualenv](https://pypi
 
 To generate and preview the documentation site on your local machine, you will need to install [quarto](https://quarto.org). The following assumes that you have setup quarto on your system.
 
-```
 
 **Set-up with virtualenv**
 
