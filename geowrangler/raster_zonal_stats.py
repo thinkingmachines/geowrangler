@@ -103,7 +103,7 @@ def create_raster_zonal_stats(
 
     return aoi
 
-# %% ../notebooks/03_raster_zonal_stats.ipynb 29
+# %% ../notebooks/03_raster_zonal_stats.ipynb 30
 def _validate_aggs(aggregations, band_count):
     "Validate aggregations based on band count, dropping invalid entries"
     aggregations_validated = []
@@ -120,7 +120,7 @@ def _validate_aggs(aggregations, band_count):
 
     return aggregations_validated
 
-# %% ../notebooks/03_raster_zonal_stats.ipynb 30
+# %% ../notebooks/03_raster_zonal_stats.ipynb 31
 def create_exactextract_zonal_stats(
     aoi: Union[  # The area of interest geodataframe, or path to the vector file
         str, gpd.GeoDataFrame
@@ -137,6 +137,7 @@ def create_exactextract_zonal_stats(
     This function is a wrapper over the `exact_extract` method from the `exactextract` Python package,
     designed for compatibility with other geowrangler modules. It takes a list of agg specs,
     with each agg spec applied to a specific band.
+    See https://github.com/isciences/exactextract/blob/master/python/README.md for more details.
 
     Parameters
     ----------
@@ -158,9 +159,9 @@ def create_exactextract_zonal_stats(
     extra_args : dict
 
 
-    Examples
+    Example usage
     --------
-    >>> create_exactextract_zonal_stats(
+    create_exactextract_zonal_stats(
         aoi=aoi_gdf,
         data="path/to/raster.tif",
         aggregations=[
@@ -171,7 +172,37 @@ def create_exactextract_zonal_stats(
         ],
     )
     """
-    # TODO: add extra args handling
+    # TODO: figure out NODATA handling
+
+    # Handle extra arguments, issuing warnings for non-default behavior.
+    if "weights" in extra_args:
+        warnings.warn(
+            "Input weights raster will be used for all passed aggregations. To use different weights for each aggregation, call `get_exactextract_zonal_stats` multiple times."
+        )
+
+    # If output, include_cols, or include_geom, return the raw exactextract results instead
+    # These values conflict with the intended postprocessing steps (renaming/filtering, joining to input gdf)
+    RETURN_RAW_RESULTS = False
+    if "output" not in extra_args:
+        extra_args["output"] = "pandas"
+    else:
+        if extra_args["output"] != "pandas":
+            RETURN_RAW_RESULTS = True
+        if extra_args["output"] == "gdal":  # requires osgeo (heavy dependency)
+            raise ValueError(
+                "extra_args['output'] is set to 'gdal', which is currently unsupported. Please choose a different option."
+            )
+
+    if "include_cols" in extra_args:
+        RETURN_RAW_RESULTS = True
+
+    if "include_geom" in extra_args:
+        RETURN_RAW_RESULTS = True
+
+    if RETURN_RAW_RESULTS:
+        warnings.warn(
+            "Defaulting to raw exactextract output using arguments in output, include_cols, and/or include_geom. Column names: band_<band number>_<func>."
+        )
 
     if isinstance(aoi, str) or isinstance(aoi, Path):
         aoi = gpd.read_file(aoi)
@@ -194,35 +225,20 @@ def create_exactextract_zonal_stats(
     for agg in aggregations:
         all_operations.update(agg["func"])
 
-        # TODO: figure out NODATA handling
-        # # If no data is set, add funcs with default_value into the list of operations
-        # if agg.get('nodata_val') is not None:
-        #     nodata_val = str(agg.get('nodata_val'))
-        #     operations_default_val = [f"{func}(default_value={nodata_val})" for func in agg.get('func')]
-        #     all_operations.update(operations_default_val)
-
     all_operations = sorted(all_operations)
 
     # If input is single band, the raster will be given as band_1_<func> for all funcs
     if data_count == 1:
-        results = exact_extract(
-            RasterioRasterSource(data),
-            aoi,
-            all_operations,
-            output="pandas",
-            include_geom=False,
-        )
+        results = exact_extract(data, aoi, all_operations, **extra_args)
+        if RETURN_RAW_RESULTS:
+            return results
         results = results.rename(
             columns={col: f"band_1_{col}" for col in results.columns}
         )
     else:
-        results = exact_extract(
-            data,
-            aoi,
-            all_operations,
-            output="pandas",
-            include_geom=False,
-        )
+        results = exact_extract(data, aoi, all_operations, **extra_args)
+        if RETURN_RAW_RESULTS:
+            return results
 
     # Create new columns as specified by agg specs
     # Each renamed column will be a copy of its corresponding result column
@@ -230,18 +246,18 @@ def create_exactextract_zonal_stats(
     for agg in aggregations:
         result_cols = [f"band_{agg['band']}_{func}" for func in agg["func"]]
 
-        if agg.get("output") is None:
+        if "output" not in agg:
             agg_out_cols = result_cols
 
-        if isinstance(agg.get("output"), str):
-            agg_out_cols = [f"{agg.get('output')}_{func}" for func in agg["func"]]
+        elif isinstance(agg["output"], str):
+            agg_out_cols = [f"{agg['output']}_{func}" for func in agg["func"]]
 
-        if isinstance(agg.get("output"), list) and all(
+        elif isinstance(agg["output"], list) and all(
             isinstance(item, str) for item in agg.get("output")
         ):
-            assert len(agg.get("output")) == len(
-                agg.get("func")
-            ), f"Output list only has {len(agg.get('output'))}, expected {len(agg.get('func'))}"
+            assert len(agg["output"]) == len(
+                agg["func"]
+            ), f"Output list only has {len(agg['output'])}, expected {len(agg['func'])}"
             agg_out_cols = agg.get("output")
 
         # Add output columns to result
