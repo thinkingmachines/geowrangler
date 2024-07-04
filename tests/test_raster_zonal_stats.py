@@ -131,3 +131,156 @@ def test_raster_zonal_stats_nodata_default():
         ),
     )
     assert results["population_count"].iloc[0] > 0
+
+# exactextract tests
+def test_create_exactextract_zonal_stats(simple_aoi):
+    terrain_file = "data/sample_terrain.tif"
+    results = rzs.create_exactextract_zonal_stats(
+        simple_aoi,
+        terrain_file,
+        aggregations=[
+            dict(band=1, func=["mean", "max", "min", "stdev"], output="elevation"),
+            dict(band=2, func=["mean", "max", "min", "stdev"], output="elevation")
+        ],    
+    )
+    assert list(results.columns.values) == [
+        "col1",
+        "lat0",
+        "lon0",
+        "lat1",
+        "lon1",
+        "lat2",
+        "lon2",
+        "lat3",
+        "lon3",
+        "geometry",
+        "elevation_mean",
+        "elevation_max",
+        "elevation_min",
+        "elevation_stdev",
+    ]
+
+def test_create_exactextract_zonal_stats_from_file():
+    terrain_file = "data/sample_terrain.tif"
+    file_aoi = "data/simple_aoi.geojson"
+    results = rzs.create_exactextract_zonal_stats(
+        file_aoi,
+        terrain_file,
+        aggregations=[dict(band=1, func=["mean", "min", "max", "stdev"], output="elevation")],
+    )
+    print(results)
+    assert list(results.columns.values) == [
+        "col1",
+        "lat0",
+        "lon0",
+        "lat1",
+        "lon1",
+        "lat2",
+        "lon2",
+        "lat3",
+        "lon3",
+        "geometry",
+        "elevation_mean",
+        "elevation_min",
+        "elevation_max",
+        "elevation_stdev",
+    ]
+
+def test_exactextract_zonal_stats_multiband():
+    aq_file = "data/ph_s5p_AER_AI_340_380.tiff"
+    file_aoi = "data/region3_admin.geojson"
+    file_aoi = gpd.read_file(file_aoi).to_crs("EPSG:3857")
+    results = rzs.create_exactextract_zonal_stats(
+        file_aoi,
+        aq_file,
+        aggregations=[
+            dict(band=1, func=["mean", "sum"], nodata_val=-9999), # default - band1_mean, band1_sum
+            dict(band=2, func=["mean", "sum"]), # default - band2_mean, band2_sum
+            dict(band=2, func=["mean", "sum"], output="prefix"), # prefix_mean, prefix_sum
+            dict(band=1, func=["mean", "sum", "count"], output=["aer_ai_mean", "aer_ai_sum", "aer_ai_count"]),
+        ],
+    )
+    assert list(results.columns.values) == [
+        "Reg_Code",
+        "Reg_Name",
+        "Reg_Alt_Name",
+        "geometry",
+        "band_1_mean",
+        "band_1_sum",
+        "band_2_mean",
+        "band_2_sum",
+        "prefix_mean",
+        "prefix_sum",
+        "aer_ai_mean",
+        "aer_ai_sum",
+        "aer_ai_count"
+    ]
+
+def test_exactextract_zonal_stats_multiband_crs_mismatch():
+    aq_file = "data/ph_s5p_AER_AI_340_380.tiff"
+    file_aoi = "data/region3_admin.geojson"
+    file_aoi = gpd.read_file(file_aoi).to_crs("EPSG:4326")
+    results = rzs.create_exactextract_zonal_stats(
+        file_aoi,
+        aq_file,
+        aggregations=[
+            dict(band=1, func=["mean", "sum"], nodata_val=-9999), # default - band1_mean, band1_sum
+            dict(band=2, func=["mean", "sum"]), # default - band2_mean, band2_sum
+            dict(band=2, func=["mean", "sum"], output="prefix"), # prefix_mean, prefix_sum
+            dict(band=1, func=["mean", "sum", "count"], output=["aer_ai_mean", "aer_ai_sum", "aer_ai_count"]),
+        ],
+    )
+    assert list(results.columns.values) == [
+        "Reg_Code",
+        "Reg_Name",
+        "Reg_Alt_Name",
+        "geometry",
+        "band_1_mean",
+        "band_1_sum",
+        "band_2_mean",
+        "band_2_sum",
+        "prefix_mean",
+        "prefix_sum",
+        "aer_ai_mean",
+        "aer_ai_sum",
+        "aer_ai_count"
+    ]
+
+def test_exactextract_geojson(simple_aoi):
+    "Check if output returns raw exactextract output"
+    terrain_file = "data/sample_terrain.tif"
+    results = rzs.create_exactextract_zonal_stats(
+        simple_aoi,
+        terrain_file,
+        aggregations=[
+            dict(band=1, func=["sum"], output="elevation"),
+        ],
+        extra_args = dict(output="geojson")
+    )
+    assert isinstance(results, list)
+
+def test_exactextract_include_cols(simple_aoi):
+    "Check if output returns raw exactextract output"
+    terrain_file = "data/sample_terrain.tif"
+    results = rzs.create_exactextract_zonal_stats(
+        simple_aoi,
+        terrain_file,
+        aggregations=[
+            dict(band=1, func=["sum"], output="elevation"),
+        ],
+        extra_args = dict(include_cols=["col1", "lat0"])
+    )
+    assert isinstance(results, pd.DataFrame)
+
+def test_exactextract_include_geom(simple_aoi):
+    "Check if output returns raw exactextract output"
+    terrain_file = "data/sample_terrain.tif"
+    results = rzs.create_exactextract_zonal_stats(
+        simple_aoi,
+        terrain_file,
+        aggregations=[
+            dict(band=1, func=["sum"], output="elevation"),
+        ],
+        extra_args = dict(include_geom=True)
+    )
+    assert isinstance(results, gpd.GeoDataFrame)

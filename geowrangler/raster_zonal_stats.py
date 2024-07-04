@@ -122,9 +122,9 @@ def _validate_aggs(aggregations, band_count):
 
 # %% ../notebooks/03_raster_zonal_stats.ipynb 31
 def create_exactextract_zonal_stats(
-    aoi: Union[  # The area of interest geodataframe, or path to the vector file
+    aoi: Union[
         str, gpd.GeoDataFrame
-    ],
+    ],  # The area of interest geodataframe, or path to the vector file
     data: Union[str, Path],  # The path to the raster data file
     aggregations: List[Dict[str, Any]],  # List of agg specs
     extra_args: dict = dict(
@@ -207,38 +207,32 @@ def create_exactextract_zonal_stats(
     if isinstance(aoi, str) or isinstance(aoi, Path):
         aoi = gpd.read_file(aoi)
 
-    # Read metadata to determine raster properties
+    # Open raster and run exactextract
     with rasterio.open(data) as dst:
-        data_meta = dst.meta
-        data_count = data_meta["count"]
-        data_crs = data_meta["crs"]
+        # Validate passed aggregations based on band count and compile
+        aggregations = _validate_aggs(aggregations, dst.count)
+        all_operations = set()
+        for agg in aggregations:
+            all_operations.update(agg["func"])
+        all_operations = sorted(all_operations)
+        if aoi.crs != dst.crs:
+            warnings.warn(
+                f"The CRS of the AOI ({aoi.crs}) and the raster data ({dst.crs}) do not match!"
+            )
 
-    if aoi.crs != data_crs:
-        warnings.warn(
-            f"The CRS of the AOI ({aoi.crs}) and the raster data ({data_crs}) do not match!"
-        )
-
-    # Validate passed aggregations
-    aggregations = _validate_aggs(aggregations, data_count)
-
-    all_operations = set()
-    for agg in aggregations:
-        all_operations.update(agg["func"])
-
-    all_operations = sorted(all_operations)
-
-    # If input is single band, the raster will be given as band_1_<func> for all funcs
-    if data_count == 1:
-        results = exact_extract(data, aoi, all_operations, **extra_args)
-        if RETURN_RAW_RESULTS:
-            return results
-        results = results.rename(
-            columns={col: f"band_1_{col}" for col in results.columns}
-        )
-    else:
-        results = exact_extract(data, aoi, all_operations, **extra_args)
-        if RETURN_RAW_RESULTS:
-            return results
+        # If input is single band, the output is processed to band_1_<func> for all funcs
+        # This is automatically done with singleband inputs
+        if dst.count == 1:
+            results = exact_extract(data, aoi, all_operations, **extra_args)
+            if RETURN_RAW_RESULTS:
+                return results
+            results = results.rename(
+                columns={col: f"band_1_{col}" for col in results.columns}
+            )
+        else:
+            results = exact_extract(data, aoi, all_operations, **extra_args)
+            if RETURN_RAW_RESULTS:
+                return results
 
     # Create new columns as specified by agg specs
     # Each renamed column will be a copy of its corresponding result column
@@ -267,5 +261,5 @@ def create_exactextract_zonal_stats(
 
     # Return only the columns specified
     output_results = results.loc[:, out_cols]
-
+    print(list(output_results.columns.values))
     return aoi.merge(output_results, how="left", left_index=True, right_index=True)
