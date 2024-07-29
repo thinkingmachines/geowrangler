@@ -126,7 +126,9 @@ def create_exactextract_zonal_stats(
         str, gpd.GeoDataFrame
     ],  # The area of interest geodataframe, or path to the vector file
     data: Union[str, Path],  # The path to the raster data file
-    aggregation: List[Dict[str, Any]],  # List of agg specs,
+    aggregation: Union[
+        Dict, List[Dict[str, Any]]
+    ],  # Dictionary or list of dictionaries specifying the aggregation
     include_cols: List[
         str
     ] = None,  # If not None, list of columns from input AOI to include in output
@@ -203,7 +205,11 @@ def create_exactextract_zonal_stats(
             "output in `extra_args` is ignored. Output is set to 'pandas'. Refer to `exactextract.exact_extract()` to use other output options."
         )
 
-    # Open
+    # Turn a single dict into a list
+    if isinstance(aggregation, dict):
+        aggregation = [aggregation]
+
+    # Open AOI if file is specified
     if isinstance(aoi, str) or isinstance(aoi, Path):
         aoi = gpd.read_file(aoi)
 
