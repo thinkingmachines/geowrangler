@@ -59,7 +59,7 @@ poetry run pytest --cov --cov-config=.coveragerc --cov-fail-under=80 -n auto
 Once the necessary changes are made, run the following to generate the python code.
 
 ```
-poetry run nbdev_build_lib
+poetry run nbdev_export
 poetry run pre-commit run -a
 poetry run pre-commit run -a
 ```
