@@ -29,10 +29,10 @@ def voxel_traversal_2d(
     direction_x = 1 if x2 > x1 else -1
     direction_y = 1 if y2 > y1 else -1
 
+    # Single point
     if (x1 == x2) and (y1 == y2):
-        raise ValueError(
-            f"start_vertex {start_vertex} and end_vertex {end_vertex} are the same"
-        )
+        pixels = [(x1, y1)]
+        return pixels
 
     # Vertical line
     elif x1 == x2:
@@ -236,7 +236,7 @@ def interpolate_x(
     return interpolated_x
 
 # %% ../../notebooks/15_polygon_fill.ipynb 17
-def polygon_fill(
+def voxel_traversal_scanline_fill(
     vertices_df: Union[
         pd.DataFrame, pl.DataFrame
     ],  # dataframe with x_col and y_col for the polygon vertices
@@ -253,6 +253,7 @@ def polygon_fill(
     offset_vertices = vertices[1:] + vertices[:1]
 
     polygon_pixels = set()
+
     for start_vertex, end_vertex in zip(vertices, offset_vertices):
         polygon_pixels.update(voxel_traversal_2d(start_vertex, end_vertex, debug))
 
