@@ -120,7 +120,7 @@ def generate_grid(self: SquareGridGenerator, gdf: GeoDataFrame) -> GeoDataFrame:
         boundary = SquareGridBoundary(x_min, y_min, x_max, y_max)
 
     polygons = {}
-    unary_union = reprojected_gdf.unary_union
+    unary_union = reprojected_gdf.union_all(method="unary")
     if isinstance(unary_union, Polygon):
         polygons.update(self.create_grid_for_polygon(boundary, unary_union))
     else:
@@ -161,11 +161,11 @@ def get_hexes_for_polygon(self: H3GridGenerator, poly: Polygon):
 def generate_grid(self: H3GridGenerator, gdf: GeoDataFrame) -> DataFrame:
     reprojected_gdf = gdf.to_crs("epsg:4326")  # h3 hexes are in epsg:4326 CRS
     hex_ids = set()
-    unary_union = reprojected_gdf.unary_union
+    unary_union = reprojected_gdf.union_all(method="unary")
     if isinstance(unary_union, Polygon):
         hex_ids.update(self.get_hexes_for_polygon(unary_union))
     else:
-        for geom in reprojected_gdf.unary_union.geoms:
+        for geom in unary_union.geoms:
             _hexes = self.get_hexes_for_polygon(geom)
             hex_ids.update(_hexes)
     df = DataFrame({"hex_id": list(hex_ids)})
@@ -234,11 +234,11 @@ def get_all_tiles_for_polygon(self: BingTileGridGenerator, polygon: Polygon):
 def generate_grid(self: BingTileGridGenerator, gdf: GeoDataFrame) -> DataFrame:
     reprojected_gdf = gdf.to_crs("epsg:4326")  # quadkeys hexes are in epsg:4326 CRS
     tiles = {}
-    unary_union = reprojected_gdf.unary_union
+    unary_union = reprojected_gdf.union_all(method="unary")
     if isinstance(unary_union, Polygon):
         tiles.update(self.get_tiles_for_polygon(unary_union))
     else:
-        for geom in reprojected_gdf.unary_union.geoms:
+        for geom in unary_union.geoms:
             _tiles = self.get_tiles_for_polygon(geom)
             tiles.update(_tiles)
     quadkey, geom_tile = zip(*((k, v) for k, v in tiles.items()))
@@ -307,11 +307,11 @@ def generate_grid_join(
         ["geometry"]
     ]  # quadkeys hexes are in epsg:4326 CRS
     tiles = []
-    unary_union = reprojected_gdf.unary_union
+    unary_union = reprojected_gdf.union_all(method="unary")
     if isinstance(unary_union, Polygon):
         tiles += self.get_all_tiles_for_polygon(unary_union)
     else:
-        for geom in reprojected_gdf.unary_union.geoms:
+        for geom in unary_union.geoms:
             tiles += self.get_all_tiles_for_polygon(
                 geom,
             )
@@ -389,22 +389,22 @@ class FastBingTileGridGenerator:
         if unique_id_col is not None:
             id_cols = [self.SUBPOLYGON_ID_COL, unique_id_col]
         else:
-            id_cols = [self.SUBPOLYGON_ID_COL]
+            complement_cols = ["x", "y", self.SUBPOLYGON_ID_COL]
+            unique_id_col = list(set(vertices.columns) - set(complement_cols))
+            assert len(unique_id_col) == 1
+            unique_id_col = unique_id_col[0]
+
+            id_cols = [self.SUBPOLYGON_ID_COL, unique_id_col]
 
         polygon_ids = vertices.select(id_cols).unique(maintain_order=True).rows()
 
         tiles_in_geom = set()
         for polygon_id in polygon_ids:
-            if len(id_cols) == 2:
-                subpolygon_id, unique_id = polygon_id
-                filter_expr = (pl.col(self.SUBPOLYGON_ID_COL) == subpolygon_id) & (
-                    pl.col(unique_id_col) == unique_id
-                )
-                poly_vertices = vertices.filter(filter_expr)
-            else:
-                subpolygon_id = polygon_id[0]
-                filter_expr = pl.col(self.SUBPOLYGON_ID_COL) == subpolygon_id
-                poly_vertices = vertices.filter(filter_expr)
+            subpolygon_id, unique_id = polygon_id
+            filter_expr = (pl.col(self.SUBPOLYGON_ID_COL) == subpolygon_id) & (
+                pl.col(unique_id_col) == unique_id
+            )
+            poly_vertices = vertices.filter(filter_expr)
 
             poly_vertices = poly_vertices.unique(maintain_order=True)
             _tiles_in_geom = voxel_traversal_scanline_fill(
@@ -448,7 +448,7 @@ class FastBingTileGridGenerator:
             tiles_in_geom = tiles_in_geom.drop(["x", "y"])
         else:
             tiles_in_geom = tiles_in_geom.with_columns(z=pl.lit(self.zoom_level))
-            column_order = ["x", "y", "z", "quadkey"]
+            column_order = ["quadkey", "x", "y", "z"]
             if unique_id_col is not None:
                 column_order += [unique_id_col]
             assert set(tiles_in_geom.columns) == set(column_order)
@@ -561,6 +561,11 @@ class FastBingTileGridGenerator:
                     Found {duplicates_bool.sum():,} duplicates"""
                 )
             polys_gdf = polys_gdf.set_index(unique_id_col)
+        else:
+            # reset index if it is not unique
+            if polys_gdf.index.nunique() != len(polys_gdf.index):
+                polys_gdf = polys_gdf.reset_index(drop=True)
+            unique_id_col = polys_gdf.index.name
 
         polys_gdf = polys_gdf.explode(index_parts=True)
 
