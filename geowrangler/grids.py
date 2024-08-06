@@ -364,7 +364,7 @@ class FastBingTileGridGenerator:
         self,
         zoom_level: int,  # Zoom level of tile. See: https://docs.microsoft.com/en-us/bingmaps/articles/bing-maps-tile-system for more info
         return_geometry: bool = True,  # If geometry should be returned. Setting this to false will only return quadkeys
-        add_xyz_cols: bool = False,  # If quadkey should be converted to their xy values.
+        add_xyz_cols: bool = False,  # If xyz columns should be returned. Unlike BingTileGridGenerator, choosing to return xyz columns doesn't substantionally add compute time.
     ):
         self.zoom_level = zoom_level
         self.return_geometry = return_geometry
