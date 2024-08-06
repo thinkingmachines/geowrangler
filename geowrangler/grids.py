@@ -450,7 +450,7 @@ class FastBingTileGridGenerator:
         else:
             tiles_in_geom = tiles_in_geom.with_columns(z=pl.lit(self.zoom_level))
             column_order = ["quadkey", "x", "y", "z"]
-            if unique_id_col is not None:
+            if has_unique_id_col:
                 column_order += [unique_id_col]
             assert set(tiles_in_geom.columns) == set(column_order)
             tiles_in_geom = tiles_in_geom.select(column_order)
