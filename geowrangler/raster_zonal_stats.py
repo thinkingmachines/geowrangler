@@ -187,7 +187,7 @@ def create_exactextract_zonal_stats(
     # Handle extra arguments to exactextract
     if "weights" in extra_args:
         warnings.warn(
-            "Input weights raster will be used for all passed aggregations. To use different weights for each aggregation, call `get_exactextract_zonal_stats` multiple times."
+            "Input weights raster will be used for all passed aggregations. To use different weights for each aggregation, call `create_exactextract_zonal_stats` multiple times."
         )
     if "include_geom" in extra_args:
         extra_args.pop("include_geom")
