@@ -388,13 +388,14 @@ class FastBingTileGridGenerator:
 
         if unique_id_col is not None:
             id_cols = [self.SUBPOLYGON_ID_COL, unique_id_col]
+            has_unique_id_col = True
         else:
             complement_cols = ["x", "y", self.SUBPOLYGON_ID_COL]
             unique_id_col = list(set(vertices.columns) - set(complement_cols))
             assert len(unique_id_col) == 1
             unique_id_col = unique_id_col[0]
-
             id_cols = [self.SUBPOLYGON_ID_COL, unique_id_col]
+            has_unique_id_col = False
 
         polygon_ids = vertices.select(id_cols).unique(maintain_order=True).rows()
 
@@ -411,13 +412,13 @@ class FastBingTileGridGenerator:
                 poly_vertices, x_col="x", y_col="y"
             )
 
-            if len(id_cols) == 2:
+            if has_unique_id_col:
                 _tiles_in_geom = [(x, y, unique_id) for (x, y) in _tiles_in_geom]
 
             tiles_in_geom.update(_tiles_in_geom)
 
         schema = {"x": self.PIXEL_DTYPE, "y": self.PIXEL_DTYPE}
-        if len(id_cols) == 2:
+        if has_unique_id_col:
             schema[unique_id_col] = vertices[unique_id_col].dtype
 
         tiles_in_geom = pl.from_records(
