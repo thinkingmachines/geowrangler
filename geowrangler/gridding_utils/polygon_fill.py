@@ -3,14 +3,14 @@
 # %% auto 0
 __all__ = []
 
-# %% ../../notebooks/15_polygon_fill.ipynb 3
+# %% ../../notebooks/15_polygon_fill.ipynb 5
 from typing import List, Tuple, Set, Optional, Dict, Union
 
 import numpy as np
 import pandas as pd
 import polars as pl
 
-# %% ../../notebooks/15_polygon_fill.ipynb 9
+# %% ../../notebooks/15_polygon_fill.ipynb 11
 # epsilon is a constant for correcting near-misses in voxel traversal
 EPSILON = 1e-14
 
@@ -161,7 +161,7 @@ def voxel_traversal_2d(
 
     return pixels
 
-# %% ../../notebooks/15_polygon_fill.ipynb 13
+# %% ../../notebooks/15_polygon_fill.ipynb 15
 def scanline_fill(
     vertices: List[
         Tuple[int, int]
@@ -235,7 +235,7 @@ def interpolate_x(
     interpolated_x = x1 + (y - y1) * inverse_slope
     return interpolated_x
 
-# %% ../../notebooks/15_polygon_fill.ipynb 17
+# %% ../../notebooks/15_polygon_fill.ipynb 19
 def voxel_traversal_scanline_fill(
     vertices_df: Union[
         pd.DataFrame, pl.DataFrame

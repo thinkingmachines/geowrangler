@@ -187,7 +187,7 @@ class BingTileGridGenerator:
         self,
         zoom_level: int,  # Zoom level of tile. See: https://docs.microsoft.com/en-us/bingmaps/articles/bing-maps-tile-system for more info
         return_geometry: bool = True,  # If geometry should be returned. Setting this to false will only return quadkeys
-        add_xyz_cols: bool = False,  # If quadkey should be converted to their xy values.
+        add_xyz_cols: bool = False,  # If quadkey should be converted to their xyz values.
     ):
         self.zoom_level = zoom_level
         self.return_geometry = return_geometry
@@ -375,223 +375,243 @@ class FastBingTileGridGenerator:
                 f"Maximum allowed zoom level is {self.MAX_ZOOM}. Input was {self.zoom_level}"
             )
 
-    def generate_grid(
-        self,
-        aoi_gdf: GeoDataFrame,
-        unique_id_col: Optional[
-            str
-        ] = None,  # the ids under this column will be preserved in the output tiles
-    ) -> Union[GeoDataFrame, pd.DataFrame]:
+# %% ../notebooks/00_grids.ipynb 22
+@patch
+def generate_grid(
+    self: FastBingTileGridGenerator,
+    aoi_gdf: GeoDataFrame,
+    unique_id_col: Optional[
+        str
+    ] = None,  # the ids under this column will be preserved in the output tiles
+) -> Union[GeoDataFrame, pd.DataFrame]:
 
-        vertices = self._polygons_to_vertices(aoi_gdf, unique_id_col)
-        vertices = self._latlng_to_xy(vertices, lat_col="y", lng_col="x")
+    vertices = self._polygons_to_vertices(aoi_gdf, unique_id_col)
+    vertices = self._latlng_to_xy(vertices, lat_col="y", lng_col="x")
 
-        if unique_id_col is not None:
-            id_cols = [self.SUBPOLYGON_ID_COL, unique_id_col]
-            has_unique_id_col = True
-        else:
-            complement_cols = ["x", "y", self.SUBPOLYGON_ID_COL]
-            unique_id_col = list(set(vertices.columns) - set(complement_cols))
-            assert len(unique_id_col) == 1
-            unique_id_col = unique_id_col[0]
-            id_cols = [self.SUBPOLYGON_ID_COL, unique_id_col]
-            has_unique_id_col = False
+    if unique_id_col is not None:
+        id_cols = [self.SUBPOLYGON_ID_COL, unique_id_col]
+        has_unique_id_col = True
+    else:
+        complement_cols = ["x", "y", self.SUBPOLYGON_ID_COL]
+        unique_id_col = list(set(vertices.columns) - set(complement_cols))
+        assert len(unique_id_col) == 1
+        unique_id_col = unique_id_col[0]
+        id_cols = [self.SUBPOLYGON_ID_COL, unique_id_col]
+        has_unique_id_col = False
 
-        polygon_ids = vertices.select(id_cols).unique(maintain_order=True).rows()
+    polygon_ids = vertices.select(id_cols).unique(maintain_order=True).rows()
 
-        tiles_in_geom = set()
-        for polygon_id in polygon_ids:
-            subpolygon_id, unique_id = polygon_id
-            filter_expr = (pl.col(self.SUBPOLYGON_ID_COL) == subpolygon_id) & (
-                pl.col(unique_id_col) == unique_id
-            )
-            poly_vertices = vertices.filter(filter_expr)
+    tiles_in_geom = set()
+    for polygon_id in polygon_ids:
+        subpolygon_id, unique_id = polygon_id
+        filter_expr = (pl.col(self.SUBPOLYGON_ID_COL) == subpolygon_id) & (
+            pl.col(unique_id_col) == unique_id
+        )
+        poly_vertices = vertices.filter(filter_expr)
 
-            poly_vertices = poly_vertices.unique(maintain_order=True)
-            _tiles_in_geom = voxel_traversal_scanline_fill(
-                poly_vertices, x_col="x", y_col="y"
-            )
+        poly_vertices = poly_vertices.unique(maintain_order=True)
+        _tiles_in_geom = voxel_traversal_scanline_fill(
+            poly_vertices, x_col="x", y_col="y"
+        )
 
-            if has_unique_id_col:
-                _tiles_in_geom = [(x, y, unique_id) for (x, y) in _tiles_in_geom]
-
-            tiles_in_geom.update(_tiles_in_geom)
-
-        schema = {"x": self.PIXEL_DTYPE, "y": self.PIXEL_DTYPE}
         if has_unique_id_col:
-            schema[unique_id_col] = vertices[unique_id_col].dtype
+            _tiles_in_geom = [(x, y, unique_id) for (x, y) in _tiles_in_geom]
 
-        tiles_in_geom = pl.from_records(
-            data=list(tiles_in_geom),
-            orient="row",
-            schema=schema,
+        tiles_in_geom.update(_tiles_in_geom)
+
+    schema = {"x": self.PIXEL_DTYPE, "y": self.PIXEL_DTYPE}
+    if has_unique_id_col:
+        schema[unique_id_col] = vertices[unique_id_col].dtype
+
+    tiles_in_geom = pl.from_records(
+        data=list(tiles_in_geom),
+        orient="row",
+        schema=schema,
+    )
+
+    quadkey_expr = self._xyz_to_quadkey(
+        pl.col("x"),
+        pl.col("y"),
+    )
+    tiles_in_geom = tiles_in_geom.with_columns(quadkey=quadkey_expr)
+
+    if self.return_geometry:
+        bboxes = self._xy_to_bbox(tiles_in_geom, "x", "y")
+
+        # use vectorized version in shapely 2.0
+        bboxes = box(
+            bboxes["minx"].to_list(),
+            bboxes["miny"].to_list(),
+            bboxes["maxx"].to_list(),
+            bboxes["maxy"].to_list(),
         )
+        bboxes = GeoSeries(bboxes, crs="epsg:4326")
 
-        quadkey_expr = self._xyz_to_quadkey(
-            pl.col("x"),
-            pl.col("y"),
-        )
-        tiles_in_geom = tiles_in_geom.with_columns(quadkey=quadkey_expr)
+    if not self.add_xyz_cols:
+        tiles_in_geom = tiles_in_geom.drop(["x", "y"])
+    else:
+        tiles_in_geom = tiles_in_geom.with_columns(z=pl.lit(self.zoom_level))
+        column_order = ["quadkey", "x", "y", "z"]
+        if has_unique_id_col:
+            column_order += [unique_id_col]
+        assert set(tiles_in_geom.columns) == set(column_order)
+        tiles_in_geom = tiles_in_geom.select(column_order)
 
-        if self.return_geometry:
-            bboxes = self._xy_to_bbox(tiles_in_geom, "x", "y")
+    if self.return_geometry:
+        tiles_in_geom = GeoDataFrame(tiles_in_geom.to_pandas(), geometry=bboxes)
+    else:
+        tiles_in_geom = tiles_in_geom.to_pandas()
 
-            # use vectorized version in shapely 2.0
-            bboxes = box(
-                bboxes["minx"].to_list(),
-                bboxes["miny"].to_list(),
-                bboxes["maxx"].to_list(),
-                bboxes["maxy"].to_list(),
-            )
-            bboxes = GeoSeries(bboxes, crs="epsg:4326")
+    return tiles_in_geom
 
-        if not self.add_xyz_cols:
-            tiles_in_geom = tiles_in_geom.drop(["x", "y"])
-        else:
-            tiles_in_geom = tiles_in_geom.with_columns(z=pl.lit(self.zoom_level))
-            column_order = ["quadkey", "x", "y", "z"]
-            if has_unique_id_col:
-                column_order += [unique_id_col]
-            assert set(tiles_in_geom.columns) == set(column_order)
-            tiles_in_geom = tiles_in_geom.select(column_order)
+# %% ../notebooks/00_grids.ipynb 23
+@patch
+def _lat_to_ytile(self: FastBingTileGridGenerator, lat: pl.Expr) -> pl.Expr:
+    logtan = pl.Expr.log(pl.Expr.tan((np.pi / 4) + (pl.Expr.radians(lat) / 2)))
 
-        if self.return_geometry:
-            tiles_in_geom = GeoDataFrame(tiles_in_geom.to_pandas(), geometry=bboxes)
-        else:
-            tiles_in_geom = tiles_in_geom.to_pandas()
+    y = 0.5 - (logtan / (2 * np.pi))
 
-        return tiles_in_geom
+    power_of_2 = int(np.power(2, self.zoom_level))
 
-    def _lat_to_ytile(self, lat: pl.Expr) -> pl.Expr:
-        logtan = pl.Expr.log(pl.Expr.tan((np.pi / 4) + (pl.Expr.radians(lat) / 2)))
+    # To address loss of precision in round-tripping between tile
+    # and lng/lat, points within EPSILON of the right side of a tile
+    # are counted in the next tile over.
+    y_pixel_coord = pl.Expr.floor((y + self.EPSILON) * power_of_2)
 
-        y = 0.5 - (logtan / (2 * np.pi))
+    ytile = (
+        pl.when(y <= 0)
+        .then(pl.lit(0))
+        .when(y >= 1)
+        .then(pl.lit(power_of_2 - 1))
+        .otherwise(y_pixel_coord)
+        .cast(self.PIXEL_DTYPE)
+    )
 
-        power_of_2 = int(np.power(2, self.zoom_level))
+    return ytile
 
-        # To address loss of precision in round-tripping between tile
-        # and lng/lat, points within EPSILON of the right side of a tile
-        # are counted in the next tile over.
-        y_pixel_coord = pl.Expr.floor((y + self.EPSILON) * power_of_2)
 
-        ytile = (
-            pl.when(y <= 0)
-            .then(pl.lit(0))
-            .when(y >= 1)
-            .then(pl.lit(power_of_2 - 1))
-            .otherwise(y_pixel_coord)
-            .cast(self.PIXEL_DTYPE)
-        )
+@patch
+def _lng_to_xtile(self: FastBingTileGridGenerator, lng: pl.Expr) -> pl.Expr:
+    x = 0.5 + (lng / 360.0)
+    power_of_2 = int(np.power(2, self.zoom_level))
 
-        return ytile
+    x_pixel_coord = pl.Expr.floor((x + self.EPSILON) * power_of_2)
 
-    def _lng_to_xtile(self, lng: pl.Expr) -> pl.Expr:
-        x = 0.5 + (lng / 360.0)
-        power_of_2 = int(np.power(2, self.zoom_level))
+    xtile = (
+        pl.when(x <= 0)
+        .then(pl.lit(0))
+        .when(x >= 1)
+        .then(pl.lit(power_of_2 - 1))
+        .otherwise(x_pixel_coord)
+        .cast(self.PIXEL_DTYPE)
+    )
 
-        x_pixel_coord = pl.Expr.floor((x + self.EPSILON) * power_of_2)
+    return xtile
 
-        xtile = (
-            pl.when(x <= 0)
-            .then(pl.lit(0))
-            .when(x >= 1)
-            .then(pl.lit(power_of_2 - 1))
-            .otherwise(x_pixel_coord)
-            .cast(self.PIXEL_DTYPE)
-        )
 
-        return xtile
+@patch
+def _latlng_to_xy(
+    self: FastBingTileGridGenerator,
+    df: pl.DataFrame,
+    lat_col: str,
+    lng_col: str,
+) -> pl.DataFrame:
+    xy_df = df.with_columns(
+        x=self._lng_to_xtile(pl.col(lng_col)),
+        y=self._lat_to_ytile(pl.col(lat_col)),
+    )
 
-    def _latlng_to_xy(
-        self,
-        df: pl.DataFrame,
-        lat_col: str,
-        lng_col: str,
-    ) -> pl.DataFrame:
-        xy_df = df.with_columns(
-            x=self._lng_to_xtile(pl.col(lng_col)),
-            y=self._lat_to_ytile(pl.col(lat_col)),
-        )
+    return xy_df
 
-        return xy_df
 
-    def _xtile_to_lng(self, xtile: pl.Expr) -> pl.Expr:
-        """This gets the longitude of the upper left corner of the tile"""
-        power_of_2 = int(np.power(2, self.zoom_level))
-        lng_deg = (xtile / power_of_2) * 360.0 - 180.0
-        return lng_deg
+@patch
+def _xtile_to_lng(self: FastBingTileGridGenerator, xtile: pl.Expr) -> pl.Expr:
+    """This gets the longitude of the upper left corner of the tile"""
+    power_of_2 = int(np.power(2, self.zoom_level))
+    lng_deg = (xtile / power_of_2) * 360.0 - 180.0
+    return lng_deg
 
-    def _ytile_to_lat(self, ytile: pl.Expr) -> pl.Expr:
-        """This gets the latitude of the upper left corner of the tile"""
-        power_of_2 = int(np.power(2, self.zoom_level))
-        y = ytile / power_of_2
-        lat_rad = pl.Expr.arctan(pl.Expr.sinh(np.pi * (1 - 2 * y)))
-        lat_deg = pl.Expr.degrees(lat_rad)
-        return lat_deg
 
-    def _xy_to_bbox(
-        self,
-        df: pl.DataFrame,
-        xtile_col: str,
-        ytile_col: str,
-    ) -> pl.DataFrame:
+@patch
+def _ytile_to_lat(self: FastBingTileGridGenerator, ytile: pl.Expr) -> pl.Expr:
+    """This gets the latitude of the upper left corner of the tile"""
+    power_of_2 = int(np.power(2, self.zoom_level))
+    y = ytile / power_of_2
+    lat_rad = pl.Expr.arctan(pl.Expr.sinh(np.pi * (1 - 2 * y)))
+    lat_deg = pl.Expr.degrees(lat_rad)
+    return lat_deg
 
-        upper_left_lng = self._xtile_to_lng(pl.col(xtile_col))
-        upper_left_lat = self._ytile_to_lat(pl.col(ytile_col))
-        lower_right_lng = self._xtile_to_lng(pl.col(xtile_col) + 1)
-        lower_right_lat = self._ytile_to_lat(pl.col(ytile_col) + 1)
 
-        bbox_df = df.select(
-            minx=upper_left_lng,
-            miny=lower_right_lat,
-            maxx=lower_right_lng,
-            maxy=upper_left_lat,
-        )
+@patch
+def _xy_to_bbox(
+    self: FastBingTileGridGenerator,
+    df: pl.DataFrame,
+    xtile_col: str,
+    ytile_col: str,
+) -> pl.DataFrame:
 
-        return bbox_df
+    upper_left_lng = self._xtile_to_lng(pl.col(xtile_col))
+    upper_left_lat = self._ytile_to_lat(pl.col(ytile_col))
+    lower_right_lng = self._xtile_to_lng(pl.col(xtile_col) + 1)
+    lower_right_lat = self._ytile_to_lat(pl.col(ytile_col) + 1)
 
-    def _polygons_to_vertices(
-        self, polys_gdf: GeoDataFrame, unique_id_col: Optional[str] = None
-    ) -> pl.DataFrame:
+    bbox_df = df.select(
+        minx=upper_left_lng,
+        miny=lower_right_lat,
+        maxx=lower_right_lng,
+        maxy=upper_left_lat,
+    )
 
-        if unique_id_col is not None:
-            duplicates_bool = polys_gdf[unique_id_col].duplicated()
-            if duplicates_bool.any():
-                raise ValueError(
-                    f"""{unique_id_col} is not unique!
-                    Found {duplicates_bool.sum():,} duplicates"""
-                )
-            polys_gdf = polys_gdf.set_index(unique_id_col)
-        else:
-            # reset index if it is not unique
-            if polys_gdf.index.nunique() != len(polys_gdf.index):
-                polys_gdf = polys_gdf.reset_index(drop=True)
-            unique_id_col = polys_gdf.index.name
+    return bbox_df
 
-        polys_gdf = polys_gdf.explode(index_parts=True)
 
-        is_poly_bool = polys_gdf.type == "Polygon"
-        if not is_poly_bool.all():
+@patch
+def _polygons_to_vertices(
+    self: FastBingTileGridGenerator,
+    polys_gdf: GeoDataFrame,
+    unique_id_col: Optional[str] = None,
+) -> pl.DataFrame:
+
+    if unique_id_col is not None:
+        duplicates_bool = polys_gdf[unique_id_col].duplicated()
+        if duplicates_bool.any():
             raise ValueError(
-                f"""
-            All geometries should be polygons or multipolygons but found
-            {is_poly_bool.sum():,} after exploding the geodatarame"""
+                f"""{unique_id_col} is not unique!
+                Found {duplicates_bool.sum():,} duplicates"""
             )
+        polys_gdf = polys_gdf.set_index(unique_id_col)
+    else:
+        # reset index if it is not unique
+        if polys_gdf.index.nunique() != len(polys_gdf.index):
+            polys_gdf = polys_gdf.reset_index(drop=True)
+        unique_id_col = polys_gdf.index.name
 
-        polys_gdf.index.names = [unique_id_col, self.SUBPOLYGON_ID_COL]
-        vertices_df = polys_gdf.get_coordinates().reset_index()
-        vertices_df = pl.from_pandas(vertices_df)
+    polys_gdf = polys_gdf.explode(index_parts=True)
 
-        return vertices_df
+    is_poly_bool = polys_gdf.type == "Polygon"
+    if not is_poly_bool.all():
+        raise ValueError(
+            f"""
+        All geometries should be polygons or multipolygons but found
+        {is_poly_bool.sum():,} after exploding the geodatarame"""
+        )
 
-    def _xyz_to_quadkey(self, x: pl.Expr, y: pl.Expr) -> pl.Expr:
+    polys_gdf.index.names = [unique_id_col, self.SUBPOLYGON_ID_COL]
+    vertices_df = polys_gdf.get_coordinates().reset_index()
+    vertices_df = pl.from_pandas(vertices_df)
 
-        # Create expressions for the quadkey digit at each bit position
-        quadkey_digit_exprs = [
-            ((x // (2**i) % 2) | ((y // (2**i) % 2) * 2))
-            for i in reversed(range(self.zoom_level))
-        ]
+    return vertices_df
 
-        quadkey = pl.concat_str(quadkey_digit_exprs)
 
-        return quadkey
+@patch
+def _xyz_to_quadkey(self: FastBingTileGridGenerator, x: pl.Expr, y: pl.Expr) -> pl.Expr:
+
+    # Create expressions for the quadkey digit at each bit position
+    quadkey_digit_exprs = [
+        ((x // (2**i) % 2) | ((y // (2**i) % 2) * 2))
+        for i in reversed(range(self.zoom_level))
+    ]
+
+    quadkey = pl.concat_str(quadkey_digit_exprs)
+
+    return quadkey
