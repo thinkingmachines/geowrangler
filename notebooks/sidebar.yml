@@ -23,6 +23,7 @@ website:
       - section: Module Reference
         contents:
           - 00_grids.ipynb
+          - 15_polygon_fill.ipynb
           - 01_validation.ipynb
           - 02_vector_zonal_stats.ipynb
           - 03_raster_zonal_stats.ipynb
