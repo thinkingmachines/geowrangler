@@ -146,7 +146,7 @@ poetry run jupyter lab
 
 To generate and view the documentation site on your local machine, the quickest way is to setup [Docker](https://docs.docker.com/get-started/). The following assumes that you have setup docker on your system.
 ```
-poetry run nbdev_build_docs --mk_readme False --force_all True
+poetry run nbdev_docs --mk_readme False --force_all True
 docker-compose up jekyll
 ```
 
@@ -160,7 +160,7 @@ To generate the docs, run the following
 
 ```
 
-poetry run nbdev_build_docs -mk_readme False --force_all True
+poetry run nbdev_docs -mk_readme False --force_all True
 cd docs && bundle i && cd ..
 
 ```
