@@ -51,7 +51,7 @@ pytest --cov --cov-config=.coveragerc --cov-fail-under=80 -n auto
 Once the necessary changes are made, run the following to generate the python code.
 
 ```
-nbdev_build_lib
+nbdev_export
 ```
 
 ## View contributions on documentation site and edit as needed

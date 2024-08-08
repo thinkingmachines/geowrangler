@@ -46,7 +46,7 @@ cd geowrangler
 virtualenv -p /usr/bin/python3.9 .venv
 source .venv/bin/activate
 pip install -e ".[dev]"
-nbdev_install_git_hooks
+nbdev_install_hooks
 ```
 
 You're all set! [Run the tests](#running-tests) to make sure everything was installed properly.
@@ -68,7 +68,7 @@ Then run the following to install the python libs.
 ```
 cd geowrangler # cd into your geowrangler local directory
 pip install -e ".[dev]"
-nbdev_install_git_hooks
+nbdev_install_hooks
 
 ```
 
