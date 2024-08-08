@@ -220,7 +220,7 @@ def test_bing_tile_grid_generator_join_return_geometry_false(
     assert isinstance(grids_gdf, pd.DataFrame)
     assert len(grids_gdf) == BING_TILE_N_TILES
 
-# FastBingTileGridGenerator has 6 more tiles than  because it considered tiles exactly on the border
+# FastBingTileGridGenerator returns 6 more tiles than BingTileGridGenerator because it considered tiles exactly on the border
 FAST_BING_TILE_N_TILES = BING_TILE_N_TILES + 6
 FAST_BING_TILE_MULTIPOLY_N_TILES = BING_TILE_MULTIPOLY_N_TILES + 6
 
