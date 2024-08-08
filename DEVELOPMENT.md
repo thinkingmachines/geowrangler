@@ -14,7 +14,7 @@ You can run geowrangler's jupyter notebooks to see how the different modules are
 * OS: Linux, MacOS, Windows Subsystem for Linux (WSL) on Windows
 
 * Requirements:
-   - python 3.8 or higher
+   - python 3.9 or higher
    - virtualenv, venv or conda for python environment virtualization
    - [quarto](https://quarto.org) to preview the documentation site locally
   
@@ -36,7 +36,7 @@ To generate and preview the documentation site on your local machine, you will n
 
 **Set-up with virtualenv**
 
-Set up your Python env with `virtualenv` and install pre-commits and the necessary python libs by running the following commands.
+Set up your Python env with `virtualenv` and install the necessary python libs by running the following commands.
 
 Remember to replace `<your-github-id>` in the github url below with your GitHub ID to clone from your fork.
 
@@ -64,7 +64,7 @@ conda deactivate # important to ensure libs from other envs aren't used
 conda activate geowrangler-env
 ```
 
-Then run the following to install the pre-commits and python libs.
+Then run the following to install the python libs.
 ```
 cd geowrangler # cd into your geowrangler local directory
 pip install -e ".[dev]"

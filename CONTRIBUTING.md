@@ -52,9 +52,5 @@ Once the necessary changes are made, run the following to generate the python co
 
 ```
 nbdev_build_lib
-pre-commit run -a
-pre-commit run -a
 ```
-> Note: we are running `pre-commit` twice so that it reformats the modules to comply with the project's formatting/linting standards and the next run checks if it is already compliant. 
-
 
