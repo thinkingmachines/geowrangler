@@ -54,3 +54,15 @@ Once the necessary changes are made, run the following to generate the python co
 nbdev_build_lib
 ```
 
+## View contributions on documentation site and edit as needed
+
+1. Run nbdev_docs to create the HTML files via Quarto (can verify locally with some port: nbdev_preview --port 4327)
+    - Doc site automatically updates once a PR is merged (in Settings > Pages need to make sure [geowrangler.thinkingmachin.es](http://geowrangler.thinkingmachin.es/) is the domain as it defaults to [thinkingmachines.github.io](http://thinkingmachines.github.io/) after merges)
+2. Edit [notebooks/index.ipynb](https://github.com/thinkingmachines/geowrangler/blob/master/notebooks/index.ipynb) to edit the [doc homepage](https://geowrangler.thinkingmachin.es/)
+3. Edit [notebooks/sidebar.yml](https://github.com/thinkingmachines/geowrangler/blob/master/notebooks/sidebar.yml) to edit the left sidebar
+
+## Updating Google Colab links in notebooks
+  - In notebooks such as tutorial notebooks you may want to add a Google Colab link at the beginning of the notebook for easy accessibility.
+  - There is no automatic way yet to update this so it's a manual update of a markdown cell. Since the link points to a notebook in master, testing the Colab button is done after merging. Follow the sample below and replace the notebook name with your contributed notebook name.
+  - Sample for notebooks/14_datasets_nightlights.ipynb:
+[![](https://colab.research.google.com/assets/colab-badge.svg "Open in Colab button")](https://colab.research.google.com/github/thinkingmachines/geowrangler/blob/master/notebooks/14_datasets_nightlights.ipynb)
