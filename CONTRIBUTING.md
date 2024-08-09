@@ -26,22 +26,14 @@ If you are reporting a bug, please include:
 ## Creating pull requests
 
 1. Fork the repo in Github or go to https://github.com/thinkingmachines/geowrangler/fork
-2. Install and enable `pre-commit` and `poetry`
+2. Set up the development environment following the instructions in [DEVELOPMENT](https://github.com/thinkingmachines/geowrangler/blob/master/DEVELOPMENT.md)
 
-```
-pip install poetry>=1.2.0 pre-commit
-pre-commit install
-poetry install
-poetry run pip install pip --upgrade
-poetry run pip install -e .
-```
-
-3. Make the necessary changes. See [Developing with nbdev](#developing-with-nbdev) for more info.
+3. Make the necessary contributions. See [Developing with nbdev](#developing-with-nbdev) for more info.
 
 4. Run the tests and ensure they all pass before submitting a PR. Also add tests whenever adding a new feature. Finally, clean up tests that are longer applicable.
 
 ```
-poetry run pytest --cov --cov-config=.coveragerc --cov-fail-under=80 -n auto
+pytest --cov --cov-config=.coveragerc --cov-fail-under=80 -n auto
 ```
 
 5. Commit and Submit PR for review
@@ -59,10 +51,18 @@ poetry run pytest --cov --cov-config=.coveragerc --cov-fail-under=80 -n auto
 Once the necessary changes are made, run the following to generate the python code.
 
 ```
-poetry run nbdev_export
-poetry run pre-commit run -a
-poetry run pre-commit run -a
+nbdev_export
 ```
-> Note: we are running `pre-commit` twice so that it reformats the modules to comply with the project's formatting/linting standards and the next run checks if it is already compliant. 
 
+## View contributions on documentation site and edit as needed
 
+1. Run nbdev_docs to create the HTML files via Quarto (can verify locally with some port: nbdev_preview --port 4327)
+    - Doc site automatically updates once a PR is merged (in Settings > Pages need to make sure [geowrangler.thinkingmachin.es](http://geowrangler.thinkingmachin.es/) is the domain as it defaults to [thinkingmachines.github.io](http://thinkingmachines.github.io/) after merges)
+2. Edit [notebooks/index.ipynb](https://github.com/thinkingmachines/geowrangler/blob/master/notebooks/index.ipynb) to edit the [doc homepage](https://geowrangler.thinkingmachin.es/)
+3. Edit [notebooks/sidebar.yml](https://github.com/thinkingmachines/geowrangler/blob/master/notebooks/sidebar.yml) to edit the left sidebar
+
+## Updating Google Colab links in notebooks
+  - In notebooks such as tutorial notebooks you may want to add a Google Colab link at the beginning of the notebook for easy accessibility.
+  - There is no automatic way yet to update this so it's a manual update of a markdown cell. Since the link points to a notebook in master, testing the Colab button is done after merging. Follow the sample below and replace the notebook name with your contributed notebook name.
+  - Sample for notebooks/14_datasets_nightlights.ipynb:
+[![](https://colab.research.google.com/assets/colab-badge.svg "Open in Colab button")](https://colab.research.google.com/github/thinkingmachines/geowrangler/blob/master/notebooks/14_datasets_nightlights.ipynb)
