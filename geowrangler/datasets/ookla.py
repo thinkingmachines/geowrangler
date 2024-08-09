@@ -365,8 +365,9 @@ def load_type_year_data(
                 f"Ookla data for aoi, {type_} {year} {ooklaFile.quarter} being loaded from {ookla_quarter_filepath}"
             )
             quarter_df = pd.read_parquet(ookla_quarter_filepath)
-            # TODO optimize filtering via merge
-            quarter_df = quarter_df[quarter_df["quadkey"].isin(aoi_quadkeys)]
+            quarter_df = quarter_df.loc[
+                quarter_df["quadkey"].isin(aoi_quadkeys), :
+            ].copy()
             quarter_df["quarter"] = int(ooklaFile.quarter)
             quarter_df_list.append(quarter_df)
 
@@ -395,7 +396,9 @@ def load_type_year_data(
         df.to_csv(cached_file_path, index=False)
     else:
         logger.debug(f"Converting Ookla data into geojson file {cached_file_path}")
-        df = gpd.GeoDataFrame(df, geometry=gpd.GeoSeries.from_wkt(df["tile"]))
+        df = gpd.GeoDataFrame(
+            df, geometry=gpd.GeoSeries.from_wkt(df["tile"]), crs="epsg:4326"
+        )
         df.to_file(cached_file_path, driver="GeoJSON")
     return df
 
