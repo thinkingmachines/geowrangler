@@ -16,10 +16,10 @@ def voxel_traversal_2d(
     end_vertex: Tuple[int, int],
     debug: bool = False,  # if true, prints diagnostic info for the algorithm
 ) -> List[Tuple[int, int]]:
-    """Returns all pixels between two points as inspired by Amanatides & Woo's “A Fast Voxel Traversal Algorithm For Ray Tracing”"""
-
-    # epsilon is a constant for correcting near-misses in voxel traversal
-    EPSILON = 1e-14
+    """
+    Returns all pixels between two points as inspired by Amanatides & Woo's “A Fast Voxel Traversal Algorithm For Ray Tracing”
+    Implementation adapted from https://www.redblobgames.com/grids/line-drawing/
+    """
 
     # Setup initial conditions
     x1, y1 = start_vertex
@@ -45,22 +45,8 @@ def voxel_traversal_2d(
 
     dy = y2 - y1
     dx = x2 - x1
-    slope = dy / dx
-    inv_slope = dx / dy
-
-    # reverse order if negative slope to preserve symmetry in floating point calculations
-    if slope < 0:
-        x1, y1 = end_vertex
-        x2, y2 = start_vertex
-
-        direction_x = 1 if x2 > x1 else -1
-        direction_y = 1 if y2 > y1 else -1
-
-    slope_multiplier = np.sqrt(1 + slope**2)
-    inv_slope_multiplier = np.sqrt(1 + inv_slope**2)
 
     pixel_x, pixel_y = x1, y1
-    ray_x, ray_y = pixel_x, pixel_y
     pixels = [(pixel_x, pixel_y)]
 
     is_finished = False
@@ -68,8 +54,12 @@ def voxel_traversal_2d(
     if debug:
         print(f"\nTraversing from ({x1},{y1}) to ({x2},{y2})")
 
-    # number of steps should not exceed the perimeter of the rectangle enclosing the line segment
-    max_steps = 2 * (abs(dx) + abs(dy))
+    ix = 0
+    iy = 0
+
+    nx = abs(dx)
+    ny = abs(dy)
+    max_steps = nx + ny
     n_steps = 0
     while not is_finished:
         # this prevents infinite loops
@@ -79,70 +69,26 @@ def voxel_traversal_2d(
                 f"Traversal has exceeded steps limit {max_steps:,}. Please recheck inputs"
             )
 
-        # get the next x or y integer that the next ray would hit
-        if direction_x == 1:
-            next_ray_x = np.floor(ray_x) + 1
-        elif direction_x == -1:
-            next_ray_x = np.ceil(ray_x) - 1
-
-        if direction_y == 1:
-            next_ray_y = np.floor(ray_y) + 1
-        elif direction_y == -1:
-            next_ray_y = np.ceil(ray_y) - 1
-
-        # get distance between the 2 candidates and check which one is closer
-        # there is an epsilon to account near-misses due to floating point differences
-
-        # y coordinate line formula is next_ray_y = ray_y + slope*(next_ray_x-ray_x)
-        # squred distance is (next_ray_x - ray_x)**2 + (slope*(next_ray_x-ray_x))**2
-        # distance simplifies to abs(next_ray_x - ray_x)* sqrt(1+slope**2)
-
-        ray_candidate_1 = (
-            next_ray_x,
-            ray_y + slope * (next_ray_x - ray_x) + direction_y * EPSILON,
-        )
-        # unsimplified square distance
-        # dist_1 = (ray_candidate_1[0] - ray_x)**2 + (ray_candidate_1[1] - ray_y)**2
-        # simplified distance
-        dist_1 = abs(next_ray_x - ray_x) * slope_multiplier
-
-        # x coordinate line formula is next_ray_x = ray_x + inv_slope*(next_ray_y-y)
-        # squared distance is (inv_slope*(next_ray_y-ray_y))**2 + (next_ray_y-ray_y)**2
-        # distance simplifies to abs(next_ray_y-ray_y)* sqrt(1 + inv_slope**2)
-
-        ray_candidate_2 = (
-            ray_x + inv_slope * (next_ray_y - ray_y) + direction_x * EPSILON,
-            next_ray_y,
-        )
-        # unsimplified square distance
-        # dist_2 = (ray_candidate_2[0] - ray_x)**2 + (ray_candidate_2[1] - ray_y)**2
-        # simplified distance
-        dist_2 = abs(next_ray_y - ray_y) * inv_slope_multiplier
-
-        # candidate 1 is closer
-        if dist_1 < dist_2:
-            pixel_x += direction_x
-            ray_x, ray_y = ray_candidate_1
-
-        # candidate 2 is closer
-        elif dist_1 > dist_2:
-            pixel_y += direction_y
-            ray_x, ray_y = ray_candidate_2
-
-        # line passes exactly on the corner
-        elif dist_1 == dist_2:
+        decision = (1 + 2 * ix) * ny - (1 + 2 * iy) * nx
+        if decision == 0:
+            # diagonal step
             pixel_x += direction_x
             pixel_y += direction_y
-            ray_x, ray_y = pixel_x, pixel_y
+            ix += 1
+            iy += 1
+        elif decision < 0:
+            # horizontal step
+            pixel_x += direction_x
+            ix += 1
         else:
-            raise ValueError(f"Erroneous distances {dist_1}, {dist_2}")
-
-        if debug:
-            print(
-                f"Next ray coords are ({ray_x}, {ray_y}) and tile coords are ({pixel_x}, {pixel_y})"
-            )
+            # vetical step
+            pixel_y += direction_y
+            iy += 1
 
         pixels.append((pixel_x, pixel_y))
+
+        if debug:
+            print(f"Next tile coords are ({pixel_x}, {pixel_y})")
 
         # checks to see if the loop is finished
         if direction_x == 1:
