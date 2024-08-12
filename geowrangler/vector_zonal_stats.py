@@ -179,7 +179,7 @@ def _fillnas(
             if colname in list(aoi.columns.values):
                 colname = colname + "_y"  # try if merged df has colname + _y
             if colname in list(results.columns.values):
-                results[colname].fillna(0, inplace=True)
+                results[colname] = results[colname].fillna(0)
 
 # %% ../notebooks/02_vector_zonal_stats.ipynb 40
 def _aggregate_stats(

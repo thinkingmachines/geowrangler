@@ -12,6 +12,7 @@ import json
 import geopandas as gpd
 import pandas as pd
 import rasterio
+import fiona
 import rasterstats as rs
 from exactextract import exact_extract
 from exactextract.raster import RasterioRasterSource
@@ -19,9 +20,33 @@ from exactextract.raster import RasterioRasterSource
 from .vector_zonal_stats import _expand_aggs, _fillnas, _fix_agg
 
 # %% ../notebooks/03_raster_zonal_stats.ipynb 9
+def check_crs_alignment(
+    aoi: Union[  # The area of interest geodataframe, or path to the vector file
+        str, Path, gpd.GeoDataFrame
+    ],
+    data: Union[str, Path],  # The path to the raster data file
+) -> None:
+
+    with rasterio.open(data) as src:
+        raster_crs = src.crs
+    if isinstance(aoi, str) or isinstance(aoi, Path):
+        with fiona.open(aoi) as aoi_src:
+            aoi_crs = aoi_src.crs
+    elif isinstance(aoi, gpd.GeoDataFrame):
+        aoi_crs = aoi.crs
+    else:
+        raise NotImplementedError(f"Not supported AOI input of type {type(aoi)}")
+
+    # Check CRS alignment
+    if raster_crs != aoi_crs:
+        raise ValueError(
+            f"The CRS of the AOI ({aoi_crs}) and the raster data ({raster_crs}) do not match!"
+        )
+
+# %% ../notebooks/03_raster_zonal_stats.ipynb 10
 def create_raster_zonal_stats(
     aoi: Union[  # The area of interest geodataframe, or path to the vector file
-        str, gpd.GeoDataFrame
+        str, Path, gpd.GeoDataFrame
     ],
     data: Union[str, Path],  # The path to the raster data file
     aggregation: Dict[  # A dict specifying the aggregation. See `create_zonal_stats` from the `geowrangler.vector_zonal_stats` module for more details
@@ -31,7 +56,7 @@ def create_raster_zonal_stats(
         str, Any
     ] = dict(
         layer=0,
-        band_num=1,
+        band=1,
         nodata=None,
         affine=None,
         all_touched=False,
@@ -42,7 +67,7 @@ def create_raster_zonal_stats(
     the `rasterstats` python package for compatibility with other geowrangler modules.
     This method currently only supports 1 band for each call, so if you want to create zonal
     stats for multiple bands with the same raster data, you can call this method for
-    each band (make sure to specify the correct `band_num` in the `extra_args` parameter).
+    each band (make sure to specify the correct `band` in the `extra_args` parameter).
     See https://pythonhosted.org/rasterstats/manual.html#zonal-statistics for more details
     """
     fixed_agg = _fix_agg(aggregation)
@@ -79,6 +104,9 @@ def create_raster_zonal_stats(
         for (i, func) in enumerate(fixed_agg["func"])
         if f"{prefix}{func}" != fixed_agg["output"][i]
     }
+
+    check_crs_alignment(aoi, data)
+
     results_dict = rs.zonal_stats(
         vectors=aoi,
         raster=data,
@@ -91,7 +119,7 @@ def create_raster_zonal_stats(
     )
 
     results = pd.DataFrame.from_records(results_dict)
-    results.rename(columns=renamed_columns, inplace=True)
+    results = results.rename(columns=renamed_columns)
     expanded_aggs = _expand_aggs([fixed_agg])
 
     if type(aoi) == str:
@@ -103,7 +131,7 @@ def create_raster_zonal_stats(
 
     return aoi
 
-# %% ../notebooks/03_raster_zonal_stats.ipynb 30
+# %% ../notebooks/03_raster_zonal_stats.ipynb 31
 def _validate_aggs(aggregation, band_count):
     "Validate aggregations based on band count, dropping invalid entries"
     aggregation_validated = []
@@ -120,10 +148,10 @@ def _validate_aggs(aggregation, band_count):
 
     return aggregation_validated
 
-# %% ../notebooks/03_raster_zonal_stats.ipynb 31
+# %% ../notebooks/03_raster_zonal_stats.ipynb 32
 def create_exactextract_zonal_stats(
     aoi: Union[
-        str, gpd.GeoDataFrame
+        str, Path, gpd.GeoDataFrame
     ],  # The area of interest geodataframe, or path to the vector file
     data: Union[str, Path],  # The path to the raster data file
     aggregation: Union[
@@ -213,6 +241,8 @@ def create_exactextract_zonal_stats(
     if isinstance(aoi, str) or isinstance(aoi, Path):
         aoi = gpd.read_file(aoi)
 
+    check_crs_alignment(aoi, data)
+
     # Open raster and run exactextract
     with rasterio.open(data) as dst:
         # Validate passed aggregations based on band count and compile
@@ -221,12 +251,6 @@ def create_exactextract_zonal_stats(
         for agg in aggregation:
             all_operations.update(agg["func"])
         all_operations = sorted(all_operations)
-
-        # Check CRS alignment
-        if aoi.crs != dst.crs:
-            warnings.warn(
-                f"The CRS of the AOI ({aoi.crs}) and the raster data ({dst.crs}) do not match!"
-            )
 
         # Run exactextract
         results = exact_extract(
