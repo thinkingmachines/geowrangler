@@ -201,7 +201,8 @@ def create_area_zonal_stats(
         aggregates, how="left", on=GEO_INDEX_NAME, suffixes=(None, "_y")
     )
 
-    results[INTERSECT_AREA_AGG["output"]].fillna(value=0.0, inplace=True)
+    bool_mask = INTERSECT_AREA_AGG["output"]
+    results[bool_mask] = results[bool_mask].fillna(value=0.0)
     # set min to zero if intersect area is not filled.
     if fix_min:
         for col, val in agg_area_dicts.items():
@@ -216,12 +217,12 @@ def create_area_zonal_stats(
                     c=col,  # kwarg to pass to lambda
                 )
     results = compute_imputed_stats(results, expanded_aggs)
-    vzs._fillnas(expanded_aggs, results, aoi)
+    results = vzs._fillnas(expanded_aggs, results, aoi)
     drop_labels = ["aoi_area"]
     if not include_intersect:
         drop_labels += [INTERSECT_AREA_AGG["output"]]
-    results.drop(labels=drop_labels, inplace=True, axis=1)
+    results = results.drop(labels=drop_labels, axis=1)
 
-    results.set_index(GEO_INDEX_NAME, inplace=True)
+    results = results.set_index(GEO_INDEX_NAME)
     results.index.name = aoi_index_name
     return results

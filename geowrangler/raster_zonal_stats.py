@@ -125,7 +125,7 @@ def create_raster_zonal_stats(
     if type(aoi) == str:
         aoi = gpd.read_file(aoi)
 
-    _fillnas(expanded_aggs, results, aoi)
+    results = _fillnas(expanded_aggs, results, aoi)
 
     aoi = aoi.merge(results, how="left", left_index=True, right_index=True)
 

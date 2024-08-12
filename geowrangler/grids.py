@@ -130,7 +130,7 @@ def generate_grid(self: SquareGridGenerator, gdf: GeoDataFrame) -> GeoDataFrame:
         dest = GeoDataFrame(
             list(polygons.values()), geometry="geometry", crs=self.grid_projection
         )
-        dest.to_crs(gdf.crs, inplace=True)
+        dest = dest.to_crs(gdf.crs)
         return dest
     else:
         return GeoDataFrame(
@@ -291,7 +291,7 @@ def get_parallel_intersects(
         progress=progress,
     )
     results = pd.concat(intersect_dfs)
-    results.drop_duplicates(subset=["quadkey"], inplace=True)
+    results = results.drop_duplicates(subset=["quadkey"])
     return results
 
 # %% ../notebooks/00_grids.ipynb 22
@@ -345,7 +345,7 @@ def generate_grid_join(
         tiles_gdf = intersect_tiles_gdf[
             intersect_tiles_gdf.columns.intersection(keep_cols)
         ]
-        tiles_gdf.reset_index(drop=True, inplace=True)
+        tiles = tiles_gdf.reset_index(drop=True)
 
     if not self.return_geometry:
         df = DataFrame(tiles_gdf.drop(columns=["geometry"]))
