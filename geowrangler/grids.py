@@ -280,8 +280,11 @@ def get_parallel_intersects(
 ):
 
     # split tiles into n chunks (1 chunk per cpu)
-    # see https://stackoverflow.com/questions/17315737/split-a-large-pandas-dataframe
-    tile_items = np.array_split(tiles_gdf, n_workers)
+    n_splits = int(np.ceil(len(tiles_gdf) / n_workers))
+    tile_items = [
+        tiles_gdf.iloc[i : i + n_splits] for i in range(0, len(tiles_gdf), n_splits)
+    ]
+
     items = [(tile_item, reprojected_gdf) for tile_item in tile_items]
     intersect_dfs = parallel(
         get_intersect_partition,
