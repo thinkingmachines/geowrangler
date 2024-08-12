@@ -132,7 +132,7 @@ def read_bands(image_list: List[str], mask: str):
 
         for band_idx in range(raster.count):
             band = raster.read(band_idx + 1).ravel()
-            subdata["B{}".format(band_idx + 1)] = band
+            subdata[f"B{band_idx + 1}"] = band
 
         # Cast to pandas subdataframe
         subdata = pd.DataFrame(subdata).fillna(0)
