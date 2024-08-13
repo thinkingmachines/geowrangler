@@ -72,8 +72,8 @@ def create_distance_zonal_stats(
     results = aoi.merge(
         aggregates, how="left", on=GEO_INDEX_NAME, suffixes=(None, "_y")
     )
-    vzs._fillnas(expanded_aggs, results, aoi)
+    results = vzs._fillnas(expanded_aggs, results, aoi)
 
-    results.set_index(GEO_INDEX_NAME, inplace=True)
+    results = results.set_index(GEO_INDEX_NAME)
     results.index.name = aoi_index_name
     return results

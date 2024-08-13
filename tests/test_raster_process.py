@@ -14,14 +14,14 @@ import geowrangler.raster_process as rp
 
 def make_circle_geometry(lat, lon, buffer, crs="epsg:4326"):
     df = pd.DataFrame({"lat": [lat], "lon": [lon]})
-    gdf = gpd.GeoDataFrame(df, geometry=gpd.points_from_xy(df.lon, df.lat), crs=crs)
-    gdf["geometry"] = gdf["geometry"].buffer(buffer)
+    gdf = gpd.GeoDataFrame(df, geometry=gpd.GeoSeries.from_xy(df.lon, df.lat), crs=crs)
+    gdf["geometry"] = gdf["geometry"].to_crs("epsg:3857").buffer(buffer).to_crs(crs)
     return gdf
 
 
 @pytest.fixture()
 def circle_geometry():
-    yield make_circle_geometry(14.599512, 120.984222, 1)
+    yield make_circle_geometry(14.599512, 120.984222, 100)
 
 
 def test_query_window_by_gdf(circle_geometry, capsys):
@@ -35,7 +35,9 @@ def test_query_window_by_gdf(circle_geometry, capsys):
     captured = capsys.readouterr()
     assert captured.out == "data/circle_files/output_0.tif\n"
     with rio.open(output_folder / "output_0.tif") as dst:
-        bounds = dst.bounds
-    assert np.isclose([*bounds], [*circle_geometry.iloc[0].geometry.bounds]).all(axis=0)
+        bounds = list(dst.bounds)
+
+    geom_bounds = circle_geometry.iloc[0].geometry.bounds
+    assert np.isclose(bounds, geom_bounds).all()
     if output_folder.exists():
         shutil.rmtree(output_folder, ignore_errors=False)

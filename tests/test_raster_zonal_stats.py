@@ -6,7 +6,6 @@ from shapely.geometry import Polygon
 
 import geowrangler.raster_zonal_stats as rzs
 
-
 @pytest.fixture()
 def simple_aoi():
     df = pd.DataFrame(
@@ -34,15 +33,19 @@ def simple_aoi():
                 ]
             )
         )
+    
+    gdf = gpd.GeoDataFrame(df, geometry=df.apply(square, axis=1), crs="EPSG:3857")
+    gdf = gdf.to_crs("epsg:4326")
 
-    return gpd.GeoDataFrame(df, geometry=df.apply(square, axis=1), crs="EPSG:4326")
+    return gdf
 
 
 def test_create_raster_zonal_stats(simple_aoi):
-    terrain_file = "data/sample_terrain.tif"
+    raster_file = "data/sample_terrain.tif"
+    simple_aoi = simple_aoi.to_crs("epsg:3857")
     results = rzs.create_raster_zonal_stats(
         simple_aoi,
-        terrain_file,
+        raster_file,
         aggregation=dict(func=["mean", "min", "max", "std"], column="elevation"),
         extra_args=dict(nodata=np.nan),
     )
@@ -65,12 +68,13 @@ def test_create_raster_zonal_stats(simple_aoi):
 
 
 def test_create_raster_zonal_stats_from_file():
-    terrain_file = "data/sample_terrain.tif"
+    raster_file = "data/phl_ppp_2020_constrained.tif"
     file_aoi = "data/simple_aoi.geojson"
+
     results = rzs.create_raster_zonal_stats(
         file_aoi,
-        terrain_file,
-        aggregation=dict(func=["mean", "min", "max", "std"], column="elevation"),
+        raster_file,
+        aggregation=dict(func=["mean", "min", "max", "std"], column="population"),
         extra_args=dict(
             nodata=np.nan,
             # everything below will be ignored
@@ -93,19 +97,19 @@ def test_create_raster_zonal_stats_from_file():
         "lat3",
         "lon3",
         "geometry",
-        "elevation_min",
-        "elevation_max",
-        "elevation_mean",
-        "elevation_std",
+        "population_min",
+        "population_max",
+        "population_mean",
+        "population_std",
     ]
 
 
 def test_raster_zonal_stats_nodata():
-    terrain_file = "data/phl_ppp_2020_constrained.tif"
+    raster_file = "data/phl_ppp_2020_constrained.tif"
     file_aoi = "data/region3_admin.geojson"
     results = rzs.create_raster_zonal_stats(
         file_aoi,
-        terrain_file,
+        raster_file,
         aggregation=dict(
             func=["sum"],
             column="population",
@@ -116,13 +120,23 @@ def test_raster_zonal_stats_nodata():
     )
     assert results["population_count"].iloc[0] > 0
 
-
+def test_create_raster_zonal_stats_crs_mismatch(simple_aoi):
+    raster_file = "data/sample_terrain.tif"
+   
+    with pytest.raises(ValueError):
+        results = rzs.create_raster_zonal_stats(
+            simple_aoi,
+            raster_file,
+            aggregation=dict(func=["mean", "min", "max", "std"], column="elevation"),
+            extra_args=dict(nodata=np.nan),
+        )
+    
 def test_raster_zonal_stats_nodata_default():
-    terrain_file = "data/phl_ppp_2020_constrained.tif"
+    raster_file = "data/phl_ppp_2020_constrained.tif"
     file_aoi = "data/region3_admin.geojson"
     results = rzs.create_raster_zonal_stats(
         file_aoi,
-        terrain_file,
+        raster_file,
         aggregation=dict(
             func=["sum"],
             column="population",
@@ -130,18 +144,16 @@ def test_raster_zonal_stats_nodata_default():
             fillna=[True],
         ),
     )
-    assert results["population_count"].iloc[0] > 0
+    assert results["population_count"].values[0] > 0
 
 # exactextract tests
 def test_create_exactextract_zonal_stats(simple_aoi):
-    terrain_file = "data/sample_terrain.tif"
+    raster_file = "data/sample_terrain.tif"
+    simple_aoi = simple_aoi.to_crs("epsg:3857")
     results = rzs.create_exactextract_zonal_stats(
         simple_aoi,
-        terrain_file,
-        aggregation=[
-            dict(band=1, func=["mean", "max", "min", "stdev"], output="elevation"),
-            dict(band=2, func=["mean", "max", "min", "stdev"], output="elevation")
-        ],    
+        raster_file,
+        aggregation=dict(band=1, func=["mean", "max", "min", "stdev"], output="elevation"),
     )
     assert list(results.columns.values) == [
         "col1",
@@ -160,13 +172,26 @@ def test_create_exactextract_zonal_stats(simple_aoi):
         "elevation_stdev",
     ]
 
+def test_create_exactextract_zonal_stats_invalid_band(simple_aoi):
+    raster_file = "data/sample_terrain.tif"
+    simple_aoi = simple_aoi.to_crs("epsg:3857")
+    with pytest.warns(UserWarning):
+        results = rzs.create_exactextract_zonal_stats(
+            simple_aoi,
+            raster_file,
+            aggregation=[
+                dict(band=1, func=["mean", "max", "min", "stdev"], output="elevation"),
+                dict(band=2, func=["mean", "max", "min", "stdev"], output="elevation")
+            ],    
+        )
+    
 def test_create_exactextract_zonal_stats_from_file():
-    terrain_file = "data/sample_terrain.tif"
+    raster_file = "data/phl_ppp_2020_constrained.tif"
     file_aoi = "data/simple_aoi.geojson"
     results = rzs.create_exactextract_zonal_stats(
         file_aoi,
-        terrain_file,
-        aggregation=[dict(band=1, func=["mean", "min", "max", "stdev"], output="elevation")],
+        raster_file,
+        aggregation=[dict(band=1, func=["mean", "min", "max", "stdev"], output="population")],
     )
     print(results)
     assert list(results.columns.values) == [
@@ -180,16 +205,16 @@ def test_create_exactextract_zonal_stats_from_file():
         "lat3",
         "lon3",
         "geometry",
-        "elevation_mean",
-        "elevation_min",
-        "elevation_max",
-        "elevation_stdev",
+        "population_mean",
+        "population_min",
+        "population_max",
+        "population_stdev",
     ]
 
 def test_exactextract_zonal_stats_multiband():
     aq_file = "data/ph_s5p_AER_AI_340_380.tiff"
     file_aoi = "data/region3_admin.geojson"
-    file_aoi = gpd.read_file(file_aoi).to_crs("EPSG:3857")
+    file_aoi = gpd.read_file(file_aoi)
     results = rzs.create_exactextract_zonal_stats(
         file_aoi,
         aq_file,
@@ -219,52 +244,42 @@ def test_exactextract_zonal_stats_multiband():
 def test_exactextract_zonal_stats_multiband_crs_mismatch():
     aq_file = "data/ph_s5p_AER_AI_340_380.tiff"
     file_aoi = "data/region3_admin.geojson"
-    file_aoi = gpd.read_file(file_aoi).to_crs("EPSG:4326")
-    results = rzs.create_exactextract_zonal_stats(
-        file_aoi,
-        aq_file,
-        aggregation=[
-            dict(band=1, func=["mean", "sum"], nodata_val=-9999), # default - band1_mean, band1_sum
-            dict(band=2, func=["mean", "sum"]), # default - band2_mean, band2_sum
-            dict(band=2, func=["mean", "sum"], output="prefix"), # prefix_mean, prefix_sum
-            dict(band=1, func=["mean", "sum", "count"], output=["aer_ai_mean", "aer_ai_sum", "aer_ai_count"]),
-        ],
-    )
-    assert list(results.columns.values) == [
-        "Reg_Code",
-        "Reg_Name",
-        "Reg_Alt_Name",
-        "geometry",
-        "band_1_mean",
-        "band_1_sum",
-        "band_2_mean",
-        "band_2_sum",
-        "prefix_mean",
-        "prefix_sum",
-        "aer_ai_mean",
-        "aer_ai_sum",
-        "aer_ai_count"
-    ]
-
+    file_aoi = gpd.read_file(file_aoi).to_crs("EPSG:3857")
+    
+    with pytest.raises(ValueError):
+        results = rzs.create_exactextract_zonal_stats(
+            file_aoi,
+            aq_file,
+            aggregation=[
+                dict(band=1, func=["mean", "sum"], nodata_val=-9999), # default - band1_mean, band1_sum
+                dict(band=2, func=["mean", "sum"]), # default - band2_mean, band2_sum
+                dict(band=2, func=["mean", "sum"], output="prefix"), # prefix_mean, prefix_sum
+                dict(band=1, func=["mean", "sum", "count"], output=["aer_ai_mean", "aer_ai_sum", "aer_ai_count"]),
+            ],
+        )
+         
 def test_exactextract_geojson(simple_aoi):
     "Check if output returns pandas output despite output option"
-    terrain_file = "data/sample_terrain.tif"
-    results = rzs.create_exactextract_zonal_stats(
-        simple_aoi,
-        terrain_file,
-        aggregation=[
-            dict(band=1, func=["sum"], output="elevation"),
-        ],
-        extra_args = dict(output="geojson")
-    )
+    raster_file = "data/sample_terrain.tif"
+    simple_aoi = simple_aoi.to_crs("epsg:3857")
+    with pytest.warns(UserWarning):
+        results = rzs.create_exactextract_zonal_stats(
+            simple_aoi,
+            raster_file,
+            aggregation=[
+                dict(band=1, func=["sum"], output="elevation"),
+            ],
+            extra_args = dict(output="geojson")
+        )
     assert isinstance(results, (pd.DataFrame, gpd.GeoDataFrame))
 
 def test_exactextract_include_cols(simple_aoi):
     "Check if output returns specified columns"
-    terrain_file = "data/sample_terrain.tif"
+    raster_file = "data/sample_terrain.tif"
+    simple_aoi = simple_aoi.to_crs("epsg:3857")
     results = rzs.create_exactextract_zonal_stats(
         simple_aoi,
-        terrain_file,
+        raster_file,
         aggregation=[
             dict(band=1, func=["sum"], output="elevation"),
         ],
@@ -277,14 +292,13 @@ def test_exactextract_include_cols(simple_aoi):
     ]
 
 def test_exactextract_include_geom(simple_aoi):
-    "Check if output returns pandas output despite output option"
-    terrain_file = "data/sample_terrain.tif"
+    "Check if output returns geom"
+    raster_file = "data/sample_terrain.tif"
+    simple_aoi = simple_aoi.to_crs("epsg:3857")
     results = rzs.create_exactextract_zonal_stats(
         simple_aoi,
-        terrain_file,
-        aggregation=[
-            dict(band=1, func=["sum"], output="elevation"),
-        ],
-        extra_args = dict(include_geom=True)
+        raster_file,
+        aggregation=dict(band=1, func=["sum"], output="elevation"),
+        include_geom=True,
     )
     assert isinstance(results, (pd.DataFrame, gpd.GeoDataFrame))

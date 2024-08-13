@@ -130,7 +130,7 @@ def generate_grid(self: SquareGridGenerator, gdf: GeoDataFrame) -> GeoDataFrame:
         dest = GeoDataFrame(
             list(polygons.values()), geometry="geometry", crs=self.grid_projection
         )
-        dest.to_crs(gdf.crs, inplace=True)
+        dest = dest.to_crs(gdf.crs)
         return dest
     else:
         return GeoDataFrame(
@@ -280,8 +280,11 @@ def get_parallel_intersects(
 ):
 
     # split tiles into n chunks (1 chunk per cpu)
-    # see https://stackoverflow.com/questions/17315737/split-a-large-pandas-dataframe
-    tile_items = np.array_split(tiles_gdf, n_workers)
+    n_splits = int(np.ceil(len(tiles_gdf) / n_workers))
+    tile_items = [
+        tiles_gdf.iloc[i : i + n_splits] for i in range(0, len(tiles_gdf), n_splits)
+    ]
+
     items = [(tile_item, reprojected_gdf) for tile_item in tile_items]
     intersect_dfs = parallel(
         get_intersect_partition,
@@ -291,7 +294,7 @@ def get_parallel_intersects(
         progress=progress,
     )
     results = pd.concat(intersect_dfs)
-    results.drop_duplicates(subset=["quadkey"], inplace=True)
+    results = results.drop_duplicates(subset=["quadkey"])
     return results
 
 # %% ../notebooks/00_grids.ipynb 22
@@ -345,7 +348,7 @@ def generate_grid_join(
         tiles_gdf = intersect_tiles_gdf[
             intersect_tiles_gdf.columns.intersection(keep_cols)
         ]
-        tiles_gdf.reset_index(drop=True, inplace=True)
+        tiles = tiles_gdf.reset_index(drop=True)
 
     if not self.return_geometry:
         df = DataFrame(tiles_gdf.drop(columns=["geometry"]))

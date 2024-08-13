@@ -114,7 +114,7 @@ def load_dhs_file(
     dhs_dict = dhs_reader.variable_labels()
     with dhs_reader:
         dhs_df = dhs_reader.read()
-    dhs_df.rename(columns=dhs_dict, inplace=True)
+    dhs_df = dhs_df.rename(columns=dhs_dict)
     return dhs_df
 
 # %% ../notebooks/04_dhs.ipynb 9

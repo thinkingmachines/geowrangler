@@ -161,9 +161,7 @@ def _prep_aoi(
     aoi.index.name = GEO_INDEX_NAME
 
     # create index col for broadcast to features
-    aoi.reset_index(
-        level=0, inplace=True
-    )  # index added as new column named GEO_INDEX_NAME
+    aoi = aoi.reset_index(level=0)  # index added as new column named GEO_INDEX_NAME
     return aoi
 
 # %% ../notebooks/02_vector_zonal_stats.ipynb 36
@@ -171,7 +169,8 @@ def _fillnas(
     expanded_aggs: List[Dict[str, Any]],  # list of expanded aggs
     results: pd.DataFrame,  # results dataframe to be filled with NAs if flag set
     aoi: pd.DataFrame,  # aoi dataframe to merge it back to
-):
+) -> pd.DataFrame:
+    results = results.copy()
     # set NAs to 0 if fillna
     for agg in expanded_aggs:
         if agg["fillna"]:
@@ -179,7 +178,13 @@ def _fillnas(
             if colname in list(aoi.columns.values):
                 colname = colname + "_y"  # try if merged df has colname + _y
             if colname in list(results.columns.values):
-                results[colname].fillna(0, inplace=True)
+                # following this guide https://medium.com/@felipecaballero/deciphering-the-cryptic-futurewarning-for-fillna-in-pandas-2-01deb4e411a1
+                with pd.option_context("future.no_silent_downcasting", True):
+                    results[colname] = (
+                        results[colname].fillna(0).infer_objects(copy=False)
+                    )
+
+    return results
 
 # %% ../notebooks/02_vector_zonal_stats.ipynb 40
 def _aggregate_stats(
@@ -195,7 +200,7 @@ def _aggregate_stats(
     results = aoi.merge(
         aggregates, how="left", on=GEO_INDEX_NAME, suffixes=(None, "_y")
     )
-    _fillnas(expanded_aggs, results, aoi)
+    results = _fillnas(expanded_aggs, results, aoi)
 
     return results
 
@@ -238,23 +243,22 @@ def create_zonal_stats(
     results = _aggregate_stats(aoi, groups, expanded_aggs)
 
     # cleanup results
-    results.set_index(GEO_INDEX_NAME, inplace=True)
+    results = results.set_index(GEO_INDEX_NAME)
     results.index.name = aoi_index_name
 
     return results
 
-# %% ../notebooks/02_vector_zonal_stats.ipynb 63
+# %% ../notebooks/02_vector_zonal_stats.ipynb 62
 tms = morecantile.tms.get("WebMercatorQuad")  # Tile Matrix for Bing Maps
 
-# %% ../notebooks/02_vector_zonal_stats.ipynb 64
+# %% ../notebooks/02_vector_zonal_stats.ipynb 63
 def get_quadkey(geometry, zoom_level):
     return tms.quadkey(tms.tile(geometry.x, geometry.y, zoom_level))
 
-# %% ../notebooks/02_vector_zonal_stats.ipynb 65
+# %% ../notebooks/02_vector_zonal_stats.ipynb 64
 def compute_quadkey(
     data: gpd.GeoDataFrame,  # The geodataframe
     zoom_level: int,  # The quadkey zoom level (1-23)
-    inplace: bool = False,  # Whether to change data inplace or not
     quadkey_column: str = "quadkey",  # The name of the quadkey output column
 ) -> gpd.GeoDataFrame:
     """
@@ -263,7 +267,7 @@ def compute_quadkey(
     from the centroids of the geometries.
     """
 
-    data = data if inplace else data.copy()
+    data = data.copy()
 
     get_zoom_quadkey = partial(get_quadkey, zoom_level=zoom_level)
 
@@ -278,7 +282,7 @@ def compute_quadkey(
 
     return data
 
-# %% ../notebooks/02_vector_zonal_stats.ipynb 72
+# %% ../notebooks/02_vector_zonal_stats.ipynb 71
 def validate_aoi_quadkey(aoi, aoi_quadkey_column) -> None:
 
     if aoi_quadkey_column not in list(aoi.columns.values):
@@ -306,7 +310,7 @@ def validate_data_quadkey(data, data_quadkey_column, min_zoom_level):
             f"data quadkey levels cannot be less than aoi quadkey level {min_zoom_level}"
         )
 
-# %% ../notebooks/02_vector_zonal_stats.ipynb 73
+# %% ../notebooks/02_vector_zonal_stats.ipynb 72
 def create_bingtile_zonal_stats(
     aoi: pd.DataFrame,  # An aoi with quadkey column
     data: pd.DataFrame,  # Data with  quadkey column
@@ -355,6 +359,6 @@ def create_bingtile_zonal_stats(
 
     results = _aggregate_stats(aoi, groups, expanded_aggs)
 
-    results.drop(columns=[GEO_INDEX_NAME], inplace=True)
+    results = results.drop(columns=[GEO_INDEX_NAME])
 
     return results
