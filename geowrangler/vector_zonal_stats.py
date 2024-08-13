@@ -3,10 +3,10 @@
 # %% auto 0
 __all__ = ['create_zonal_stats', 'compute_quadkey', 'create_bingtile_zonal_stats']
 
-# %% ../notebooks/02_vector_zonal_stats.ipynb 8
+# %% ../notebooks/02_vector_zonal_stats.ipynb 6
 GEO_INDEX_NAME = "__GeoWrangleer_aoi_index"
 
-# %% ../notebooks/02_vector_zonal_stats.ipynb 9
+# %% ../notebooks/02_vector_zonal_stats.ipynb 7
 from functools import partial
 from typing import Any, Dict, List
 
@@ -15,7 +15,7 @@ import morecantile
 import numpy as np
 import pandas as pd
 
-# %% ../notebooks/02_vector_zonal_stats.ipynb 13
+# %% ../notebooks/02_vector_zonal_stats.ipynb 11
 def _fix_agg(
     agg: Dict[str, Any],  # A dict containing at the minimum a 'func' key
 ) -> Dict[str, Any]:
@@ -54,7 +54,7 @@ def _fix_agg(
 
     return agg
 
-# %% ../notebooks/02_vector_zonal_stats.ipynb 18
+# %% ../notebooks/02_vector_zonal_stats.ipynb 16
 def _check_agg(
     agg: Dict[str, Any],  # A dict containing at the minimum a 'func' key
     i: int,  # The index into the list of aggregations
@@ -95,7 +95,7 @@ def _check_agg(
             f"fillna list {agg['fillna']} doesn't match func list {agg['func']} in agg[{i}] {agg}"
         )
 
-# %% ../notebooks/02_vector_zonal_stats.ipynb 21
+# %% ../notebooks/02_vector_zonal_stats.ipynb 19
 def _validate_aggs(
     fixed_aggs: List[Dict[str, Any]],  # A list of fixed agg specs
     data: pd.DataFrame,  # Source dataframe
@@ -111,7 +111,7 @@ def _validate_aggs(
             )
         outputs += agg["output"]
 
-# %% ../notebooks/02_vector_zonal_stats.ipynb 26
+# %% ../notebooks/02_vector_zonal_stats.ipynb 24
 def _validate_aoi(
     aoi: pd.DataFrame,  # Source dataframe
 ) -> None:
@@ -120,7 +120,7 @@ def _validate_aoi(
             "AOI has a pandas.MultiIndex. Please convert the index to a single level such as pd.RangeIndex"
         )
 
-# %% ../notebooks/02_vector_zonal_stats.ipynb 27
+# %% ../notebooks/02_vector_zonal_stats.ipynb 25
 def _expand_aggs(
     aggs: List[Dict[str, Any]],  # List of fixed valid aggs
 ) -> List[Dict[str, Any]]:
@@ -137,14 +137,14 @@ def _expand_aggs(
             expanded_aggs += [expanded_agg]
     return expanded_aggs
 
-# %% ../notebooks/02_vector_zonal_stats.ipynb 29
+# %% ../notebooks/02_vector_zonal_stats.ipynb 27
 def _build_agg_args(
     aggs: List[Dict[str, Any]],  # A list of expanded aggs
 ) -> Dict:
     """Builds a dict of args with output as key and a tuple of column and func as value from a list of expanded aggs"""
     return {agg["output"]: (agg["column"], agg["func"]) for agg in aggs}
 
-# %% ../notebooks/02_vector_zonal_stats.ipynb 31
+# %% ../notebooks/02_vector_zonal_stats.ipynb 29
 def _prep_aoi(
     aoi: pd.DataFrame,  # Area of interest
 ) -> pd.DataFrame:
@@ -164,7 +164,7 @@ def _prep_aoi(
     aoi = aoi.reset_index(level=0)  # index added as new column named GEO_INDEX_NAME
     return aoi
 
-# %% ../notebooks/02_vector_zonal_stats.ipynb 36
+# %% ../notebooks/02_vector_zonal_stats.ipynb 34
 def _fillnas(
     expanded_aggs: List[Dict[str, Any]],  # list of expanded aggs
     results: pd.DataFrame,  # results dataframe to be filled with NAs if flag set
@@ -186,7 +186,7 @@ def _fillnas(
 
     return results
 
-# %% ../notebooks/02_vector_zonal_stats.ipynb 40
+# %% ../notebooks/02_vector_zonal_stats.ipynb 38
 def _aggregate_stats(
     aoi: pd.DataFrame,  # Area of interest
     groups: pd.core.groupby.DataFrameGroupBy,  # Source data aggregated into groups by GEO_INDEX_NAME
@@ -204,7 +204,7 @@ def _aggregate_stats(
 
     return results
 
-# %% ../notebooks/02_vector_zonal_stats.ipynb 46
+# %% ../notebooks/02_vector_zonal_stats.ipynb 44
 def create_zonal_stats(
     aoi: gpd.GeoDataFrame,  # Area of interest for which zonal stats are to be computed for
     data: gpd.GeoDataFrame,  # Source gdf containing data to compute zonal stats from
@@ -248,14 +248,14 @@ def create_zonal_stats(
 
     return results
 
-# %% ../notebooks/02_vector_zonal_stats.ipynb 62
+# %% ../notebooks/02_vector_zonal_stats.ipynb 60
 tms = morecantile.tms.get("WebMercatorQuad")  # Tile Matrix for Bing Maps
 
-# %% ../notebooks/02_vector_zonal_stats.ipynb 63
+# %% ../notebooks/02_vector_zonal_stats.ipynb 61
 def get_quadkey(geometry, zoom_level):
     return tms.quadkey(tms.tile(geometry.x, geometry.y, zoom_level))
 
-# %% ../notebooks/02_vector_zonal_stats.ipynb 64
+# %% ../notebooks/02_vector_zonal_stats.ipynb 62
 def compute_quadkey(
     data: gpd.GeoDataFrame,  # The geodataframe
     zoom_level: int,  # The quadkey zoom level (1-23)
@@ -282,7 +282,7 @@ def compute_quadkey(
 
     return data
 
-# %% ../notebooks/02_vector_zonal_stats.ipynb 71
+# %% ../notebooks/02_vector_zonal_stats.ipynb 69
 def validate_aoi_quadkey(aoi, aoi_quadkey_column) -> None:
 
     if aoi_quadkey_column not in list(aoi.columns.values):
@@ -310,7 +310,7 @@ def validate_data_quadkey(data, data_quadkey_column, min_zoom_level):
             f"data quadkey levels cannot be less than aoi quadkey level {min_zoom_level}"
         )
 
-# %% ../notebooks/02_vector_zonal_stats.ipynb 72
+# %% ../notebooks/02_vector_zonal_stats.ipynb 70
 def create_bingtile_zonal_stats(
     aoi: pd.DataFrame,  # An aoi with quadkey column
     data: pd.DataFrame,  # Data with  quadkey column
