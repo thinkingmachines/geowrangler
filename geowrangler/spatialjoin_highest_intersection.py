@@ -11,7 +11,7 @@ import pandas as pd
 import requests
 from . import grids
 
-# %% ../notebooks/12_spatialjoin_highest_intersection.ipynb 26
+# %% ../notebooks/12_spatialjoin_highest_intersection.ipynb 23
 def get_highest_intersection(
     gdf1: gpd.GeoDataFrame,  # gdf1 will be the basis of output geometry
     gdf2: gpd.GeoDataFrame,  # gdf2 data will all be included during intersection
