@@ -3,7 +3,7 @@
 # %% auto 0
 __all__ = ['GRID_ID', 'generate_mask', 'read_bands']
 
-# %% ../notebooks/08_raster_to_dataframe.ipynb 10
+# %% ../notebooks/08_raster_to_dataframe.ipynb 8
 import json
 from typing import Any, Dict, List
 
@@ -13,7 +13,7 @@ import pandas as pd
 import rasterio as rio
 import rasterio.mask
 
-# %% ../notebooks/08_raster_to_dataframe.ipynb 13
+# %% ../notebooks/08_raster_to_dataframe.ipynb 11
 def _explode(gdf):
     """
     Explodes a geodataframe
@@ -38,7 +38,7 @@ def _explode(gdf):
 
     return gdf_out
 
-# %% ../notebooks/08_raster_to_dataframe.ipynb 14
+# %% ../notebooks/08_raster_to_dataframe.ipynb 12
 GRID_ID = 1
 
 
@@ -116,7 +116,7 @@ def generate_mask(
 
     return masks, grids, label_values
 
-# %% ../notebooks/08_raster_to_dataframe.ipynb 16
+# %% ../notebooks/08_raster_to_dataframe.ipynb 14
 def read_bands(image_list: List[str], mask: str):
 
     data = []
