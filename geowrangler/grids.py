@@ -23,7 +23,7 @@ from shapely import box
 from shapely.geometry import Polygon, shape
 from shapely.prepared import prep
 
-from geowrangler.gridding_utils.polygon_fill import voxel_traversal_scanline_fill
+from geowrangler.gridding_utils import polygon_fill
 
 logger = logging.getLogger(__name__)
 
@@ -140,8 +140,8 @@ def generate_grid(self: SquareGridGenerator, gdf: GeoDataFrame) -> GeoDataFrame:
 
 # %% ../notebooks/00_grids.ipynb 13
 class FastSquareGridGenerator:
-    PIXEL_DTYPE = pl.UInt32
-    SUBPOLYGON_ID_COL = "__subpolygon_id__"
+    PIXEL_DTYPE = polygon_fill.PIXEL_DTYPE
+    SUBPOLYGON_ID_COL = polygon_fill.SUBPOLYGON_ID_COL
 
     def __init__(
         self,
@@ -378,9 +378,9 @@ def generate_grid_join(
 # %% ../notebooks/00_grids.ipynb 26
 class FastBingTileGridGenerator:
     EPSILON = 1e-14
-    PIXEL_DTYPE = pl.UInt32
-    SUBPOLYGON_ID_COL = "__subpolygon_id__"
-    MAX_ZOOM = 31
+    PIXEL_DTYPE = polygon_fill.PIXEL_DTYPE
+    SUBPOLYGON_ID_COL = polygon_fill.SUBPOLYGON_ID_COL
+    MAX_ZOOM = 30
 
     def __init__(
         self,
@@ -407,49 +407,10 @@ def generate_grid(
     ] = None,  # the ids under this column will be preserved in the output tiles
 ) -> Union[GeoDataFrame, pd.DataFrame]:
 
-    vertices = self._polygons_to_vertices(aoi_gdf, unique_id_col)
+    vertices = polygon_fill.polygons_to_vertices(aoi_gdf, unique_id_col)
     vertices = self._latlng_to_xy(vertices, lat_col="y", lng_col="x")
 
-    if unique_id_col is not None:
-        id_cols = [self.SUBPOLYGON_ID_COL, unique_id_col]
-        has_unique_id_col = True
-    else:
-        complement_cols = ["x", "y", self.SUBPOLYGON_ID_COL]
-        unique_id_col = list(set(vertices.columns) - set(complement_cols))
-        assert len(unique_id_col) == 1
-        unique_id_col = unique_id_col[0]
-        id_cols = [self.SUBPOLYGON_ID_COL, unique_id_col]
-        has_unique_id_col = False
-
-    polygon_ids = vertices.select(id_cols).unique(maintain_order=True).rows()
-
-    tiles_in_geom = set()
-    for polygon_id in polygon_ids:
-        subpolygon_id, unique_id = polygon_id
-        filter_expr = (pl.col(self.SUBPOLYGON_ID_COL) == subpolygon_id) & (
-            pl.col(unique_id_col) == unique_id
-        )
-        poly_vertices = vertices.filter(filter_expr)
-
-        poly_vertices = poly_vertices.unique(maintain_order=True)
-        _tiles_in_geom = voxel_traversal_scanline_fill(
-            poly_vertices, x_col="x", y_col="y"
-        )
-
-        if has_unique_id_col:
-            _tiles_in_geom = [(x, y, unique_id) for (x, y) in _tiles_in_geom]
-
-        tiles_in_geom.update(_tiles_in_geom)
-
-    schema = {"x": self.PIXEL_DTYPE, "y": self.PIXEL_DTYPE}
-    if has_unique_id_col:
-        schema[unique_id_col] = vertices[unique_id_col].dtype
-
-    tiles_in_geom = pl.from_records(
-        data=list(tiles_in_geom),
-        orient="row",
-        schema=schema,
-    )
+    tiles_in_geom = polygon_fill.fast_fill_polygon(vertices, unique_id_col)
 
     quadkey_expr = self._xyz_to_quadkey(
         pl.col("x"),
@@ -460,21 +421,12 @@ def generate_grid(
     if self.return_geometry:
         bboxes = self._xy_to_bbox(tiles_in_geom, "x", "y")
 
-        # use vectorized version in shapely 2.0
-        bboxes = box(
-            bboxes["minx"].to_list(),
-            bboxes["miny"].to_list(),
-            bboxes["maxx"].to_list(),
-            bboxes["maxy"].to_list(),
-        )
-        bboxes = GeoSeries(bboxes, crs="epsg:4326")
-
     if not self.add_xyz_cols:
         tiles_in_geom = tiles_in_geom.drop(["x", "y"])
     else:
         tiles_in_geom = tiles_in_geom.with_columns(z=pl.lit(self.zoom_level))
         column_order = ["quadkey", "x", "y", "z"]
-        if has_unique_id_col:
+        if unique_id_col is not None:
             column_order += [unique_id_col]
         assert set(tiles_in_geom.columns) == set(column_order)
         tiles_in_geom = tiles_in_geom.select(column_order)
@@ -570,7 +522,7 @@ def _xy_to_bbox(
     df: pl.DataFrame,
     xtile_col: str,
     ytile_col: str,
-) -> pl.DataFrame:
+) -> GeoSeries:
 
     upper_left_lng = self._xtile_to_lng(pl.col(xtile_col))
     upper_left_lat = self._ytile_to_lat(pl.col(ytile_col))
@@ -584,45 +536,16 @@ def _xy_to_bbox(
         maxy=upper_left_lat,
     )
 
-    return bbox_df
+    # use vectorized version in shapely 2.0
+    bboxes = box(
+        bbox_df["minx"].to_list(),
+        bbox_df["miny"].to_list(),
+        bbox_df["maxx"].to_list(),
+        bbox_df["maxy"].to_list(),
+    )
+    bboxes = GeoSeries(bboxes, crs="epsg:4326")
 
-
-@patch
-def _polygons_to_vertices(
-    self: FastBingTileGridGenerator,
-    polys_gdf: GeoDataFrame,
-    unique_id_col: Optional[str] = None,
-) -> pl.DataFrame:
-
-    if unique_id_col is not None:
-        duplicates_bool = polys_gdf[unique_id_col].duplicated()
-        if duplicates_bool.any():
-            raise ValueError(
-                f"""{unique_id_col} is not unique!
-                Found {duplicates_bool.sum():,} duplicates"""
-            )
-        polys_gdf = polys_gdf.set_index(unique_id_col)
-    else:
-        # reset index if it is not unique
-        if polys_gdf.index.nunique() != len(polys_gdf.index):
-            polys_gdf = polys_gdf.reset_index(drop=True)
-        unique_id_col = polys_gdf.index.name
-
-    polys_gdf = polys_gdf.explode(index_parts=True)
-
-    is_poly_bool = polys_gdf.type == "Polygon"
-    if not is_poly_bool.all():
-        raise ValueError(
-            f"""
-        All geometries should be polygons or multipolygons but found
-        {is_poly_bool.sum():,} after exploding the geodatarame"""
-        )
-
-    polys_gdf.index.names = [unique_id_col, self.SUBPOLYGON_ID_COL]
-    vertices_df = polys_gdf.get_coordinates().reset_index()
-    vertices_df = pl.from_pandas(vertices_df)
-
-    return vertices_df
+    return bboxes
 
 
 @patch
