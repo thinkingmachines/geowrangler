@@ -156,7 +156,7 @@ class FastSquareGridGenerator:
         if self.cell_size <= 0:
             raise ValueError(f"cell_size should be positive but instead is {cell_size}")
 
-# %% ../notebooks/00_grids.ipynb 15
+# %% ../notebooks/00_grids.ipynb 16
 class H3GridGenerator:
     def __init__(
         self,
@@ -166,7 +166,7 @@ class H3GridGenerator:
         self.resolution = resolution
         self.return_geometry = return_geometry
 
-# %% ../notebooks/00_grids.ipynb 16
+# %% ../notebooks/00_grids.ipynb 17
 @patch
 def get_hexes_for_polygon(self: H3GridGenerator, poly: Polygon):
     return h3.polyfill(
@@ -175,7 +175,7 @@ def get_hexes_for_polygon(self: H3GridGenerator, poly: Polygon):
         geo_json_conformant=True,
     )
 
-# %% ../notebooks/00_grids.ipynb 17
+# %% ../notebooks/00_grids.ipynb 18
 @patch
 def generate_grid(self: H3GridGenerator, gdf: GeoDataFrame) -> DataFrame:
     reprojected_gdf = gdf.to_crs("epsg:4326")  # h3 hexes are in epsg:4326 CRS
@@ -200,7 +200,7 @@ def generate_grid(self: H3GridGenerator, gdf: GeoDataFrame) -> DataFrame:
     )
     return h3_gdf.to_crs(gdf.crs)
 
-# %% ../notebooks/00_grids.ipynb 19
+# %% ../notebooks/00_grids.ipynb 20
 class BingTileGridGenerator:
     def __init__(
         self,
@@ -237,7 +237,7 @@ class BingTileGridGenerator:
             tiles = {qk: (geom, tile) for qk, geom, tile in tiles}
         return tiles
 
-# %% ../notebooks/00_grids.ipynb 20
+# %% ../notebooks/00_grids.ipynb 21
 @patch
 def get_all_tiles_for_polygon(self: BingTileGridGenerator, polygon: Polygon):
     """Get the interseting tiles with polygon for a zoom level. Polygon should be in EPSG:4326"""
@@ -248,7 +248,7 @@ def get_all_tiles_for_polygon(self: BingTileGridGenerator, polygon: Polygon):
     )
     return tiles
 
-# %% ../notebooks/00_grids.ipynb 21
+# %% ../notebooks/00_grids.ipynb 22
 @patch
 def generate_grid(self: BingTileGridGenerator, gdf: GeoDataFrame) -> DataFrame:
     reprojected_gdf = gdf.to_crs("epsg:4326")  # quadkeys hexes are in epsg:4326 CRS
@@ -283,7 +283,7 @@ def generate_grid(self: BingTileGridGenerator, gdf: GeoDataFrame) -> DataFrame:
 
     return tiles_gdf
 
-# %% ../notebooks/00_grids.ipynb 22
+# %% ../notebooks/00_grids.ipynb 23
 def get_intersect_partition(item):
     tiles_gdf, reprojected_gdf = item
     tiles_gdf.sindex
@@ -293,7 +293,7 @@ def get_intersect_partition(item):
     )
     return intersect_tiles_gdf
 
-# %% ../notebooks/00_grids.ipynb 23
+# %% ../notebooks/00_grids.ipynb 24
 def get_parallel_intersects(
     tiles_gdf, reprojected_gdf, n_workers=defaults.cpus, progress=True
 ):
@@ -316,7 +316,7 @@ def get_parallel_intersects(
     results = results.drop_duplicates(subset=["quadkey"])
     return results
 
-# %% ../notebooks/00_grids.ipynb 24
+# %% ../notebooks/00_grids.ipynb 25
 @patch
 def generate_grid_join(
     self: BingTileGridGenerator,
@@ -375,7 +375,7 @@ def generate_grid_join(
 
     return tiles_gdf.to_crs(gdf.crs)
 
-# %% ../notebooks/00_grids.ipynb 26
+# %% ../notebooks/00_grids.ipynb 27
 class FastBingTileGridGenerator:
     EPSILON = 1e-14
     PIXEL_DTYPE = polygon_fill.PIXEL_DTYPE
@@ -397,7 +397,7 @@ class FastBingTileGridGenerator:
                 f"Maximum allowed zoom level is {self.MAX_ZOOM}. Input was {self.zoom_level}"
             )
 
-# %% ../notebooks/00_grids.ipynb 27
+# %% ../notebooks/00_grids.ipynb 28
 @patch
 def generate_grid(
     self: FastBingTileGridGenerator,
@@ -438,7 +438,7 @@ def generate_grid(
 
     return tiles_in_geom
 
-# %% ../notebooks/00_grids.ipynb 28
+# %% ../notebooks/00_grids.ipynb 29
 @patch
 def _lat_to_ytile(self: FastBingTileGridGenerator, lat: pl.Expr) -> pl.Expr:
     logtan = pl.Expr.log(pl.Expr.tan((np.pi / 4) + (pl.Expr.radians(lat) / 2)))

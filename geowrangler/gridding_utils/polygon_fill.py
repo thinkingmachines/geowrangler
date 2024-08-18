@@ -192,7 +192,7 @@ def voxel_traversal_scanline_fill(
 ) -> Set[Tuple[int, int]]:
     """
     Returns pixels that intersect a polygon
-    This uses voxel traversal to fill the boundary, and scanline fill for the interior. All coordinates are assumed to be nonnegative integers
+    This uses voxel traversal to fill the boundary, and scanline fill for the interior. All coordinates are assumed to be integers
     """
 
     vertices = list(zip(vertices_df[x_col].to_list(), vertices_df[y_col].to_list()))
