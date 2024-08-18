@@ -410,7 +410,7 @@ def generate_grid(
     vertices = polygon_fill.polygons_to_vertices(aoi_gdf, unique_id_col)
     vertices = self._latlng_to_xy(vertices, lat_col="y", lng_col="x")
 
-    tiles_in_geom = polygon_fill.fast_fill_polygon(vertices, unique_id_col)
+    tiles_in_geom = polygon_fill.fast_polygon_fill(vertices, unique_id_col)
 
     quadkey_expr = self._xyz_to_quadkey(
         pl.col("x"),
