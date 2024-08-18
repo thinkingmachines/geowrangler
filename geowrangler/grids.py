@@ -64,7 +64,9 @@ class SquareGridGenerator:
         self,
         cell_size: float,  # height and width of a square cell in meters
         grid_projection: str = "EPSG:3857",  # projection of grid output
-        boundary: Union[SquareGridBoundary, List[float]] = None,  # original boundary
+        boundary: Union[
+            SquareGridBoundary, List[float], Tuple[float]
+        ] = None,  # original boundary
     ):
         self.cell_size = cell_size
         self.grid_projection = grid_projection
@@ -108,17 +110,9 @@ def create_grid_for_polygon(self: SquareGridGenerator, boundary, geometry):
 
 # %% ../notebooks/00_grids.ipynb 11
 @patch
-def generate_grid(self: SquareGridGenerator, gdf: GeoDataFrame) -> GeoDataFrame:
-    reprojected_gdf = gdf.to_crs(self.grid_projection)
-    if self.boundary is None:
-        boundary = SquareGridBoundary(*reprojected_gdf.total_bounds)
-    elif isinstance(self.boundary, SquareGridBoundary):
-        boundary = self.boundary
-    else:
-        transformer = Transformer.from_crs(gdf.crs, reprojected_gdf.crs, always_xy=True)
-        x_min, y_min = transformer.transform(self.boundary[0], self.boundary[1])
-        x_max, y_max = transformer.transform(self.boundary[2], self.boundary[3])
-        boundary = SquareGridBoundary(x_min, y_min, x_max, y_max)
+def generate_grid(self: SquareGridGenerator, aoi_gdf: GeoDataFrame) -> GeoDataFrame:
+    reprojected_gdf = aoi_gdf.to_crs(self.grid_projection)
+    boundary = setup_boundary(self.boundary, aoi_gdf, reprojected_gdf)
 
     polygons = {}
     unary_union = reprojected_gdf.union_all(method="unary")
@@ -131,14 +125,39 @@ def generate_grid(self: SquareGridGenerator, gdf: GeoDataFrame) -> GeoDataFrame:
         dest = GeoDataFrame(
             list(polygons.values()), geometry="geometry", crs=self.grid_projection
         )
-        dest = dest.to_crs(gdf.crs)
+        dest = dest.to_crs(aoi_gdf.crs)
         return dest
     else:
         return GeoDataFrame(
-            {"x": [], "y": [], "geometry": []}, geometry="geometry", crs=gdf.crs
+            {"x": [], "y": [], "geometry": []}, geometry="geometry", crs=aoi_gdf.crs
         )
 
-# %% ../notebooks/00_grids.ipynb 13
+# %% ../notebooks/00_grids.ipynb 12
+def setup_boundary(
+    boundary: Optional[Union[SquareGridGenerator, List[float]]],
+    aoi_gdf: GeoDataFrame,
+    reprojected_gdf: GeoDataFrame,
+) -> SquareGridBoundary:
+
+    if boundary is None:
+        boundary = SquareGridBoundary(*reprojected_gdf.total_bounds)
+    elif isinstance(boundary, SquareGridBoundary):
+        boundary = boundary
+    elif isinstance(boundary, list) or isinstance(boundary, tuple):
+        transformer = Transformer.from_crs(
+            aoi_gdf.crs, reprojected_gdf.crs, always_xy=True
+        )
+        x_min, y_min = transformer.transform(boundary[0], boundary[1])
+        x_max, y_max = transformer.transform(boundary[2], boundary[3])
+        boundary = SquareGridBoundary(x_min, y_min, x_max, y_max)
+    else:
+        raise NotImplementedError(
+            f"boundary should be a SquareGridBoundary or a list, but instead got {type(boundary)}"
+        )
+
+    return boundary
+
+# %% ../notebooks/00_grids.ipynb 14
 class FastSquareGridGenerator:
     PIXEL_DTYPE = polygon_fill.PIXEL_DTYPE
     SUBPOLYGON_ID_COL = polygon_fill.SUBPOLYGON_ID_COL
@@ -147,16 +166,55 @@ class FastSquareGridGenerator:
         self,
         cell_size: float,  # height and width of a square cell in meters
         grid_projection: str = "EPSG:3857",  # planar projection of grid
+        boundary: Union[SquareGridBoundary, List[float]] = None,  # original boundary
         add_xy_cols: bool = False,  # If xy columns should be returned. This doesn't add compute time if True
     ):
         self.cell_size = cell_size
         self.grid_projection = grid_projection
+        self.boundary = boundary
         self.add_xy_cols = add_xy_cols
 
         if self.cell_size <= 0:
             raise ValueError(f"cell_size should be positive but instead is {cell_size}")
 
-# %% ../notebooks/00_grids.ipynb 16
+# %% ../notebooks/00_grids.ipynb 15
+@patch
+def generate_grid(
+    self: FastSquareGridGenerator,
+    aoi_gdf: GeoDataFrame,
+    unique_id_col: Optional[
+        str
+    ] = None,  # the ids under this column will be preserved in the output tiles
+) -> Union[GeoDataFrame, pd.DataFrame]:
+
+    reprojected_gdf = aoi_gdf.to_crs(self.grid_projection)
+    boundary = setup_boundary(boundary, aoi_gdf, reprojected_gdf)
+
+    vertices = polygon_fill.polygons_to_vertices(aoi_gdf, unique_id_col)
+    vertices = self._latlng_to_xy(vertices, boundary, lat_col="y", lng_col="x")
+
+    tiles_in_geom = polygon_fill.fast_polygon_fill(vertices, unique_id_col)
+
+    if self.return_geometry:
+        bboxes = self._xy_to_bbox(tiles_in_geom, "x", "y")
+
+    if not self.add_xy_cols:
+        tiles_in_geom = tiles_in_geom.drop(["x", "y"])
+    else:
+        column_order = ["x", "y"]
+        if unique_id_col is not None:
+            column_order += [unique_id_col]
+        assert set(tiles_in_geom.columns) == set(column_order)
+        tiles_in_geom = tiles_in_geom.select(column_order)
+
+    if self.return_geometry:
+        tiles_in_geom = GeoDataFrame(tiles_in_geom.to_pandas(), geometry=bboxes)
+    else:
+        tiles_in_geom = tiles_in_geom.to_pandas()
+
+    return tiles_in_geom
+
+# %% ../notebooks/00_grids.ipynb 17
 class H3GridGenerator:
     def __init__(
         self,
@@ -166,7 +224,7 @@ class H3GridGenerator:
         self.resolution = resolution
         self.return_geometry = return_geometry
 
-# %% ../notebooks/00_grids.ipynb 17
+# %% ../notebooks/00_grids.ipynb 18
 @patch
 def get_hexes_for_polygon(self: H3GridGenerator, poly: Polygon):
     return h3.polyfill(
@@ -175,10 +233,10 @@ def get_hexes_for_polygon(self: H3GridGenerator, poly: Polygon):
         geo_json_conformant=True,
     )
 
-# %% ../notebooks/00_grids.ipynb 18
+# %% ../notebooks/00_grids.ipynb 19
 @patch
-def generate_grid(self: H3GridGenerator, gdf: GeoDataFrame) -> DataFrame:
-    reprojected_gdf = gdf.to_crs("epsg:4326")  # h3 hexes are in epsg:4326 CRS
+def generate_grid(self: H3GridGenerator, aoi_gdf: GeoDataFrame) -> DataFrame:
+    reprojected_gdf = aoi_gdf.to_crs("epsg:4326")  # h3 hexes are in epsg:4326 CRS
     hex_ids = set()
     unary_union = reprojected_gdf.union_all(method="unary")
     if isinstance(unary_union, Polygon):
@@ -198,9 +256,9 @@ def generate_grid(self: H3GridGenerator, gdf: GeoDataFrame) -> DataFrame:
         geometry=hexes,
         crs="epsg:4326",
     )
-    return h3_gdf.to_crs(gdf.crs)
+    return h3_gdf.to_crs(aoi_gdf.crs)
 
-# %% ../notebooks/00_grids.ipynb 20
+# %% ../notebooks/00_grids.ipynb 21
 class BingTileGridGenerator:
     def __init__(
         self,
@@ -237,7 +295,7 @@ class BingTileGridGenerator:
             tiles = {qk: (geom, tile) for qk, geom, tile in tiles}
         return tiles
 
-# %% ../notebooks/00_grids.ipynb 21
+# %% ../notebooks/00_grids.ipynb 22
 @patch
 def get_all_tiles_for_polygon(self: BingTileGridGenerator, polygon: Polygon):
     """Get the interseting tiles with polygon for a zoom level. Polygon should be in EPSG:4326"""
@@ -248,10 +306,10 @@ def get_all_tiles_for_polygon(self: BingTileGridGenerator, polygon: Polygon):
     )
     return tiles
 
-# %% ../notebooks/00_grids.ipynb 22
+# %% ../notebooks/00_grids.ipynb 23
 @patch
-def generate_grid(self: BingTileGridGenerator, gdf: GeoDataFrame) -> DataFrame:
-    reprojected_gdf = gdf.to_crs("epsg:4326")  # quadkeys hexes are in epsg:4326 CRS
+def generate_grid(self: BingTileGridGenerator, aoi_gdf: GeoDataFrame) -> DataFrame:
+    reprojected_gdf = aoi_gdf.to_crs("epsg:4326")  # quadkeys hexes are in epsg:4326 CRS
     tiles = {}
     unary_union = reprojected_gdf.union_all(method="unary")
     if isinstance(unary_union, Polygon):
@@ -276,14 +334,14 @@ def generate_grid(self: BingTileGridGenerator, gdf: GeoDataFrame) -> DataFrame:
             geometry=list(geom),
             crs="epsg:4326",
         )
-        tiles_gdf = tiles_gdf.to_crs(gdf.crs)
+        tiles_gdf = tiles_gdf.to_crs(aoi_gdf.crs)
         return tiles_gdf
     else:
         tiles_gdf = DataFrame(result)
 
     return tiles_gdf
 
-# %% ../notebooks/00_grids.ipynb 23
+# %% ../notebooks/00_grids.ipynb 24
 def get_intersect_partition(item):
     tiles_gdf, reprojected_gdf = item
     tiles_gdf.sindex
@@ -293,7 +351,7 @@ def get_intersect_partition(item):
     )
     return intersect_tiles_gdf
 
-# %% ../notebooks/00_grids.ipynb 24
+# %% ../notebooks/00_grids.ipynb 25
 def get_parallel_intersects(
     tiles_gdf, reprojected_gdf, n_workers=defaults.cpus, progress=True
 ):
@@ -316,16 +374,16 @@ def get_parallel_intersects(
     results = results.drop_duplicates(subset=["quadkey"])
     return results
 
-# %% ../notebooks/00_grids.ipynb 25
+# %% ../notebooks/00_grids.ipynb 26
 @patch
 def generate_grid_join(
     self: BingTileGridGenerator,
-    gdf: GeoDataFrame,
+    aoi_gdf: GeoDataFrame,
     filter: bool = True,
     n_workers=defaults.cpus,
     progress=True,
 ) -> DataFrame:
-    reprojected_gdf = gdf.to_crs("epsg:4326")[
+    reprojected_gdf = aoi_gdf.to_crs("epsg:4326")[
         ["geometry"]
     ]  # quadkeys hexes are in epsg:4326 CRS
     tiles = []
@@ -373,9 +431,9 @@ def generate_grid_join(
         df = DataFrame(tiles_gdf.drop(columns=["geometry"]))
         return df
 
-    return tiles_gdf.to_crs(gdf.crs)
+    return tiles_gdf.to_crs(aoi_gdf.crs)
 
-# %% ../notebooks/00_grids.ipynb 27
+# %% ../notebooks/00_grids.ipynb 28
 class FastBingTileGridGenerator:
     EPSILON = 1e-14
     PIXEL_DTYPE = polygon_fill.PIXEL_DTYPE
@@ -397,7 +455,7 @@ class FastBingTileGridGenerator:
                 f"Maximum allowed zoom level is {self.MAX_ZOOM}. Input was {self.zoom_level}"
             )
 
-# %% ../notebooks/00_grids.ipynb 28
+# %% ../notebooks/00_grids.ipynb 29
 @patch
 def generate_grid(
     self: FastBingTileGridGenerator,
@@ -438,7 +496,7 @@ def generate_grid(
 
     return tiles_in_geom
 
-# %% ../notebooks/00_grids.ipynb 29
+# %% ../notebooks/00_grids.ipynb 30
 @patch
 def _lat_to_ytile(self: FastBingTileGridGenerator, lat: pl.Expr) -> pl.Expr:
     logtan = pl.Expr.log(pl.Expr.tan((np.pi / 4) + (pl.Expr.radians(lat) / 2)))
