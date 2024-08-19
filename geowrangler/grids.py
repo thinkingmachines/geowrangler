@@ -162,7 +162,9 @@ class FastSquareGridGenerator:
         self,
         cell_size: float,  # height and width of a square cell in meters
         grid_projection: str = "EPSG:3857",  # planar projection of grid
-        boundary: Union[SquareGridBoundary, List[float]] = None,  # original boundary
+        boundary: Union[
+            SquareGridBoundary, Iterable[float]
+        ] = None,  # original boundary
     ):
         self.cell_size = cell_size
         self.grid_projection = grid_projection
