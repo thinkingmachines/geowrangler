@@ -185,6 +185,7 @@ def generate_grid(
     boundary = setup_boundary(self.boundary, aoi_gdf, reprojected_gdf)
 
     vertices = polygon_fill.polygons_to_vertices(reprojected_gdf, unique_id_col)
+    vertices = self._remove_out_of_bounds_polygons(vertices, boundary)
     vertices = self._northingeasting_to_xy(
         vertices, boundary, northing_col="y", easting_col="x"
     )
@@ -207,12 +208,55 @@ def generate_grid(
 
 # %% ../notebooks/00_grids.ipynb 16
 @patch
+def _remove_out_of_bounds_polygons(
+    self: FastSquareGridGenerator,
+    vertices: pl.DataFrame,
+    boundary: SquareGridBoundary,
+) -> pl.DataFrame:
+    id_cols = [col for col in vertices.columns if col != "x" and col != "y"]
+
+    x_out_of_bounds_expr = (pl.col("maxx") < pl.lit(boundary.x_min)) | (
+        pl.lit(boundary.x_max) < pl.col("minx")
+    )
+    y_out_of_bounds_expr = (pl.col("maxy") < pl.lit(boundary.y_min)) | (
+        pl.lit(boundary.y_max) < pl.col("miny")
+    )
+
+    out_of_bounds_expr = x_out_of_bounds_expr | y_out_of_bounds_expr
+
+    out_of_bounds_polygons = (
+        vertices.group_by(id_cols)
+        .agg(
+            minx=pl.col("x").min(),
+            miny=pl.col("y").min(),
+            maxx=pl.col("x").max(),
+            maxy=pl.col("y").max(),
+        )
+        .filter(out_of_bounds_expr)
+        .select(id_cols)
+    )
+
+    # keep only vertices from polygons that are not out of bounds
+    vertices = vertices.join(out_of_bounds_polygons, on=id_cols, how="anti")
+    return vertices
+
+
+@patch
 def _northing_to_ytile(
     self: FastSquareGridGenerator,
     northing: pl.Expr,
     y_min: float,
+    y_max: float,
 ) -> pl.Expr:
 
+    # clamping to bounds
+    northing = (
+        pl.when(northing < y_min)
+        .then(pl.lit(y_min))
+        .when(northing > y_max)
+        .then(pl.lit(y_max))
+        .otherwise(northing)
+    )
     ytile = ((northing - y_min) / self.cell_size).floor()
     ytile = ytile.cast(self.PIXEL_DTYPE)
 
@@ -224,7 +268,17 @@ def _easting_to_xtile(
     self: FastSquareGridGenerator,
     easting: pl.Expr,
     x_min: float,
+    x_max: float,
 ) -> pl.Expr:
+
+    # clamping to bounds
+    easting = (
+        pl.when(easting < x_min)
+        .then(pl.lit(x_min))
+        .when(easting > x_max)
+        .then(pl.lit(x_max))
+        .otherwise(easting)
+    )
 
     xtile = ((easting - x_min) / self.cell_size).floor()
     xtile = xtile.cast(self.PIXEL_DTYPE)
@@ -247,8 +301,8 @@ def _northingeasting_to_xy(
     y_max = boundary.y_max
 
     xy_df = df.with_columns(
-        x=self._easting_to_xtile(pl.col(easting_col), x_min),
-        y=self._northing_to_ytile(pl.col(northing_col), y_min),
+        x=self._easting_to_xtile(pl.col(easting_col), x_min, x_max),
+        y=self._northing_to_ytile(pl.col(northing_col), y_min, y_max),
     )
 
     return xy_df
