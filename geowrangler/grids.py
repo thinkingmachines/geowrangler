@@ -76,10 +76,10 @@ class SquareGridGenerator:
 @patch
 def create_cell(
     self: SquareGridGenerator,
-    x: float,  # x coord of top left
-    y: float,  # y coord of top left
+    x: float,  # x coord of bottom left
+    y: float,  # y coord of bottom left
 ) -> Polygon:
-    """Create a square cell based on the top left coordinates and cell_size"""
+    """Create a square cell based on the bottom left coordinates and cell_size"""
     return Polygon(
         [
             (x, y),
