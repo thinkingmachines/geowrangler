@@ -31,11 +31,26 @@ logger = logging.getLogger(__name__)
 class SquareGridBoundary:
     """Reusing Boundary. x_min, y_min, x_max, and y_max are in the the target crs"""
 
-    def __init__(self, x_min: float, y_min: float, x_max: float, y_max: float):
+    BOUNDARY_TYPES = ["aoi_boundary", "custom_boundary"]
+
+    def __init__(
+        self,
+        x_min: float,
+        y_min: float,
+        x_max: float,
+        y_max: float,
+        boundary_type: Optional[str] = None,
+    ):
         self.x_min = x_min
         self.y_min = y_min
         self.x_max = x_max
         self.y_max = y_max
+        if boundary_type is not None:
+            if boundary_type not in self.BOUNDARY_TYPES:
+                raise ValueError(
+                    f"{boundary_type} boundary_type is not supported. Please select from these options {self.BOUNDARY_TYPES}"
+                )
+        self.boundary_type = boundary_type
 
     def get_range_subset(
         self, x_min: float, y_min: float, x_max: float, y_max: float, cell_size: float
@@ -140,7 +155,9 @@ def setup_boundary(
 ) -> SquareGridBoundary:
 
     if boundary is None:
-        boundary = SquareGridBoundary(*reprojected_gdf.total_bounds)
+        boundary = SquareGridBoundary(
+            *reprojected_gdf.total_bounds, boundary_type="aoi_boundary"
+        )
     elif isinstance(boundary, SquareGridBoundary):
         boundary = boundary
     else:
@@ -149,7 +166,9 @@ def setup_boundary(
         )
         x_min, y_min = transformer.transform(boundary[0], boundary[1])
         x_max, y_max = transformer.transform(boundary[2], boundary[3])
-        boundary = SquareGridBoundary(x_min, y_min, x_max, y_max)
+        boundary = SquareGridBoundary(
+            x_min, y_min, x_max, y_max, boundary_type="custom_boundary"
+        )
 
     return boundary
 
@@ -187,7 +206,8 @@ def generate_grid(
     boundary = setup_boundary(self.boundary, aoi_gdf, reprojected_gdf)
 
     vertices = polygon_fill.polygons_to_vertices(reprojected_gdf, unique_id_col)
-    vertices = self._remove_out_of_bounds_polygons(vertices, boundary)
+    if boundary.boundary_type != "aoi_boundary":
+        vertices = self._remove_out_of_bounds_polygons(vertices, boundary)
     vertices = self._northingeasting_to_xy(
         vertices, boundary, northing_col="y", easting_col="x"
     )
