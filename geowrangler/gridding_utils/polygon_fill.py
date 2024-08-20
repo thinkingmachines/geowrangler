@@ -249,9 +249,9 @@ def polygons_to_vertices(
 
     return vertices_df
 
-# %% ../../notebooks/15_polygon_fill.ipynb 31
+# %% ../../notebooks/15_polygon_fill.ipynb 32
 def fast_polygon_fill(
-    vertices_df: pl.DataFrame,  # integer vertices of a single polygon
+    vertices_df: pl.DataFrame,  # integer vertices of all polygons in the AOI
     unique_id_col: Optional[
         str
     ] = None,  # the ids under this column will be preserved in the output tiles
