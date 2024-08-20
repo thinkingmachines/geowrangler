@@ -19,7 +19,8 @@ def voxel_traversal_2d(
 ) -> List[Tuple[int, int]]:
     """
     Returns all pixels between two points as inspired by Amanatides & Woo's “A Fast Voxel Traversal Algorithm For Ray Tracing”
-    Implementation adapted from https://www.redblobgames.com/grids/line-drawing/
+
+    Implementation adapted from https://www.redblobgames.com/grids/line-drawing/ in the supercover lines section
     """
 
     # Setup initial conditions
@@ -191,8 +192,9 @@ def voxel_traversal_scanline_fill(
     debug: bool = False,  # if true, prints diagnostic info for both voxel traversal and scanline fill algorithms
 ) -> Set[Tuple[int, int]]:
     """
-    Returns pixels that intersect a polygon
-    This uses voxel traversal to fill the boundary, and scanline fill for the interior. All coordinates are assumed to be integers
+    Returns pixels that intersect a polygon.
+
+    This uses voxel traversal to fill the boundary, and scanline fill for the interior. All coordinates are assumed to be integers.
     """
 
     vertices = list(zip(vertices_df[x_col].to_list(), vertices_df[y_col].to_list()))
