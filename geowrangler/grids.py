@@ -14,6 +14,7 @@ import morecantile
 import numpy as np
 import pandas as pd
 import polars as pl
+import warnings
 from fastcore.all import defaults, parallel
 from fastcore.basics import patch
 from geopandas import GeoDataFrame, GeoSeries
@@ -170,7 +171,25 @@ def setup_boundary(
             x_min, y_min, x_max, y_max, boundary_type="custom_boundary"
         )
 
+    if not is_aoi_within_boundary(boundary, reprojected_gdf):
+        warnings.warn(
+            "The given boundary does not fully enclose the reprojected AOI. There might be missing grid cells due to this. Try getting the boundary of the reprojected AOI, and/or adding a buffer to the boundary. See geowrangler.thinkingmachin.es/tutorial.grids.html#reprojecting-before-gridding for more info."
+        )
+
     return boundary
+
+
+def is_aoi_within_boundary(
+    boundary: Optional[Union[SquareGridGenerator, Iterable[float]]],
+    gdf: GeoDataFrame,
+) -> bool:
+
+    gdf_minx, gdf_miny, gdf_maxx, gdf_maxy = gdf.total_bounds
+    is_x_within_bounds = (gdf_minx >= boundary.x_min) & (gdf_maxx <= boundary.x_max)
+    is_y_within_bounds = (gdf_miny >= boundary.y_min) & (gdf_maxy <= boundary.y_max)
+
+    is_within_bounds = is_x_within_bounds & is_y_within_bounds
+    return is_within_bounds
 
 # %% ../notebooks/00_grids.ipynb 14
 class FastSquareGridGenerator:
