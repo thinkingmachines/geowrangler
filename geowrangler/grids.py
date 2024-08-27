@@ -173,7 +173,7 @@ def setup_boundary(
 
     if not is_aoi_within_boundary(boundary, reprojected_gdf):
         warnings.warn(
-            "The given boundary does not fully enclose the reprojected AOI. There might be missing grid cells due to this. Try getting the boundary of the reprojected AOI, and/or adding a buffer to the boundary. See geowrangler.thinkingmachin.es/tutorial.grids.html#reprojecting-before-gridding for more info."
+            "The given boundary does not fully enclose the reprojected AOI. There might be missing grid cells due to this. If this is not expected, get the boundary of the reprojected AOI, and/or add a buffer to the boundary. See geowrangler.thinkingmachin.es/tutorial.grids.html#reprojecting-before-gridding for more info."
         )
 
     return boundary
