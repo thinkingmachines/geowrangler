@@ -177,3 +177,6 @@ data/output_0.tif
 notebooks/data
 _proc/
 _docs/
+
+# pypi
+.pypirc
