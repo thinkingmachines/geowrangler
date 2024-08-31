@@ -37,7 +37,7 @@ The `<REPOSITORY>` value is either `pypi` or `testpypi`.
 
 1. Document the release notes in `CHANGELOG.md`
 2. Run `nbdev_release_git` to create entries for the [release page](https://github.com/thinkingmachines/geowrangler/tags). 
-    - You'll need to create a github token for your gh account for this. See the [nbdev.release docs](https://nbdev.fast.ai/api/release.html#overview) for details
+    - You'll need to create a GitHub personal access token for this if you haven't already. See the [nbdev.release docs](https://nbdev.fast.ai/api/release.html#overview), under the `Setup` section, for more details.
 
 ## Submitting
 
