@@ -33,6 +33,12 @@ The `<REPOSITORY>` value is either `pypi` or `testpypi`.
 ./scripts/publish2pypi.sh <REPOSITORY>
 ```
 
+## Updating release notes and tagging a release
+
+1. Document the release notes in `CHANGELOG.md`
+2. Run `nbdev_release_git` to create entries for the [release page](https://github.com/thinkingmachines/geowrangler/tags). 
+    - You'll need to create a github token for your gh account for this. See the [nbdev.release docs](https://nbdev.fast.ai/api/release.html#overview) for details
+
 ## Submitting
 
 Create a PR and tag it as the release version. The tag should be in the format `vX.Y.Z` where `X.Y.Z` is the major, minor and patch version numbers. 
