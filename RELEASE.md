@@ -2,7 +2,7 @@
 
 ## Bumping the version
 
-Run the following. Use `<part>` = 0, 1, 2 for major, minor or patch depending on the release. See https://nbdev.fast.ai/api/release.html#bump-version for more details
+Run the following. Use `<part>` = 0, 1, 2 for major, minor or patch depending on the release. For example if the version is 1.5.2 then the major version is 1, the minor version is 5, and the patch version is 2. See https://nbdev.fast.ai/api/release.html#bump-version for more details
 
 ```
 nbdev_bump_version --part <part>
@@ -41,4 +41,4 @@ The `<REPOSITORY>` value is either `pypi` or `testpypi`.
 
 ## Submitting
 
-Create a PR and tag it as the release version. The tag should be in the format `vX.Y.Z` where `X.Y.Z` is the major, minor and patch version numbers. 
+Create a PR and tag it as the release version. The tag should be in the format `vX.Y.Z` where `X`, `Y`, and `Z` are the major, minor and patch version numbers respectively. 
