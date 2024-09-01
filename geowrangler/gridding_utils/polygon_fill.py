@@ -16,11 +16,13 @@ def voxel_traversal_2d(
     start_vertex: Tuple[int, int],
     end_vertex: Tuple[int, int],
     debug: bool = False,  # if true, prints diagnostic info for the algorithm
-) -> List[Tuple[int, int]]:
+) -> Dict[str, List[Tuple[int, int]]]:
     """
     Returns all pixels between two points as inspired by Amanatides & Woo's “A Fast Voxel Traversal Algorithm For Ray Tracing”
 
     Implementation adapted from https://www.redblobgames.com/grids/line-drawing/ in the supercover lines section
+
+    This also returns the off diagonals that can be useful for correcting errors at the corners of polygons during polygon fill
     """
 
     # Setup initial conditions
@@ -30,26 +32,32 @@ def voxel_traversal_2d(
     direction_x = 1 if x2 > x1 else -1
     direction_y = 1 if y2 > y1 else -1
 
+    result = {"line_pixels": [], "off_diagonal_pixels": []}
+
     # Single point
     if (x1 == x2) and (y1 == y2):
         pixels = [(x1, y1)]
-        return pixels
+        result["line_pixels"].extend(pixels)
+        return result
 
     # Vertical line
     elif x1 == x2:
         pixels = [(x1, y) for y in range(y1, y2 + direction_y, direction_y)]
-        return pixels
+        result["line_pixels"].extend(pixels)
+        return result
 
     # Horizontal line
     elif y1 == y2:
         pixels = [(x, y1) for x in range(x1, x2 + direction_x, direction_x)]
-        return pixels
+        result["line_pixels"].extend(pixels)
+        return result
 
     dy = y2 - y1
     dx = x2 - x1
 
     pixel_x, pixel_y = x1, y1
     pixels = [(pixel_x, pixel_y)]
+    off_diagonal_pixels = []
 
     is_finished = False
 
@@ -73,6 +81,10 @@ def voxel_traversal_2d(
 
         decision = (1 + 2 * ix) * ny - (1 + 2 * iy) * nx
         if decision == 0:
+
+            off_diagonal_pixels.append((pixel_x + direction_x, pixel_y))
+            off_diagonal_pixels.append((pixel_x, pixel_y + direction_y))
+
             # diagonal step
             pixel_x += direction_x
             pixel_y += direction_y
@@ -106,9 +118,10 @@ def voxel_traversal_2d(
         if is_x_finished and is_y_finished:
             break
 
-    return pixels
+    result = {"line_pixels": pixels, "off_diagonal_pixels": off_diagonal_pixels}
+    return result
 
-# %% ../../notebooks/15_polygon_fill.ipynb 15
+# %% ../../notebooks/15_polygon_fill.ipynb 17
 def interpolate_x(
     start_vertex: Tuple[int, int],
     end_vertex: Tuple[int, int],
@@ -125,7 +138,7 @@ def interpolate_x(
     interpolated_x = x1 + (y - y1) * inverse_slope
     return interpolated_x
 
-# %% ../../notebooks/15_polygon_fill.ipynb 16
+# %% ../../notebooks/15_polygon_fill.ipynb 18
 def scanline_fill(
     vertices: List[
         Tuple[int, int]
@@ -182,7 +195,7 @@ def scanline_fill(
 
     return filled_pixels
 
-# %% ../../notebooks/15_polygon_fill.ipynb 20
+# %% ../../notebooks/15_polygon_fill.ipynb 22
 def voxel_traversal_scanline_fill(
     vertices_df: Union[
         pd.DataFrame, pl.DataFrame
@@ -190,30 +203,41 @@ def voxel_traversal_scanline_fill(
     x_col: str = "x",
     y_col: str = "y",
     debug: bool = False,  # if true, prints diagnostic info for both voxel traversal and scanline fill algorithms
-) -> Set[Tuple[int, int]]:
+) -> Dict[str, Set[Tuple[int, int]]]:
     """
     Returns pixels that intersect a polygon.
 
     This uses voxel traversal to fill the boundary, and scanline fill for the interior. All coordinates are assumed to be integers.
+
+    This also returns the off boundary pixels that can be useful for correcting errors at the corners of polygons during polygon fill
     """
 
     vertices = list(zip(vertices_df[x_col].to_list(), vertices_df[y_col].to_list()))
     offset_vertices = vertices[1:] + vertices[:1]
 
     polygon_pixels = set()
+    off_boundary_pixels = set()
 
     for start_vertex, end_vertex in zip(vertices, offset_vertices):
-        polygon_pixels.update(voxel_traversal_2d(start_vertex, end_vertex, debug))
+        voxel_traversal_results = voxel_traversal_2d(start_vertex, end_vertex, debug)
+        polygon_pixels.update(voxel_traversal_results["line_pixels"])
+        off_boundary_pixels.update(voxel_traversal_results["off_diagonal_pixels"])
 
     polygon_pixels.update(scanline_fill(vertices, debug))
 
-    return polygon_pixels
+    off_boundary_pixels = off_boundary_pixels - polygon_pixels
 
-# %% ../../notebooks/15_polygon_fill.ipynb 27
+    result = {
+        "polygon_pixels": polygon_pixels,
+        "off_boundary_pixels": off_boundary_pixels,
+    }
+    return result
+
+# %% ../../notebooks/15_polygon_fill.ipynb 30
 SUBPOLYGON_ID_COL = "__subpolygon_id__"
 PIXEL_DTYPE = pl.Int32
 
-# %% ../../notebooks/15_polygon_fill.ipynb 28
+# %% ../../notebooks/15_polygon_fill.ipynb 31
 def polygons_to_vertices(
     polys_gdf: gpd.GeoDataFrame,
     unique_id_col: Optional[
@@ -251,13 +275,13 @@ def polygons_to_vertices(
 
     return vertices_df
 
-# %% ../../notebooks/15_polygon_fill.ipynb 32
+# %% ../../notebooks/15_polygon_fill.ipynb 35
 def fast_polygon_fill(
     vertices_df: pl.DataFrame,  # integer vertices of all polygons in the AOI
     unique_id_col: Optional[
         str
     ] = None,  # the ids under this column will be preserved in the output tiles
-) -> pl.DataFrame:
+) -> Dict[str, pl.DataFrame]:
 
     if unique_id_col is not None:
         id_cols = [SUBPOLYGON_ID_COL, unique_id_col]
@@ -276,6 +300,7 @@ def fast_polygon_fill(
     polygon_ids = vertices_df.select(id_cols).unique(maintain_order=True).rows()
 
     tiles_in_geom = set()
+    tiles_off_boundary = set()
     for polygon_id in polygon_ids:
         subpolygon_id, unique_id = polygon_id
         filter_expr = (pl.col(SUBPOLYGON_ID_COL) == subpolygon_id) & (
@@ -284,14 +309,18 @@ def fast_polygon_fill(
         poly_vertices = vertices_df.filter(filter_expr)
 
         poly_vertices = poly_vertices.unique(maintain_order=True)
-        _tiles_in_geom = voxel_traversal_scanline_fill(
+        voxel_traversal_results = voxel_traversal_scanline_fill(
             poly_vertices, x_col="x", y_col="y"
         )
+        _tiles_in_geom = voxel_traversal_results["polygon_pixels"]
+        _tiles_off_boundary = voxel_traversal_results["off_boundary_pixels"]
 
         if has_unique_id_col:
             _tiles_in_geom = [(x, y, unique_id) for (x, y) in _tiles_in_geom]
+            _tiles_off_boundary = [(x, y, unique_id) for (x, y) in _tiles_off_boundary]
 
         tiles_in_geom.update(_tiles_in_geom)
+        tiles_off_boundary.update(_tiles_off_boundary)
 
     schema = {"x": PIXEL_DTYPE, "y": PIXEL_DTYPE}
     if has_unique_id_col:
@@ -303,4 +332,12 @@ def fast_polygon_fill(
         schema=schema,
     )
 
-    return tiles_in_geom
+    tiles_off_boundary = pl.from_records(
+        data=list(tiles_off_boundary),
+        orient="row",
+        schema=schema,
+    )
+
+    result = {"tiles_in_geom": tiles_in_geom, "tiles_off_boundary": tiles_off_boundary}
+
+    return result
