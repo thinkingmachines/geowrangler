@@ -225,7 +225,7 @@ def voxel_traversal_scanline_fill(
 
     polygon_pixels.update(scanline_fill(vertices, debug))
 
-    # removing duplicates
+    # removing off boundary tiles that are actually in the interior
     off_boundary_pixels = off_boundary_pixels - polygon_pixels
 
     result = {
@@ -323,7 +323,7 @@ def fast_polygon_fill(
         tiles_in_geom.update(_tiles_in_geom)
         tiles_off_boundary.update(_tiles_off_boundary)
 
-    # removing duplicates
+    # removing off boundary tiles that are actually in the interior
     tiles_off_boundary = tiles_off_boundary - tiles_in_geom
 
     schema = {"x": PIXEL_DTYPE, "y": PIXEL_DTYPE}
