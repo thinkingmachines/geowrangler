@@ -225,6 +225,7 @@ def voxel_traversal_scanline_fill(
 
     polygon_pixels.update(scanline_fill(vertices, debug))
 
+    # removing duplicates
     off_boundary_pixels = off_boundary_pixels - polygon_pixels
 
     result = {
@@ -321,6 +322,9 @@ def fast_polygon_fill(
 
         tiles_in_geom.update(_tiles_in_geom)
         tiles_off_boundary.update(_tiles_off_boundary)
+
+    # removing duplicates
+    tiles_off_boundary = tiles_off_boundary - tiles_in_geom
 
     schema = {"x": PIXEL_DTYPE, "y": PIXEL_DTYPE}
     if has_unique_id_col:
