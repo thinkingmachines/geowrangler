@@ -238,7 +238,7 @@ def generate_grid(
     # this is error correction on the polygon boundary (not the square boundary)
     tiles_off_boundary = polygon_fill_result["tiles_off_boundary"]
     off_boundary_bboxes = self._xy_to_bbox(tiles_off_boundary, boundary, "x", "y")
-    all_polygon_boundary = aoi_gdf.boundary.union_all(method="unary")
+    all_polygon_boundary = reprojected_gdf.boundary.union_all(method="unary")
     intersects_boundary_bool = off_boundary_bboxes.intersects(all_polygon_boundary)
 
     addtl_tiles_in_geom = tiles_off_boundary.filter(pl.Series(intersects_boundary_bool))
