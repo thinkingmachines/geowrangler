@@ -22,7 +22,7 @@ def voxel_traversal_2d(
 
     Implementation adapted from https://www.redblobgames.com/grids/line-drawing/ in the supercover lines section
 
-    This also returns the off diagonals that can be useful for correcting errors at the corners of polygons during polygon fill
+    This also returns the off-diagonal pixels that can be useful for correcting errors at the corners of polygons during polygon fill
     """
 
     # Setup initial conditions
@@ -209,7 +209,7 @@ def voxel_traversal_scanline_fill(
 
     This uses voxel traversal to fill the boundary, and scanline fill for the interior. All coordinates are assumed to be integers.
 
-    This also returns the off boundary pixels that can be useful for correcting errors at the corners of polygons during polygon fill
+    This also returns the off-boundary pixels that can be useful for correcting errors at the corners of polygons during polygon fill
     """
 
     vertices = list(zip(vertices_df[x_col].to_list(), vertices_df[y_col].to_list()))
@@ -233,11 +233,11 @@ def voxel_traversal_scanline_fill(
     }
     return result
 
-# %% ../../notebooks/15_polygon_fill.ipynb 30
+# %% ../../notebooks/15_polygon_fill.ipynb 31
 SUBPOLYGON_ID_COL = "__subpolygon_id__"
 PIXEL_DTYPE = pl.Int32
 
-# %% ../../notebooks/15_polygon_fill.ipynb 31
+# %% ../../notebooks/15_polygon_fill.ipynb 32
 def polygons_to_vertices(
     polys_gdf: gpd.GeoDataFrame,
     unique_id_col: Optional[
@@ -275,7 +275,7 @@ def polygons_to_vertices(
 
     return vertices_df
 
-# %% ../../notebooks/15_polygon_fill.ipynb 35
+# %% ../../notebooks/15_polygon_fill.ipynb 36
 def fast_polygon_fill(
     vertices_df: pl.DataFrame,  # integer vertices of all polygons in the AOI
     unique_id_col: Optional[
