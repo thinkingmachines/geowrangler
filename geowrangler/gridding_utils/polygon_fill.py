@@ -121,7 +121,7 @@ def voxel_traversal_2d(
     result = {"line_pixels": pixels, "off_diagonal_pixels": off_diagonal_pixels}
     return result
 
-# %% ../../notebooks/15_polygon_fill.ipynb 17
+# %% ../../notebooks/15_polygon_fill.ipynb 15
 def interpolate_x(
     start_vertex: Tuple[int, int],
     end_vertex: Tuple[int, int],
@@ -138,7 +138,7 @@ def interpolate_x(
     interpolated_x = x1 + (y - y1) * inverse_slope
     return interpolated_x
 
-# %% ../../notebooks/15_polygon_fill.ipynb 18
+# %% ../../notebooks/15_polygon_fill.ipynb 16
 def scanline_fill(
     vertices: List[
         Tuple[int, int]
@@ -195,7 +195,7 @@ def scanline_fill(
 
     return filled_pixels
 
-# %% ../../notebooks/15_polygon_fill.ipynb 22
+# %% ../../notebooks/15_polygon_fill.ipynb 20
 def voxel_traversal_scanline_fill(
     vertices_df: Union[
         pd.DataFrame, pl.DataFrame
@@ -234,11 +234,11 @@ def voxel_traversal_scanline_fill(
     }
     return result
 
-# %% ../../notebooks/15_polygon_fill.ipynb 31
+# %% ../../notebooks/15_polygon_fill.ipynb 27
 SUBPOLYGON_ID_COL = "__subpolygon_id__"
 PIXEL_DTYPE = pl.Int32
 
-# %% ../../notebooks/15_polygon_fill.ipynb 32
+# %% ../../notebooks/15_polygon_fill.ipynb 28
 def polygons_to_vertices(
     polys_gdf: gpd.GeoDataFrame,
     unique_id_col: Optional[
@@ -276,7 +276,7 @@ def polygons_to_vertices(
 
     return vertices_df
 
-# %% ../../notebooks/15_polygon_fill.ipynb 36
+# %% ../../notebooks/15_polygon_fill.ipynb 32
 def fast_polygon_fill(
     vertices_df: pl.DataFrame,  # integer vertices of all polygons in the AOI
     unique_id_col: Optional[
