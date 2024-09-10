@@ -231,9 +231,24 @@ def generate_grid(
         vertices, boundary, northing_col="y", easting_col="x"
     )
 
-    tiles_in_geom = polygon_fill.fast_polygon_fill(vertices, unique_id_col)
-
+    polygon_fill_result = polygon_fill.fast_polygon_fill(vertices, unique_id_col)
+    tiles_in_geom = polygon_fill_result["tiles_in_geom"]
     bboxes = self._xy_to_bbox(tiles_in_geom, boundary, "x", "y")
+
+    # this is error correction on the polygon boundary (not the square boundary)
+    tiles_off_boundary = polygon_fill_result["tiles_off_boundary"]
+    if not tiles_off_boundary.is_empty():
+        off_boundary_bboxes = self._xy_to_bbox(tiles_off_boundary, boundary, "x", "y")
+        all_polygon_boundary = reprojected_gdf.boundary.union_all(method="unary")
+        intersects_boundary_bool = off_boundary_bboxes.intersects(all_polygon_boundary)
+
+        addtl_tiles_in_geom = tiles_off_boundary.filter(
+            pl.Series(intersects_boundary_bool)
+        )
+        addtl_boundary_bboxes = off_boundary_bboxes[intersects_boundary_bool].copy()
+
+        tiles_in_geom = pl.concat([tiles_in_geom, addtl_tiles_in_geom])
+        bboxes = pd.concat([bboxes, addtl_boundary_bboxes], ignore_index=True)
 
     column_order = ["x", "y"]
     if unique_id_col is not None:
@@ -664,7 +679,20 @@ def generate_grid(
     vertices = polygon_fill.polygons_to_vertices(aoi_gdf, unique_id_col)
     vertices = self._latlng_to_xy(vertices, lat_col="y", lng_col="x")
 
-    tiles_in_geom = polygon_fill.fast_polygon_fill(vertices, unique_id_col)
+    polygon_fill_result = polygon_fill.fast_polygon_fill(vertices, unique_id_col)
+    tiles_in_geom = polygon_fill_result["tiles_in_geom"]
+
+    # this is error correction on the polygon boundary (not the square boundary)
+    tiles_off_boundary = polygon_fill_result["tiles_off_boundary"]
+    if not tiles_off_boundary.is_empty():
+        off_boundary_bboxes = self._xy_to_bbox(tiles_off_boundary, "x", "y")
+        all_polygon_boundary = aoi_gdf.boundary.union_all(method="unary")
+        intersects_boundary_bool = off_boundary_bboxes.intersects(all_polygon_boundary)
+        addtl_tiles_in_geom = tiles_off_boundary.filter(
+            pl.Series(intersects_boundary_bool)
+        )
+
+        tiles_in_geom = pl.concat([tiles_in_geom, addtl_tiles_in_geom])
 
     quadkey_expr = self._xyz_to_quadkey(
         pl.col("x"),
@@ -674,6 +702,10 @@ def generate_grid(
 
     if self.return_geometry:
         bboxes = self._xy_to_bbox(tiles_in_geom, "x", "y")
+
+        if not tiles_off_boundary.is_empty():
+            addtl_boundary_bboxes = off_boundary_bboxes[intersects_boundary_bool].copy()
+            bboxes = pd.concat([bboxes, addtl_boundary_bboxes], ignore_index=True)
 
     if not self.add_xyz_cols:
         tiles_in_geom = tiles_in_geom.drop(["x", "y"])
