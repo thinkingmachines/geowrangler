@@ -1,5 +1,10 @@
 # Release Notes
 
+## 0.5.1
+
+### Improvements
+- Missing corner tiles issue is fixed for both `FastSquareGridGenerator` and `FastBingTileGenerator` (PR [#255](https://github.com/thinkingmachines/geowrangler/pull/255)) from [@joshuacortez](https://github.com/joshuacortez)
+
 ## 0.5.0
 
 ### New Features
