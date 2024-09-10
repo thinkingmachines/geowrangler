@@ -1,5 +1,15 @@
 # Release Notes
 
+## 0.5.0
+
+### New Features
+
+- `FastSquareGridGenerator` as a faster equivalent to `SquareGridGenerator` (PR [#253](https://github.com/thinkingmachines/geowrangler/pull/253)) from [@joshuacortez](https://github.com/joshuacortez)
+  - Just like `FastBingTileGenerator`, this is also added in `00_grids.ipynb`.
+
+### Improvements
+- The `generate_grid` method in `SquareGridGenerator` and `FastSquareGridGenerator` shows a warning when the boundary of doesn't fully enclose the AOI. (issue [#147](https://github.com/thinkingmachines/geowrangler/issues/147))
+
 ## 0.4.0
 
 ### New Features

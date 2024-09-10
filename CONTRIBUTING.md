@@ -66,3 +66,9 @@ nbdev_export
   - There is no automatic way yet to update this so it's a manual update of a markdown cell. Since the link points to a notebook in master, testing the Colab button is done after merging. Follow the sample below and replace the notebook name with your contributed notebook name.
   - Sample for notebooks/14_datasets_nightlights.ipynb:
 [![](https://colab.research.google.com/assets/colab-badge.svg "Open in Colab button")](https://colab.research.google.com/github/thinkingmachines/geowrangler/blob/master/notebooks/14_datasets_nightlights.ipynb)
+
+## Updating GitHub pages doc site domain after PR is merged
+- After your PR is merged, go the repo site on GitHub -> `Settings` -> `Pages`
+- Update the Custom Domain to be geowrangler.thinkingmachin.es
+  - We need to update this after every PR merge because GitHub resets the custom domain to blank
+- If you don't have access to `Settings`, then feel free to reach out to the maintainers to update on your behalf.
