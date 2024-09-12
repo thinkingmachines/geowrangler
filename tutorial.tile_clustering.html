@@ -1,0 +1,1477 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.5.57">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Tile Clustering Tutorial – geowrangler</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script><script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+
+<link rel="stylesheet" href="styles.css">
+<meta property="og:title" content="Tile Clustering Tutorial – geowrangler">
+<meta property="og:description" content="🌏 A python package for wrangling geospatial datasets">
+<meta property="og:site_name" content="geowrangler">
+<meta name="twitter:title" content="Tile Clustering Tutorial – geowrangler">
+<meta name="twitter:description" content="🌏 A python package for wrangling geospatial datasets">
+<meta name="twitter:card" content="summary">
+</head>
+
+<body class="nav-sidebar floating nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">geowrangler</span>
+    </a>
+  </div>
+        <div class="quarto-navbar-tools tools-end">
+</div>
+          <div id="quarto-search" class="" title="Search"></div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./tutorial.grids.html">Tutorials</a></li><li class="breadcrumb-item"><a href="./tutorial.tile_clustering.html">Tile Clustering Tutorial</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Geowrangler</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Tutorials</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.grids.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Grid Generation Tutorial</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.geometry_validation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Geometry Validation Tutorial</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.vector_zonal_stats.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Vector Zonal Stats Tutorial</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.raster_zonal_stats.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Raster Zonal Stats Tutorial</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.area_zonal_stats.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Vector Area Zonal Stats Tutorial</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.distance_zonal_stats.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Vector Distance Zonal Stats Tutorial</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.dhs.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">DHS Wealth Index</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.datasets.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Datasets Download</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.spatialjoin_highest_intersection.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Spatial Join Using Highest Intersection Tutorial</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.tile_clustering.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Tile Clustering Tutorial</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.raster_process.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Raster Processing Tutorial</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.raster_to_df.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Raster to Dataframe Tutorial</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Use Case Demos</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./overview.poverty_mapping_demo.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Explore Poverty Mapping Machine Learning Models</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./overview.usecase_ookla.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exploring Internet Speeds with Ookla</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">Module Reference</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./grids.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Grids</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./polygon_fill.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Polygon Fill</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./validation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Geometry Validation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./vector_zonal_stats.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Vector Zonal Stats</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./raster_zonal_stats.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Raster Zonal Stats</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./area_zonal_stats.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Area Zonal Stats</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./distance_zonal_stats.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Distance Zonal Stats</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./vector_to_raster_mask.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Vector to Raster mask</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./raster_to_dataframe.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Raster to Dataframe</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./raster_process.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Raster Processing</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./dhs.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">DHS Utilities</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./datasets_geofabrik.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Datasets Geofabrik</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./datasets_ookla.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Datasets Ookla</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./datasets_nightlights.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Night Lights</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./datasets_utils.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Datasets Utils</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tile_clustering.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Tile Clustering</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./spatialjoin_highest_intersection.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Spatial Join Highest Intersection</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#summary" id="toc-summary" class="nav-link active" data-scroll-target="#summary">Summary</a></li>
+  <li><a href="#how-does-it-work" id="toc-how-does-it-work" class="nav-link" data-scroll-target="#how-does-it-work">How does it work?</a>
+  <ul class="collapse">
+  <li><a href="#tileclustering.cluster_tilesdf-category_col" id="toc-tileclustering.cluster_tilesdf-category_col" class="nav-link" data-scroll-target="#tileclustering.cluster_tilesdf-category_col"><code>TileClustering().cluster_tiles(df, category_col)</code></a></li>
+  </ul></li>
+  <li><a href="#sample-use-case--clustering-areas-based-on-scores" id="toc-sample-use-case--clustering-areas-based-on-scores" class="nav-link" data-scroll-target="#sample-use-case--clustering-areas-based-on-scores">Sample use case- Clustering areas based on scores</a>
+  <ul class="collapse">
+  <li><a href="#step-1-import-packages" id="toc-step-1-import-packages" class="nav-link" data-scroll-target="#step-1-import-packages">Step 1: Import packages</a></li>
+  <li><a href="#step-2-load-geodataframe-and-generate-grid" id="toc-step-2-load-geodataframe-and-generate-grid" class="nav-link" data-scroll-target="#step-2-load-geodataframe-and-generate-grid">Step 2: Load GeoDataFrame and generate grid</a></li>
+  <li><a href="#step-3-assign-scores" id="toc-step-3-assign-scores" class="nav-link" data-scroll-target="#step-3-assign-scores">Step 3: Assign scores</a></li>
+  <li><a href="#step-4-tile-clustering" id="toc-step-4-tile-clustering" class="nav-link" data-scroll-target="#step-4-tile-clustering">Step 4: Tile clustering</a></li>
+  </ul></li>
+  </ul>
+<div class="toc-actions"><ul><li><a href="https://github.com/thinkingmachines/geowrangler/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./tutorial.grids.html">Tutorials</a></li><li class="breadcrumb-item"><a href="./tutorial.tile_clustering.html">Tile Clustering Tutorial</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Tile Clustering Tutorial</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<!-- WARNING: THIS FILE WAS AUTOGENERATED! DO NOT EDIT! -->
+<blockquote class="blockquote">
+<p>A basic introduction to using tile clustering</p>
+</blockquote>
+<p><a href="https://colab.research.google.com/github/thinkingmachines/geowrangler/blob/master/notebooks/tutorial.tile_clustering.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg" title="Open in Colab button" class="img-fluid"></a></p>
+<section id="summary" class="level2">
+<h2 class="anchored" data-anchor-id="summary">Summary</h2>
+<p>Clusters adjacent grid tiles together. Usage of this function assumes that the input is a grid dataset.</p>
+</section>
+<section id="how-does-it-work" class="level2">
+<h2 class="anchored" data-anchor-id="how-does-it-work">How does it work?</h2>
+<p>Tile clustering works by assigning the same ID to grid cells belonging to the same cluster. There are options to: (a) cluster adjacent cells by category, (b) cluster grid cells via adjacent edges or corners.</p>
+<section id="tileclustering.cluster_tilesdf-category_col" class="level3">
+<h3 class="anchored" data-anchor-id="tileclustering.cluster_tilesdf-category_col"><code>TileClustering().cluster_tiles(df, category_col)</code></h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 15%">
+<col style="width: 21%">
+<col style="width: 21%">
+<col style="width: 21%">
+<col style="width: 21%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th style="text-align: left;">type</th>
+<th style="text-align: left;">default</th>
+<th style="text-align: left;">optional/required</th>
+<th style="text-align: left;">details</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>cluster_type</td>
+<td style="text-align: left;">String</td>
+<td style="text-align: left;"><code>four_way</code></td>
+<td style="text-align: left;">optional</td>
+<td style="text-align: left;">Leave blank () if using <code>four_way</code> cluster_type (top, bottom, left, right sides of a cell). Put in <code>eight_way</code> if preference is to cluster via four sides and corners of a cell.</td>
+</tr>
+<tr class="even">
+<td>df</td>
+<td style="text-align: left;">GeoDataFrame</td>
+<td style="text-align: left;"><em>none</em></td>
+<td style="text-align: left;">required</td>
+<td style="text-align: left;">dataframe for clustering</td>
+</tr>
+<tr class="odd">
+<td>category_col</td>
+<td style="text-align: left;">String</td>
+<td style="text-align: left;"><em>none</em></td>
+<td style="text-align: left;">optional</td>
+<td style="text-align: left;">column for category if need to cluster adjacent cells by category</td>
+</tr>
+</tbody>
+</table>
+<p>A technical step-by-step explanation of how <code>TileClustering().cluster_tiles</code> works is detailed in the cell blocks below. An example on how to use it with its arguments is shown in the <strong>sample use case</strong> section thereafter.</p>
+<ol type="1">
+<li>Define the class.</li>
+</ol>
+<pre><code>class TileClustering:
+    def __init__(
+        self,
+        cluster_type: str = "four_way",
+    ) -&gt; None:
+
+        assert cluster_type in ["four_way", "eight_way"]
+        self.cluster_type = cluster_type
+        self.tile_cluster_col = "tile_cluster"</code></pre>
+<ol start="2" type="1">
+<li>Define the function.</li>
+</ol>
+<pre><code>@patch
+def cluster_tiles(
+    self: TileClustering,
+    df: pd.DataFrame,
+    grid_x_col="x",
+    grid_y_col="y",
+    category_col: Optional[str] = None,
+) -&gt; pd.DataFrame:
+    """
+    Appends the cluster ID for each square grid cell
+    """
+
+    if category_col is None:
+        cluster_df = self._cluster_tiles_single(df, grid_x_col, grid_y_col)
+    else:
+        assert (
+            not df[category_col].isnull().any()
+        ), f"There shouldn't be null values for {category_col}"
+        unique_categories = df[category_col].unique().tolist()
+
+        cluster_df_list = []
+        for i, category in enumerate(unique_categories, start=1):
+            bool_mask = df[category_col] == category
+            filtered_df = df.loc[bool_mask, :].copy()
+            cluster_filtered_df = self._cluster_tiles_single(
+                filtered_df, grid_x_col, grid_y_col
+            )
+            cluster_filtered_df[self.tile_cluster_col] = cluster_filtered_df[
+                self.tile_cluster_col
+            ].apply(lambda key: f"{key}-{i}")
+            cluster_df_list.append(cluster_filtered_df)
+        cluster_df = pd.concat(cluster_df_list, axis=0, ignore_index=True)
+
+    df = pd.merge(left=df, right=cluster_df, on=[grid_x_col, grid_y_col], how="left")
+
+    return df</code></pre>
+<ol start="3" type="1">
+<li>Categorize commands depending on input of <code>category_col</code>. Append cluster ID for each grid cell.</li>
+</ol>
+<pre><code>    # no entry in category_col - run the patched function _cluster_tiles_single
+    if category_col is None:
+        cluster_df = self._cluster_tiles_single(df, grid_x_col, grid_y_col)
+
+    # entry in category_col - make sure that all rows have values
+    else:
+        assert (
+            not df[category_col].isnull().any()
+        ), f"There shouldn't be null values for {category_col}"
+        unique_categories = df[category_col].unique().tolist()
+
+    # append cluster ID for each grid cell
+        cluster_df_list = []
+        for i, category in enumerate(unique_categories, start=1):
+            bool_mask = df[category_col] == category
+            filtered_df = df.loc[bool_mask, :].copy()
+            cluster_filtered_df = self._cluster_tiles_single(
+                filtered_df, grid_x_col, grid_y_col
+            )
+            cluster_filtered_df[self.tile_cluster_col] = cluster_filtered_df[
+                self.tile_cluster_col
+            ].apply(lambda key: f"{key}-{i}")
+            cluster_df_list.append(cluster_filtered_df)
+        cluster_df = pd.concat(cluster_df_list, axis=0, ignore_index=True)</code></pre>
+<ol start="4" type="1">
+<li>Merge grid cells with same cluster ID.</li>
+</ol>
+<pre><code>    df = pd.merge(left=df, right=cluster_df, on=[grid_x_col, grid_y_col], how="left")</code></pre>
+<ol start="5" type="1">
+<li>Return output dataframe.</li>
+</ol>
+<pre><code>    return df</code></pre>
+<ol start="6" type="1">
+<li>Other <code>@patch</code> functions</li>
+</ol>
+<p><code>_cluster_tiles_single</code> - called when there is no entry in <code>category_col</code></p>
+<pre><code>@patch
+def _cluster_tiles_single(
+    self: TileClustering,
+    df: pd.DataFrame,
+    grid_x_col="x",
+    grid_y_col="y",
+) -&gt; pd.DataFrame:
+    """
+    Performs tile clustering on a single category
+    """
+
+    if self.tile_cluster_col in df.columns:
+        raise ValueError(
+            f"{self.tile_cluster_col} already exists as a column. Please rename"
+        )
+
+    grid_x = df[grid_x_col]
+    grid_y = df[grid_y_col]
+
+    self.grid_idx = set(zip(grid_x, grid_y))
+
+    self.tile_cluster_dict = {}
+    self.cluster_id = 0
+
+    for key in self.grid_idx:
+        if key not in self.tile_cluster_dict.keys():
+            self.cluster_id += 1
+
+            # reset the call stack per iteration
+            self.call_stack = deque()
+            self._dfs_connected_components(key)
+
+    cluster_df = pd.DataFrame.from_dict(
+        self.tile_cluster_dict, orient="index", columns=[self.tile_cluster_col]
+    )
+    cluster_df = cluster_df.reset_index()
+    cluster_df[grid_x_col] = cluster_df["index"].apply(lambda idx: idx[0])
+    cluster_df[grid_y_col] = cluster_df["index"].apply(lambda idx: idx[1])
+    cluster_df = cluster_df.drop(columns="index")
+
+    return cluster_df</code></pre>
+<p><code>_get_adjacent_keys</code> - defines how <code>four_way</code> and <code>eight_way</code> clustering works</p>
+<pre><code>@patch
+def _get_adjacent_keys(
+    self: TileClustering,
+    key: Tuple[int, int],
+) -&gt; List[Tuple[int, int]]:
+
+    x_idx = key[0]
+    y_idx = key[1]
+
+    east_key = (x_idx + 1, y_idx)
+    west_key = (x_idx - 1, y_idx)
+    south_key = (x_idx, y_idx - 1)
+    north_key = (x_idx, y_idx + 1)
+
+    if self.cluster_type == "four_way":
+        adjacent_keys = [east_key, west_key, south_key, north_key]
+
+    if self.cluster_type == "eight_way":
+        northeast_key = (x_idx + 1, y_idx + 1)
+        northwest_key = (x_idx - 1, y_idx + 1)
+        southeast_key = (x_idx + 1, y_idx - 1)
+        southwest_key = (x_idx - 1, y_idx - 1)
+
+        adjacent_keys = [
+            east_key,
+            west_key,
+            south_key,
+            north_key,
+            northeast_key,
+            northwest_key,
+            southeast_key,
+            southwest_key,
+        ]
+
+    return adjacent_keys</code></pre>
+<p><code>_dfs_connected_components</code> - a non-recursive depth-first search implementation of connected components</p>
+<pre><code>@patch
+def _dfs_connected_components(
+    self: TileClustering,
+    key: Tuple[int, int],
+) -&gt; None:
+
+    self.call_stack.append(key)
+    while self.call_stack:
+        ref_key = self.call_stack.pop()
+
+        # check if key exists in the first place
+        if ref_key in self.grid_idx:
+            # check if adjacent key has already been assigned
+            if ref_key not in self.tile_cluster_dict.keys():
+                self.tile_cluster_dict[ref_key] = self.cluster_id
+
+                adjacent_keys = self._get_adjacent_keys(ref_key)
+                for adjacent_key in adjacent_keys:
+                    self.call_stack.append(adjacent_key)</code></pre>
+</section>
+</section>
+<section id="sample-use-case--clustering-areas-based-on-scores" class="level2">
+<h2 class="anchored" data-anchor-id="sample-use-case--clustering-areas-based-on-scores">Sample use case- Clustering areas based on scores</h2>
+<p>Input: - <code>grid_gdf5k</code> - GeoDataFrame of randomly scored 5km x 5km grid cells - <code>class</code> - category column for basis of of clustering</p>
+<p>Output: - clustered grid based on <code>class</code></p>
+<section id="step-1-import-packages" class="level3">
+<h3 class="anchored" data-anchor-id="step-1-import-packages">Step 1: Import packages</h3>
+<div id="a41cf2b3-eec6-4b0f-be02-3cc407064742" class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> geopandas <span class="im">as</span> gpd</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> geowrangler.grids <span class="im">as</span> grids</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> geowrangler.tile_clustering <span class="im">as</span> tile_clustering</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="step-2-load-geodataframe-and-generate-grid" class="level3">
+<h3 class="anchored" data-anchor-id="step-2-load-geodataframe-and-generate-grid">Step 2: Load GeoDataFrame and generate grid</h3>
+<div id="bc3d6456-75a5-4b2e-bf3d-561db6400e53" class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>grid_generator5k <span class="op">=</span> grids.SquareGridGenerator(<span class="dv">5_000</span>)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>grid_gdf5k <span class="op">=</span> grid_generator5k.generate_grid(region3_gdf)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="6cbc2f89-29ff-4806-8059-263939d36eee" class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>grid_gdf5k</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">x</th>
+<th data-quarto-table-cell-role="th">y</th>
+<th data-quarto-table-cell-role="th">geometry</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>7</td>
+<td>8</td>
+<td>POLYGON ((120.10024 14.75528, 120.14516 14.755...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>6</td>
+<td>8</td>
+<td>POLYGON ((120.05533 14.75528, 120.10024 14.755...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>9</td>
+<td>8</td>
+<td>POLYGON ((120.19008 14.75528, 120.23499 14.755...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>2</td>
+<td>24</td>
+<td>POLYGON ((119.87566 15.4491, 119.92058 15.4491...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>2</td>
+<td>25</td>
+<td>POLYGON ((119.87566 15.49239, 119.92058 15.492...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1069</td>
+<td>54</td>
+<td>44</td>
+<td>POLYGON ((122.21128 16.31312, 122.2562 16.3131...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1070</td>
+<td>54</td>
+<td>45</td>
+<td>POLYGON ((122.21128 16.35623, 122.2562 16.3562...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1071</td>
+<td>54</td>
+<td>46</td>
+<td>POLYGON ((122.21128 16.39932, 122.2562 16.3993...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1072</td>
+<td>54</td>
+<td>47</td>
+<td>POLYGON ((122.21128 16.4424, 122.2562 16.4424,...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1073</td>
+<td>54</td>
+<td>48</td>
+<td>POLYGON ((122.21128 16.48548, 122.2562 16.4854...</td>
+</tr>
+</tbody>
+</table>
+
+<p>1074 rows × 3 columns</p>
+</div>
+</div>
+</div>
+<div id="1b52b1af-3df4-47c3-9498-729cc04c7009" class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>grid_gdf5k.plot()<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="tutorial.tile_clustering_files/figure-html/cell-12-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="step-3-assign-scores" class="level3">
+<h3 class="anchored" data-anchor-id="step-3-assign-scores">Step 3: Assign scores</h3>
+<div id="137ce678-836e-4cea-9ab2-e3925b9178f9" class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>grid_gdf5k</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">x</th>
+<th data-quarto-table-cell-role="th">y</th>
+<th data-quarto-table-cell-role="th">geometry</th>
+<th data-quarto-table-cell-role="th">score</th>
+<th data-quarto-table-cell-role="th">class</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>7</td>
+<td>8</td>
+<td>POLYGON ((120.10024 14.75528, 120.14516 14.755...</td>
+<td>0.216056</td>
+<td>False</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>6</td>
+<td>8</td>
+<td>POLYGON ((120.05533 14.75528, 120.10024 14.755...</td>
+<td>0.198387</td>
+<td>False</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>9</td>
+<td>8</td>
+<td>POLYGON ((120.19008 14.75528, 120.23499 14.755...</td>
+<td>0.508601</td>
+<td>False</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>2</td>
+<td>24</td>
+<td>POLYGON ((119.87566 15.4491, 119.92058 15.4491...</td>
+<td>0.186705</td>
+<td>False</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>2</td>
+<td>25</td>
+<td>POLYGON ((119.87566 15.49239, 119.92058 15.492...</td>
+<td>0.383824</td>
+<td>False</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1069</td>
+<td>54</td>
+<td>44</td>
+<td>POLYGON ((122.21128 16.31312, 122.2562 16.3131...</td>
+<td>0.059555</td>
+<td>False</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1070</td>
+<td>54</td>
+<td>45</td>
+<td>POLYGON ((122.21128 16.35623, 122.2562 16.3562...</td>
+<td>0.824039</td>
+<td>True</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1071</td>
+<td>54</td>
+<td>46</td>
+<td>POLYGON ((122.21128 16.39932, 122.2562 16.3993...</td>
+<td>0.903166</td>
+<td>True</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1072</td>
+<td>54</td>
+<td>47</td>
+<td>POLYGON ((122.21128 16.4424, 122.2562 16.4424,...</td>
+<td>0.186872</td>
+<td>False</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1073</td>
+<td>54</td>
+<td>48</td>
+<td>POLYGON ((122.21128 16.48548, 122.2562 16.4854...</td>
+<td>0.208694</td>
+<td>False</td>
+</tr>
+</tbody>
+</table>
+
+<p>1074 rows × 5 columns</p>
+</div>
+</div>
+</div>
+</section>
+<section id="step-4-tile-clustering" class="level3">
+<h3 class="anchored" data-anchor-id="step-4-tile-clustering">Step 4: Tile clustering</h3>
+<div id="a2ae60f2-7354-49ea-8da7-574fdca9cd12" class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>output <span class="op">=</span> tile_clustering.TileClustering().cluster_tiles(</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    df<span class="op">=</span>grid_gdf5k, category_col<span class="op">=</span><span class="st">"class"</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="17e0ccf4-1e87-43c6-9910-78cd605e6da7" class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>output</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">x</th>
+<th data-quarto-table-cell-role="th">y</th>
+<th data-quarto-table-cell-role="th">geometry</th>
+<th data-quarto-table-cell-role="th">score</th>
+<th data-quarto-table-cell-role="th">class</th>
+<th data-quarto-table-cell-role="th">tile_cluster</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>7</td>
+<td>8</td>
+<td>POLYGON ((120.10024 14.75528, 120.14516 14.755...</td>
+<td>0.216056</td>
+<td>False</td>
+<td>1-1</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>6</td>
+<td>8</td>
+<td>POLYGON ((120.05533 14.75528, 120.10024 14.755...</td>
+<td>0.198387</td>
+<td>False</td>
+<td>1-1</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>9</td>
+<td>8</td>
+<td>POLYGON ((120.19008 14.75528, 120.23499 14.755...</td>
+<td>0.508601</td>
+<td>False</td>
+<td>1-1</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>2</td>
+<td>24</td>
+<td>POLYGON ((119.87566 15.4491, 119.92058 15.4491...</td>
+<td>0.186705</td>
+<td>False</td>
+<td>1-1</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>2</td>
+<td>25</td>
+<td>POLYGON ((119.87566 15.49239, 119.92058 15.492...</td>
+<td>0.383824</td>
+<td>False</td>
+<td>1-1</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1069</td>
+<td>54</td>
+<td>44</td>
+<td>POLYGON ((122.21128 16.31312, 122.2562 16.3131...</td>
+<td>0.059555</td>
+<td>False</td>
+<td>2-1</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1070</td>
+<td>54</td>
+<td>45</td>
+<td>POLYGON ((122.21128 16.35623, 122.2562 16.3562...</td>
+<td>0.824039</td>
+<td>True</td>
+<td>33-2</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1071</td>
+<td>54</td>
+<td>46</td>
+<td>POLYGON ((122.21128 16.39932, 122.2562 16.3993...</td>
+<td>0.903166</td>
+<td>True</td>
+<td>33-2</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1072</td>
+<td>54</td>
+<td>47</td>
+<td>POLYGON ((122.21128 16.4424, 122.2562 16.4424,...</td>
+<td>0.186872</td>
+<td>False</td>
+<td>2-1</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1073</td>
+<td>54</td>
+<td>48</td>
+<td>POLYGON ((122.21128 16.48548, 122.2562 16.4854...</td>
+<td>0.208694</td>
+<td>False</td>
+<td>2-1</td>
+</tr>
+</tbody>
+</table>
+
+<p>1074 rows × 6 columns</p>
+</div>
+</div>
+</div>
+<div id="4b8bc4bc-9fd6-4c61-8590-fc16b129cf0f" class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>output.plot(column<span class="op">=</span><span class="st">"class"</span>, categorical<span class="op">=</span><span class="va">True</span>, cmap<span class="op">=</span><span class="st">"Spectral"</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="tutorial.tile_clustering_files/figure-html/cell-17-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp("https:\/\/geowrangler\.thinkingmachin\.es\/");
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/thinkingmachines/geowrangler/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>

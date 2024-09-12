@@ -1,0 +1,1776 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.5.57">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Datasets Download – geowrangler</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script><script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+
+<link rel="stylesheet" href="styles.css">
+<meta property="og:title" content="Datasets Download – geowrangler">
+<meta property="og:description" content="🌏 A python package for wrangling geospatial datasets">
+<meta property="og:site_name" content="geowrangler">
+<meta name="twitter:title" content="Datasets Download – geowrangler">
+<meta name="twitter:description" content="🌏 A python package for wrangling geospatial datasets">
+<meta name="twitter:card" content="summary">
+</head>
+
+<body class="nav-sidebar floating nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">geowrangler</span>
+    </a>
+  </div>
+        <div class="quarto-navbar-tools tools-end">
+</div>
+          <div id="quarto-search" class="" title="Search"></div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./tutorial.grids.html">Tutorials</a></li><li class="breadcrumb-item"><a href="./tutorial.datasets.html">Datasets Download</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Geowrangler</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Tutorials</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.grids.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Grid Generation Tutorial</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.geometry_validation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Geometry Validation Tutorial</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.vector_zonal_stats.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Vector Zonal Stats Tutorial</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.raster_zonal_stats.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Raster Zonal Stats Tutorial</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.area_zonal_stats.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Vector Area Zonal Stats Tutorial</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.distance_zonal_stats.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Vector Distance Zonal Stats Tutorial</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.dhs.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">DHS Wealth Index</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.datasets.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Datasets Download</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.spatialjoin_highest_intersection.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Spatial Join Using Highest Intersection Tutorial</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.tile_clustering.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Tile Clustering Tutorial</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.raster_process.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Raster Processing Tutorial</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.raster_to_df.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Raster to Dataframe Tutorial</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Use Case Demos</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./overview.poverty_mapping_demo.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Explore Poverty Mapping Machine Learning Models</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./overview.usecase_ookla.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exploring Internet Speeds with Ookla</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">Module Reference</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./grids.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Grids</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./polygon_fill.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Polygon Fill</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./validation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Geometry Validation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./vector_zonal_stats.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Vector Zonal Stats</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./raster_zonal_stats.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Raster Zonal Stats</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./area_zonal_stats.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Area Zonal Stats</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./distance_zonal_stats.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Distance Zonal Stats</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./vector_to_raster_mask.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Vector to Raster mask</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./raster_to_dataframe.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Raster to Dataframe</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./raster_process.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Raster Processing</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./dhs.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">DHS Utilities</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./datasets_geofabrik.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Datasets Geofabrik</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./datasets_ookla.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Datasets Ookla</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./datasets_nightlights.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Night Lights</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./datasets_utils.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Datasets Utils</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tile_clustering.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Tile Clustering</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./spatialjoin_highest_intersection.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Spatial Join Highest Intersection</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#downloading-geofabrik-data" id="toc-downloading-geofabrik-data" class="nav-link active" data-scroll-target="#downloading-geofabrik-data">Downloading Geofabrik Data</a>
+  <ul class="collapse">
+  <li><a href="#listing-down-available-regions" id="toc-listing-down-available-regions" class="nav-link" data-scroll-target="#listing-down-available-regions">Listing down available regions</a></li>
+  <li><a href="#downloading-a-region-file-to-a-directory" id="toc-downloading-a-region-file-to-a-directory" class="nav-link" data-scroll-target="#downloading-a-region-file-to-a-directory">Downloading a region file to a directory</a></li>
+  <li><a href="#loading-geofabrik-files" id="toc-loading-geofabrik-files" class="nav-link" data-scroll-target="#loading-geofabrik-files">Loading geofabrik files</a></li>
+  <li><a href="#unzipping-and-caching-osm" id="toc-unzipping-and-caching-osm" class="nav-link" data-scroll-target="#unzipping-and-caching-osm">Unzipping and Caching OSM</a></li>
+  <li><a href="#using-the-osm-data-manager" id="toc-using-the-osm-data-manager" class="nav-link" data-scroll-target="#using-the-osm-data-manager">Using the OSM Data Manager</a></li>
+  </ul></li>
+  <li><a href="#loading-osm-data-from-other-years" id="toc-loading-osm-data-from-other-years" class="nav-link" data-scroll-target="#loading-osm-data-from-other-years">Loading OSM data from other years</a></li>
+  <li><a href="#downloading-ookla-data" id="toc-downloading-ookla-data" class="nav-link" data-scroll-target="#downloading-ookla-data">Downloading Ookla Data</a>
+  <ul class="collapse">
+  <li><a href="#listing-down-available-files" id="toc-listing-down-available-files" class="nav-link" data-scroll-target="#listing-down-available-files">Listing down available files</a></li>
+  <li><a href="#downloading-an-ookla-file-to-a-directory" id="toc-downloading-an-ookla-file-to-a-directory" class="nav-link" data-scroll-target="#downloading-an-ookla-file-to-a-directory">Downloading an ookla file to a directory</a></li>
+  <li><a href="#loading-ookla-data" id="toc-loading-ookla-data" class="nav-link" data-scroll-target="#loading-ookla-data">Loading ookla data</a></li>
+  </ul></li>
+  </ul>
+<div class="toc-actions"><ul><li><a href="https://github.com/thinkingmachines/geowrangler/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./tutorial.grids.html">Tutorials</a></li><li class="breadcrumb-item"><a href="./tutorial.datasets.html">Datasets Download</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Datasets Download</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<!-- WARNING: THIS FILE WAS AUTOGENERATED! DO NOT EDIT! -->
+<blockquote class="blockquote">
+<p>Basic introduction to downloading open geospatial data using Geowrangler</p>
+</blockquote>
+<p><a href="https://colab.research.google.com/github/thinkingmachines/geowrangler/blob/master/notebooks/tutorial.datasets.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg" title="Open in Colab button" class="img-fluid"></a></p>
+<section id="downloading-geofabrik-data" class="level2">
+<h2 class="anchored" data-anchor-id="downloading-geofabrik-data">Downloading Geofabrik Data</h2>
+<div id="98a64b09-7f4d-4d47-8ae6-25498a280c62" class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> geopandas <span class="im">as</span> gpd</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> geowrangler.datasets <span class="im">import</span> geofabrik</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<section id="listing-down-available-regions" class="level3">
+<h3 class="anchored" data-anchor-id="listing-down-available-regions">Listing down available regions</h3>
+<div id="bf6d7a73-2ace-4d10-9e30-f119410240c9" class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>regions <span class="op">=</span> geofabrik.list_geofabrik_regions()</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co"># list down regions in asia</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>{k: v <span class="cf">for</span> k, v <span class="kw">in</span> regions.items() <span class="cf">if</span> <span class="st">"asia"</span> <span class="kw">in</span> v}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>{'afghanistan': 'https://download.geofabrik.de/asia/afghanistan-latest-free.shp.zip',
+ 'armenia': 'https://download.geofabrik.de/asia/armenia-latest-free.shp.zip',
+ 'azerbaijan': 'https://download.geofabrik.de/asia/azerbaijan-latest-free.shp.zip',
+ 'bangladesh': 'https://download.geofabrik.de/asia/bangladesh-latest-free.shp.zip',
+ 'bhutan': 'https://download.geofabrik.de/asia/bhutan-latest-free.shp.zip',
+ 'cambodia': 'https://download.geofabrik.de/asia/cambodia-latest-free.shp.zip',
+ 'central-zone': 'https://download.geofabrik.de/asia/india/central-zone-latest-free.shp.zip',
+ 'china': 'https://download.geofabrik.de/asia/china-latest-free.shp.zip',
+ 'chubu': 'https://download.geofabrik.de/asia/japan/chubu-latest-free.shp.zip',
+ 'chugoku': 'https://download.geofabrik.de/asia/japan/chugoku-latest-free.shp.zip',
+ 'east-timor': 'https://download.geofabrik.de/asia/east-timor-latest-free.shp.zip',
+ 'eastern-zone': 'https://download.geofabrik.de/asia/india/eastern-zone-latest-free.shp.zip',
+ 'gcc-states': 'https://download.geofabrik.de/asia/gcc-states-latest-free.shp.zip',
+ 'hokkaido': 'https://download.geofabrik.de/asia/japan/hokkaido-latest-free.shp.zip',
+ 'iran': 'https://download.geofabrik.de/asia/iran-latest-free.shp.zip',
+ 'iraq': 'https://download.geofabrik.de/asia/iraq-latest-free.shp.zip',
+ 'israel-and-palestine': 'https://download.geofabrik.de/asia/israel-and-palestine-latest-free.shp.zip',
+ 'java': 'https://download.geofabrik.de/asia/indonesia/java-latest-free.shp.zip',
+ 'jordan': 'https://download.geofabrik.de/asia/jordan-latest-free.shp.zip',
+ 'kalimantan': 'https://download.geofabrik.de/asia/indonesia/kalimantan-latest-free.shp.zip',
+ 'kansai': 'https://download.geofabrik.de/asia/japan/kansai-latest-free.shp.zip',
+ 'kanto': 'https://download.geofabrik.de/asia/japan/kanto-latest-free.shp.zip',
+ 'kazakhstan': 'https://download.geofabrik.de/asia/kazakhstan-latest-free.shp.zip',
+ 'kyrgyzstan': 'https://download.geofabrik.de/asia/kyrgyzstan-latest-free.shp.zip',
+ 'kyushu': 'https://download.geofabrik.de/asia/japan/kyushu-latest-free.shp.zip',
+ 'laos': 'https://download.geofabrik.de/asia/laos-latest-free.shp.zip',
+ 'lebanon': 'https://download.geofabrik.de/asia/lebanon-latest-free.shp.zip',
+ 'malaysia-singapore-brunei': 'https://download.geofabrik.de/asia/malaysia-singapore-brunei-latest-free.shp.zip',
+ 'maldives': 'https://download.geofabrik.de/asia/maldives-latest-free.shp.zip',
+ 'maluku': 'https://download.geofabrik.de/asia/indonesia/maluku-latest-free.shp.zip',
+ 'mongolia': 'https://download.geofabrik.de/asia/mongolia-latest-free.shp.zip',
+ 'myanmar': 'https://download.geofabrik.de/asia/myanmar-latest-free.shp.zip',
+ 'nepal': 'https://download.geofabrik.de/asia/nepal-latest-free.shp.zip',
+ 'north-eastern-zone': 'https://download.geofabrik.de/asia/india/north-eastern-zone-latest-free.shp.zip',
+ 'north-korea': 'https://download.geofabrik.de/asia/north-korea-latest-free.shp.zip',
+ 'northern-zone': 'https://download.geofabrik.de/asia/india/northern-zone-latest-free.shp.zip',
+ 'nusa-tenggara': 'https://download.geofabrik.de/asia/indonesia/nusa-tenggara-latest-free.shp.zip',
+ 'pakistan': 'https://download.geofabrik.de/asia/pakistan-latest-free.shp.zip',
+ 'papua': 'https://download.geofabrik.de/asia/indonesia/papua-latest-free.shp.zip',
+ 'philippines': 'https://download.geofabrik.de/asia/philippines-latest-free.shp.zip',
+ 'shikoku': 'https://download.geofabrik.de/asia/japan/shikoku-latest-free.shp.zip',
+ 'south-korea': 'https://download.geofabrik.de/asia/south-korea-latest-free.shp.zip',
+ 'southern-zone': 'https://download.geofabrik.de/asia/india/southern-zone-latest-free.shp.zip',
+ 'sri-lanka': 'https://download.geofabrik.de/asia/sri-lanka-latest-free.shp.zip',
+ 'sulawesi': 'https://download.geofabrik.de/asia/indonesia/sulawesi-latest-free.shp.zip',
+ 'sumatra': 'https://download.geofabrik.de/asia/indonesia/sumatra-latest-free.shp.zip',
+ 'syria': 'https://download.geofabrik.de/asia/syria-latest-free.shp.zip',
+ 'taiwan': 'https://download.geofabrik.de/asia/taiwan-latest-free.shp.zip',
+ 'tajikistan': 'https://download.geofabrik.de/asia/tajikistan-latest-free.shp.zip',
+ 'thailand': 'https://download.geofabrik.de/asia/thailand-latest-free.shp.zip',
+ 'tohoku': 'https://download.geofabrik.de/asia/japan/tohoku-latest-free.shp.zip',
+ 'turkmenistan': 'https://download.geofabrik.de/asia/turkmenistan-latest-free.shp.zip',
+ 'uzbekistan': 'https://download.geofabrik.de/asia/uzbekistan-latest-free.shp.zip',
+ 'vietnam': 'https://download.geofabrik.de/asia/vietnam-latest-free.shp.zip',
+ 'western-zone': 'https://download.geofabrik.de/asia/india/western-zone-latest-free.shp.zip',
+ 'yemen': 'https://download.geofabrik.de/asia/yemen-latest-free.shp.zip'}</code></pre>
+</div>
+</div>
+</section>
+<section id="downloading-a-region-file-to-a-directory" class="level3">
+<h3 class="anchored" data-anchor-id="downloading-a-region-file-to-a-directory">Downloading a region file to a directory</h3>
+<div id="17ae0871-236d-4006-bf8b-e25ebdd27b31" class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>downloaded_file <span class="op">=</span> geofabrik.download_geofabrik_region(<span class="st">"laos"</span>, <span class="st">"../test_dir"</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>downloaded_file</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>2023-02-01 17:00:04.495 | INFO     | geowrangler.datasets.utils:urlretrieve:27 - Retrieving https://download.geofabrik.de/asia/laos-latest-free.shp.zip into ../test_dir/laos-latest-free.shp.zip</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+
+<style>
+    /* Turns off some styling */
+    progress {
+        /* gets rid of default border in Firefox and Opera. */
+        border: none;
+        /* Needs to be in here for Safari polyfill so background images work as expected. */
+        background-size: auto;
+    }
+    progress:not([value]), progress:not([value])::-webkit-progress-bar {
+        background: repeating-linear-gradient(45deg, #7e7e7e, #7e7e7e 10px, #5c5c5c 10px, #5c5c5c 20px);
+    }
+    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+        background: #F44336;
+    }
+</style>
+</div>
+<div class="cell-output cell-output-display">
+
+    <div>
+      <progress value="97345536" class="" max="97341916" style="width:300px; height:20px; vertical-align: middle;"></progress>
+      100.00% [97345536/97341916 00:17&lt;00:00]
+    </div>
+    
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>CPU times: user 1.58 s, sys: 980 ms, total: 2.56 s
+Wall time: 18 s</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<pre><code>Path('../test_dir/laos-latest-free.shp.zip')</code></pre>
+</div>
+</div>
+</section>
+<section id="loading-geofabrik-files" class="level3">
+<h3 class="anchored" data-anchor-id="loading-geofabrik-files">Loading geofabrik files</h3>
+<div id="27c87df0-faf4-47ed-8a15-656cfcd9d0c2" class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>gdf <span class="op">=</span> gpd.read_file(downloaded_file)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>gdf.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>CPU times: user 19.4 s, sys: 528 ms, total: 19.9 s
+Wall time: 19.9 s</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">osm_id</th>
+<th data-quarto-table-cell-role="th">code</th>
+<th data-quarto-table-cell-role="th">fclass</th>
+<th data-quarto-table-cell-role="th">name</th>
+<th data-quarto-table-cell-role="th">type</th>
+<th data-quarto-table-cell-role="th">geometry</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>36192811</td>
+<td>1500</td>
+<td>building</td>
+<td>Don Chan Palace</td>
+<td>None</td>
+<td>POLYGON ((102.61392 17.95514, 102.61419 17.955...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>36195671</td>
+<td>1500</td>
+<td>building</td>
+<td>ຕະຫລາດເຊົ້າ. 早市塲</td>
+<td>None</td>
+<td>POLYGON ((102.61382 17.96520, 102.61393 17.965...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>36195973</td>
+<td>1500</td>
+<td>building</td>
+<td>Mercure Hotel Laotel</td>
+<td>None</td>
+<td>POLYGON ((102.59386 17.96890, 102.59432 17.968...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>36784437</td>
+<td>1500</td>
+<td>building</td>
+<td>None</td>
+<td>None</td>
+<td>POLYGON ((105.79786 15.11905, 105.79838 15.119...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>37886432</td>
+<td>1500</td>
+<td>building</td>
+<td>Presidential Palace</td>
+<td>None</td>
+<td>POLYGON ((102.60940 17.96246, 102.60951 17.962...</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>You can also list the contents of the zipped shape file as well as load the shape file within it</p>
+<div id="7d1f0210-7d28-486e-8b0e-93714d342c5d" class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="op">!</span>unzip <span class="op">-</span>l {downloaded_file.as_posix()}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Archive:  ../test_dir/laos-latest-free.shp.zip
+  Length      Date    Time    Name
+---------  ---------- -----   ----
+      647  2023-02-01 09:00   README
+        6  2023-02-01 09:00   gis_osm_buildings_a_free_1.cpg
+ 68322734  2023-02-01 09:00   gis_osm_buildings_a_free_1.dbf
+      144  2023-02-01 09:00   gis_osm_buildings_a_free_1.prj
+ 60089724  2023-02-01 09:00   gis_osm_buildings_a_free_1.shp
+  3312708  2023-02-01 09:00   gis_osm_buildings_a_free_1.shx
+        6  2023-02-01 09:00   gis_osm_landuse_a_free_1.cpg
+  2845642  2023-02-01 09:00   gis_osm_landuse_a_free_1.dbf
+      144  2023-02-01 09:00   gis_osm_landuse_a_free_1.prj
+ 14407732  2023-02-01 09:00   gis_osm_landuse_a_free_1.shp
+   157092  2023-02-01 09:00   gis_osm_landuse_a_free_1.shx
+        6  2023-02-01 09:00   gis_osm_natural_a_free_1.cpg
+     7702  2023-02-01 09:00   gis_osm_natural_a_free_1.dbf
+      144  2023-02-01 09:00   gis_osm_natural_a_free_1.prj
+    15556  2023-02-01 09:00   gis_osm_natural_a_free_1.shp
+      516  2023-02-01 09:00   gis_osm_natural_a_free_1.shx
+        6  2023-02-01 09:00   gis_osm_natural_free_1.cpg
+   753872  2023-02-01 09:00   gis_osm_natural_free_1.dbf
+      144  2023-02-01 09:00   gis_osm_natural_free_1.prj
+   145644  2023-02-01 09:00   gis_osm_natural_free_1.shp
+    41684  2023-02-01 09:00   gis_osm_natural_free_1.shx
+        6  2023-02-01 09:00   gis_osm_places_a_free_1.cpg
+    26854  2023-02-01 09:00   gis_osm_places_a_free_1.dbf
+      144  2023-02-01 09:00   gis_osm_places_a_free_1.prj
+   441004  2023-02-01 09:00   gis_osm_places_a_free_1.shp
+     1476  2023-02-01 09:00   gis_osm_places_a_free_1.shx
+        6  2023-02-01 09:00   gis_osm_places_free_1.cpg
+  1142544  2023-02-01 09:00   gis_osm_places_free_1.dbf
+      144  2023-02-01 09:00   gis_osm_places_free_1.prj
+   206460  2023-02-01 09:00   gis_osm_places_free_1.shp
+    59060  2023-02-01 09:00   gis_osm_places_free_1.shx
+        6  2023-02-01 09:00   gis_osm_pofw_a_free_1.cpg
+    39602  2023-02-01 09:00   gis_osm_pofw_a_free_1.dbf
+      144  2023-02-01 09:00   gis_osm_pofw_a_free_1.prj
+    49992  2023-02-01 09:00   gis_osm_pofw_a_free_1.shp
+     2276  2023-02-01 09:00   gis_osm_pofw_a_free_1.shx
+        6  2023-02-01 09:00   gis_osm_pofw_free_1.cpg
+    66427  2023-02-01 09:00   gis_osm_pofw_free_1.dbf
+      144  2023-02-01 09:00   gis_osm_pofw_free_1.prj
+    12896  2023-02-01 09:00   gis_osm_pofw_free_1.shp
+     3756  2023-02-01 09:00   gis_osm_pofw_free_1.shx
+        6  2023-02-01 09:00   gis_osm_pois_a_free_1.cpg
+   274067  2023-02-01 09:00   gis_osm_pois_a_free_1.dbf
+      144  2023-02-01 09:00   gis_osm_pois_a_free_1.prj
+   351936  2023-02-01 09:00   gis_osm_pois_a_free_1.shp
+    15212  2023-02-01 09:00   gis_osm_pois_a_free_1.shx
+        6  2023-02-01 09:00   gis_osm_pois_free_1.cpg
+  1884292  2023-02-01 09:00   gis_osm_pois_free_1.dbf
+      144  2023-02-01 09:00   gis_osm_pois_free_1.prj
+   363932  2023-02-01 09:00   gis_osm_pois_free_1.shp
+   104052  2023-02-01 09:00   gis_osm_pois_free_1.shx
+        6  2023-02-01 09:00   gis_osm_railways_free_1.cpg
+   100110  2023-02-01 09:00   gis_osm_railways_free_1.dbf
+      144  2023-02-01 09:00   gis_osm_railways_free_1.prj
+   101636  2023-02-01 09:00   gis_osm_railways_free_1.shp
+     5124  2023-02-01 09:00   gis_osm_railways_free_1.shx
+        6  2023-02-01 09:00   gis_osm_roads_free_1.cpg
+ 20909019  2023-02-01 09:00   gis_osm_roads_free_1.dbf
+      144  2023-02-01 09:00   gis_osm_roads_free_1.prj
+ 50224636  2023-02-01 09:00   gis_osm_roads_free_1.shp
+   914140  2023-02-01 09:00   gis_osm_roads_free_1.shx
+        6  2023-02-01 09:00   gis_osm_traffic_a_free_1.cpg
+   102532  2023-02-01 09:00   gis_osm_traffic_a_free_1.dbf
+      144  2023-02-01 09:00   gis_osm_traffic_a_free_1.prj
+   131304  2023-02-01 09:00   gis_osm_traffic_a_free_1.shp
+     5748  2023-02-01 09:00   gis_osm_traffic_a_free_1.shx
+        6  2023-02-01 09:00   gis_osm_traffic_free_1.cpg
+   275807  2023-02-01 09:00   gis_osm_traffic_free_1.dbf
+      144  2023-02-01 09:00   gis_osm_traffic_free_1.prj
+    53328  2023-02-01 09:00   gis_osm_traffic_free_1.shp
+    15308  2023-02-01 09:00   gis_osm_traffic_free_1.shx
+        6  2023-02-01 09:00   gis_osm_transport_a_free_1.cpg
+    10892  2023-02-01 09:00   gis_osm_transport_a_free_1.dbf
+      144  2023-02-01 09:00   gis_osm_transport_a_free_1.prj
+    28840  2023-02-01 09:00   gis_osm_transport_a_free_1.shp
+      692  2023-02-01 09:00   gis_osm_transport_a_free_1.shx
+        6  2023-02-01 09:00   gis_osm_transport_free_1.cpg
+    82522  2023-02-01 09:00   gis_osm_transport_free_1.dbf
+      144  2023-02-01 09:00   gis_osm_transport_free_1.prj
+    16004  2023-02-01 09:00   gis_osm_transport_free_1.shp
+     4644  2023-02-01 09:00   gis_osm_transport_free_1.shx
+        6  2023-02-01 09:00   gis_osm_water_a_free_1.cpg
+   979927  2023-02-01 09:00   gis_osm_water_a_free_1.dbf
+      144  2023-02-01 09:00   gis_osm_water_a_free_1.prj
+ 14026044  2023-02-01 09:00   gis_osm_water_a_free_1.shp
+    54156  2023-02-01 09:00   gis_osm_water_a_free_1.shx
+        6  2023-02-01 09:00   gis_osm_waterways_free_1.cpg
+  1662494  2023-02-01 09:00   gis_osm_waterways_free_1.dbf
+      144  2023-02-01 09:00   gis_osm_waterways_free_1.prj
+ 14396164  2023-02-01 09:00   gis_osm_waterways_free_1.shp
+    88756  2023-02-01 09:00   gis_osm_waterways_free_1.shx
+---------                     -------
+259339618                     91 files</code></pre>
+</div>
+</div>
+<div id="8d20c11d-4dba-4fec-9f40-5cb21441a9e6" class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>gdf2 <span class="op">=</span> gpd.read_file(<span class="ss">f"</span><span class="sc">{</span>downloaded_file<span class="sc">.</span>as_posix()<span class="sc">}</span><span class="ss">!gis_osm_pois_free_1.shp"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>CPU times: user 745 ms, sys: 19.4 ms, total: 764 ms
+Wall time: 773 ms</code></pre>
+</div>
+</div>
+</section>
+<section id="unzipping-and-caching-osm" class="level3">
+<h3 class="anchored" data-anchor-id="unzipping-and-caching-osm">Unzipping and Caching OSM</h3>
+<p>In addition downloading, the geofabrik module provides an unzipping and caching facility (default cache directory: <code>~/.cache/geowrangler/osm</code> ) to make it easier to access OSM data.</p>
+<div id="804a52c0-9f58-40d1-a666-2d193f425c2d" class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>download_path <span class="op">=</span> geofabrik.download_osm_region_data(<span class="st">"afghanistan"</span>)</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>download_path</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>2023-02-01 17:00:42.767 | INFO     | geowrangler.datasets.geofabrik:download_osm_region_data:127 - OSM Data: Cached data available for afghanistan at /home/butchtm/.cache/geowrangler/osm/afghanistan-latest-free.shp.zip? False
+2023-02-01 17:00:43.526 | INFO     | geowrangler.datasets.geofabrik:download_osm_region_data:141 - OSM Data: Re-initializing OSM region zip file at /home/butchtm/.cache/geowrangler/osm/afghanistan-latest-free.shp.zip...
+2023-02-01 17:00:43.529 | INFO     | geowrangler.datasets.geofabrik:download_osm_region_data:148 - OSM Data: Downloading Geofabrik in /home/butchtm/.cache/geowrangler/osm/afghanistan-latest-free.shp.zip...
+2023-02-01 17:00:44.247 | INFO     | geowrangler.datasets.utils:urlretrieve:27 - Retrieving https://download.geofabrik.de/asia/afghanistan-latest-free.shp.zip into /home/butchtm/.cache/geowrangler/osm/afghanistan-latest-free.shp.zip</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+
+<style>
+    /* Turns off some styling */
+    progress {
+        /* gets rid of default border in Firefox and Opera. */
+        border: none;
+        /* Needs to be in here for Safari polyfill so background images work as expected. */
+        background-size: auto;
+    }
+    progress:not([value]), progress:not([value])::-webkit-progress-bar {
+        background: repeating-linear-gradient(45deg, #7e7e7e, #7e7e7e 10px, #5c5c5c 10px, #5c5c5c 20px);
+    }
+    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+        background: #F44336;
+    }
+</style>
+</div>
+<div class="cell-output cell-output-display">
+
+    <div>
+      <progress value="241524736" class="" max="241516716" style="width:300px; height:20px; vertical-align: middle;"></progress>
+      100.00% [241524736/241516716 00:39&lt;00:00]
+    </div>
+    
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>2023-02-01 17:01:23.951 | INFO     | geowrangler.datasets.geofabrik:download_osm_region_data:159 - OSM Data: Successfully downloaded and cached OSM data for afghanistan at /home/butchtm/.cache/geowrangler/osm/afghanistan-latest-free.shp.zip!</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>CPU times: user 3.22 s, sys: 1.76 s, total: 4.98 s
+Wall time: 41.2 s</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<pre><code>Path('/home/butchtm/.cache/geowrangler/osm/afghanistan-latest-free.shp.zip')</code></pre>
+</div>
+</div>
+<p>Downloading it the second time around should be much faster as it only checks if its in the cache and returns the path</p>
+<div id="7f2b2e55-6d64-4ade-b8c1-24baa9d7f39b" class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>download_path2 <span class="op">=</span> geofabrik.download_osm_region_data(<span class="st">"afghanistan"</span>)</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>download_path2</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>2023-02-01 17:01:23.973 | INFO     | geowrangler.datasets.geofabrik:download_osm_region_data:127 - OSM Data: Cached data available for afghanistan at /home/butchtm/.cache/geowrangler/osm/afghanistan-latest-free.shp.zip? True</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>CPU times: user 2.22 ms, sys: 349 µs, total: 2.57 ms
+Wall time: 2.08 ms</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<pre><code>Path('/home/butchtm/.cache/geowrangler/osm/afghanistan-latest-free.shp.zip')</code></pre>
+</div>
+</div>
+<div id="d816c677-01db-4167-aaea-9d7cb7a31b47" class="cell">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="op">!</span>ls <span class="op">-</span>aldh  {download_path2}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>-rw-r--r-- 1 butchtm butchtm 231M Feb  1 17:01 /home/butchtm/.cache/geowrangler/osm/afghanistan-latest-free.shp.zip</code></pre>
+</div>
+</div>
+</section>
+<section id="using-the-osm-data-manager" class="level3">
+<h3 class="anchored" data-anchor-id="using-the-osm-data-manager">Using the OSM Data Manager</h3>
+<p>We also provide an OSM Data Manager which, in addition to using the default cache (<code>~/.cache/geowrangler/osm</code>), also caches the geodataframe for either the pois or the roads datasets from OSM in memory to avoid having to reload the OSM data from disk.</p>
+<div id="43318ba1-a38a-4535-8403-1bc831734bdd" class="cell">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create the osm data manager</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>odm <span class="op">=</span> geofabrik.OsmDataManager()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="7d4945dd-5825-48c4-b6ac-86009477f13c" class="cell">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>pois_ph <span class="op">=</span> odm.load_pois(<span class="st">"philippines"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>2023-02-01 17:01:24.214 | INFO     | geowrangler.datasets.geofabrik:download_osm_region_data:127 - OSM Data: Cached data available for philippines at /home/butchtm/.cache/geowrangler/osm/philippines-latest-free.shp.zip? False
+2023-02-01 17:01:25.631 | INFO     | geowrangler.datasets.geofabrik:download_osm_region_data:141 - OSM Data: Re-initializing OSM region zip file at /home/butchtm/.cache/geowrangler/osm/philippines-latest-free.shp.zip...
+2023-02-01 17:01:25.634 | INFO     | geowrangler.datasets.geofabrik:download_osm_region_data:148 - OSM Data: Downloading Geofabrik in /home/butchtm/.cache/geowrangler/osm/philippines-latest-free.shp.zip...
+2023-02-01 17:01:26.355 | INFO     | geowrangler.datasets.utils:urlretrieve:27 - Retrieving https://download.geofabrik.de/asia/philippines-latest-free.shp.zip into /home/butchtm/.cache/geowrangler/osm/philippines-latest-free.shp.zip</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+
+<style>
+    /* Turns off some styling */
+    progress {
+        /* gets rid of default border in Firefox and Opera. */
+        border: none;
+        /* Needs to be in here for Safari polyfill so background images work as expected. */
+        background-size: auto;
+    }
+    progress:not([value]), progress:not([value])::-webkit-progress-bar {
+        background: repeating-linear-gradient(45deg, #7e7e7e, #7e7e7e 10px, #5c5c5c 10px, #5c5c5c 20px);
+    }
+    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+        background: #F44336;
+    }
+</style>
+</div>
+<div class="cell-output cell-output-display">
+
+    <div>
+      <progress value="1185939456" class="" max="1185011560" style="width:300px; height:20px; vertical-align: middle;"></progress>
+      100.08% [1185939456/1185011560 07:39&lt;00:00]
+    </div>
+    
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>2023-02-01 17:09:06.368 | INFO     | geowrangler.datasets.geofabrik:download_osm_region_data:159 - OSM Data: Successfully downloaded and cached OSM data for philippines at /home/butchtm/.cache/geowrangler/osm/philippines-latest-free.shp.zip!
+2023-02-01 17:09:06.370 | DEBUG    | geowrangler.datasets.geofabrik:load_pois:218 - OSM POIs for philippines being loaded from /home/butchtm/.cache/geowrangler/osm/philippines-latest-free.shp.zip</code></pre>
+</div>
+</div>
+<div id="858615fd-3781-4e98-a615-9c8ba0897436" class="cell">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>pois_ph.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">osm_id</th>
+<th data-quarto-table-cell-role="th">code</th>
+<th data-quarto-table-cell-role="th">fclass</th>
+<th data-quarto-table-cell-role="th">name</th>
+<th data-quarto-table-cell-role="th">geometry</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>21717820</td>
+<td>2907</td>
+<td>camera_surveillance</td>
+<td>None</td>
+<td>POINT (121.02120 14.57608)</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>21717872</td>
+<td>2722</td>
+<td>museum</td>
+<td>Ayala Museum</td>
+<td>POINT (121.02324 14.55358)</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>24078301</td>
+<td>2402</td>
+<td>motel</td>
+<td>Sogo Grand Hotel</td>
+<td>POINT (121.04515 14.56449)</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>24078959</td>
+<td>2907</td>
+<td>camera_surveillance</td>
+<td>None</td>
+<td>POINT (121.05945 14.60098)</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>24797511</td>
+<td>2542</td>
+<td>bicycle_shop</td>
+<td>Christine Sports Cycle Marketing</td>
+<td>POINT (120.99506 14.55224)</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<div id="36ff36b9-dc11-4bc0-b011-70f076429086" class="cell">
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>roads_ph <span class="op">=</span> odm.load_roads(<span class="st">"philippines"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>2023-02-01 17:09:10.649 | INFO     | geowrangler.datasets.geofabrik:download_osm_region_data:127 - OSM Data: Cached data available for philippines at /home/butchtm/.cache/geowrangler/osm/philippines-latest-free.shp.zip? True
+2023-02-01 17:09:10.653 | DEBUG    | geowrangler.datasets.geofabrik:load_roads:274 - OSM Roads for philippines being loaded from /home/butchtm/.cache/geowrangler/osm/philippines-latest-free.shp.zip</code></pre>
+</div>
+</div>
+<div id="b33a3963-71d5-43a1-a47f-513257daae30" class="cell">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>roads_ph.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">osm_id</th>
+<th data-quarto-table-cell-role="th">code</th>
+<th data-quarto-table-cell-role="th">fclass</th>
+<th data-quarto-table-cell-role="th">name</th>
+<th data-quarto-table-cell-role="th">ref</th>
+<th data-quarto-table-cell-role="th">oneway</th>
+<th data-quarto-table-cell-role="th">maxspeed</th>
+<th data-quarto-table-cell-role="th">layer</th>
+<th data-quarto-table-cell-role="th">bridge</th>
+<th data-quarto-table-cell-role="th">tunnel</th>
+<th data-quarto-table-cell-role="th">geometry</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>267</td>
+<td>5115</td>
+<td>tertiary</td>
+<td>Maharlika Street</td>
+<td>None</td>
+<td>F</td>
+<td>30</td>
+<td>0</td>
+<td>F</td>
+<td>F</td>
+<td>LINESTRING (121.05195 14.65011, 121.05209 14.6...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>2508359</td>
+<td>5153</td>
+<td>footway</td>
+<td>Sagada Mission Compound</td>
+<td>None</td>
+<td>B</td>
+<td>0</td>
+<td>0</td>
+<td>F</td>
+<td>F</td>
+<td>LINESTRING (120.90199 17.08090, 120.90197 17.0...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>2667097</td>
+<td>5113</td>
+<td>primary</td>
+<td>Taft Avenue</td>
+<td>170</td>
+<td>F</td>
+<td>60</td>
+<td>0</td>
+<td>F</td>
+<td>F</td>
+<td>LINESTRING (120.99682 14.55577, 120.99671 14.5...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>2667099</td>
+<td>5113</td>
+<td>primary</td>
+<td>Lerma Street</td>
+<td>170</td>
+<td>F</td>
+<td>60</td>
+<td>0</td>
+<td>F</td>
+<td>F</td>
+<td>LINESTRING (120.98539 14.60460, 120.98545 14.6...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>2667105</td>
+<td>5122</td>
+<td>residential</td>
+<td>Manalito Street</td>
+<td>None</td>
+<td>B</td>
+<td>0</td>
+<td>0</td>
+<td>F</td>
+<td>F</td>
+<td>LINESTRING (120.99380 14.54125, 120.99497 14.5...</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="loading-osm-data-from-other-years" class="level2">
+<h2 class="anchored" data-anchor-id="loading-osm-data-from-other-years">Loading OSM data from other years</h2>
+<p>In addition to providing access to the latest OSM shape files, we also provide an optional <code>year</code> parameter, which allows you to download OSM data from previous years.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The availability of data from previous years is dependent on what geofabrik has made available. Please check the <a href="https://download.geofabrik.de/">Geofabrik download site</a> for the list of available data.</p>
+</div>
+</div>
+<div id="b2d7e4cb-c380-43bd-a65c-fa75fad3622a" class="cell">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>pois_ph <span class="op">=</span> odm.load_pois(<span class="st">"philippines"</span>, year<span class="op">=</span><span class="st">"2017"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>2023-02-01 17:10:30.351 | INFO     | geowrangler.datasets.geofabrik:download_osm_region_data:127 - OSM Data: Cached data available for philippines at /home/butchtm/.cache/geowrangler/osm/philippines-170101-free.shp.zip? False
+2023-02-01 17:10:33.834 | INFO     | geowrangler.datasets.geofabrik:download_osm_region_data:141 - OSM Data: Re-initializing OSM region zip file at /home/butchtm/.cache/geowrangler/osm/philippines-170101-free.shp.zip...
+2023-02-01 17:10:33.838 | INFO     | geowrangler.datasets.geofabrik:download_osm_region_data:148 - OSM Data: Downloading Geofabrik in /home/butchtm/.cache/geowrangler/osm/philippines-170101-free.shp.zip...
+2023-02-01 17:10:35.780 | INFO     | geowrangler.datasets.utils:urlretrieve:27 - Retrieving https://download.geofabrik.de/asia/philippines-170101-free.shp.zip into /home/butchtm/.cache/geowrangler/osm/philippines-170101-free.shp.zip</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+
+<style>
+    /* Turns off some styling */
+    progress {
+        /* gets rid of default border in Firefox and Opera. */
+        border: none;
+        /* Needs to be in here for Safari polyfill so background images work as expected. */
+        background-size: auto;
+    }
+    progress:not([value]), progress:not([value])::-webkit-progress-bar {
+        background: repeating-linear-gradient(45deg, #7e7e7e, #7e7e7e 10px, #5c5c5c 10px, #5c5c5c 20px);
+    }
+    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+        background: #F44336;
+    }
+</style>
+</div>
+<div class="cell-output cell-output-display">
+
+    <div>
+      <progress value="412090368" class="" max="411074511" style="width:300px; height:20px; vertical-align: middle;"></progress>
+      100.25% [412090368/411074511 01:49&lt;00:00]
+    </div>
+    
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>2023-02-01 17:12:24.933 | INFO     | geowrangler.datasets.geofabrik:download_osm_region_data:163 - OSM Data: Successfully downloaded and cached OSM data for philippines and 2017 at /home/butchtm/.cache/geowrangler/osm/philippines-170101-free.shp.zip!
+2023-02-01 17:12:24.935 | DEBUG    | geowrangler.datasets.geofabrik:load_pois:220 - OSM POIs for philippines and year 2017 being loaded from /home/butchtm/.cache/geowrangler/osm/philippines-170101-free.shp.zip</code></pre>
+</div>
+</div>
+<div id="11703f77-d63b-4d6a-97f9-49baa9e9334a" class="cell">
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>pois_ph</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">osm_id</th>
+<th data-quarto-table-cell-role="th">code</th>
+<th data-quarto-table-cell-role="th">fclass</th>
+<th data-quarto-table-cell-role="th">name</th>
+<th data-quarto-table-cell-role="th">geometry</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>14401658</td>
+<td>2742</td>
+<td>viewpoint</td>
+<td>East Point</td>
+<td>POINT (120.62020 14.38562)</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>14446500</td>
+<td>2721</td>
+<td>attraction</td>
+<td>Intramuros</td>
+<td>POINT (120.97533 14.59059)</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>21717872</td>
+<td>2722</td>
+<td>museum</td>
+<td>Ayala Museum</td>
+<td>POINT (121.02324 14.55358)</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>24078301</td>
+<td>2401</td>
+<td>hotel</td>
+<td>Sogo Grand Hotel</td>
+<td>POINT (121.04515 14.56449)</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>24078959</td>
+<td>2907</td>
+<td>camera_surveillance</td>
+<td>None</td>
+<td>POINT (121.05945 14.60098)</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">67400</td>
+<td>4584129489</td>
+<td>2502</td>
+<td>bakery</td>
+<td>Come-on bakery</td>
+<td>POINT (123.26424 9.19066)</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">67401</td>
+<td>4584130190</td>
+<td>2401</td>
+<td>hotel</td>
+<td>L-mansion</td>
+<td>POINT (121.00280 14.55968)</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">67402</td>
+<td>4584164592</td>
+<td>2721</td>
+<td>attraction</td>
+<td>Lugnason Falls</td>
+<td>POINT (123.53406 9.14808)</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">67403</td>
+<td>4584215391</td>
+<td>2742</td>
+<td>viewpoint</td>
+<td>None</td>
+<td>POINT (123.53406 9.14804)</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">67404</td>
+<td>4584253097</td>
+<td>2511</td>
+<td>convenience</td>
+<td>Herlyn's Burger House</td>
+<td>POINT (120.58250 14.99107)</td>
+</tr>
+</tbody>
+</table>
+
+<p>67405 rows × 5 columns</p>
+</div>
+</div>
+</div>
+</section>
+<section id="downloading-ookla-data" class="level2">
+<h2 class="anchored" data-anchor-id="downloading-ookla-data">Downloading Ookla Data</h2>
+<div id="f871558e-b391-46cc-89c4-ce2d6c10db74" class="cell">
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> geopandas <span class="im">as</span> gpd</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> geowrangler.datasets <span class="im">import</span> ookla</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<section id="listing-down-available-files" class="level3">
+<h3 class="anchored" data-anchor-id="listing-down-available-files">Listing down available files</h3>
+<div id="89ed5a78-94be-495a-9ab1-ffa47388ac5b" class="cell">
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>ookla_files <span class="op">=</span> ookla.list_ookla_files()</span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>ookla_files</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>{OoklaQuarter(type='fixed', year='2019', quarter='1'): '2019-01-01_performance_fixed_tiles.parquet',
+ OoklaQuarter(type='fixed', year='2019', quarter='2'): '2019-04-01_performance_fixed_tiles.parquet',
+ OoklaQuarter(type='fixed', year='2019', quarter='3'): '2019-07-01_performance_fixed_tiles.parquet',
+ OoklaQuarter(type='fixed', year='2019', quarter='4'): '2019-10-01_performance_fixed_tiles.parquet',
+ OoklaQuarter(type='fixed', year='2020', quarter='1'): '2020-01-01_performance_fixed_tiles.parquet',
+ OoklaQuarter(type='fixed', year='2020', quarter='2'): '2020-04-01_performance_fixed_tiles.parquet',
+ OoklaQuarter(type='fixed', year='2020', quarter='3'): '2020-07-01_performance_fixed_tiles.parquet',
+ OoklaQuarter(type='fixed', year='2020', quarter='4'): '2020-10-01_performance_fixed_tiles.parquet',
+ OoklaQuarter(type='fixed', year='2021', quarter='1'): '2021-01-01_performance_fixed_tiles.parquet',
+ OoklaQuarter(type='fixed', year='2021', quarter='2'): '2021-04-01_performance_fixed_tiles.parquet',
+ OoklaQuarter(type='fixed', year='2021', quarter='3'): '2021-07-01_performance_fixed_tiles.parquet',
+ OoklaQuarter(type='fixed', year='2021', quarter='4'): '2021-10-01_performance_fixed_tiles.parquet',
+ OoklaQuarter(type='fixed', year='2022', quarter='1'): '2022-01-01_performance_fixed_tiles.parquet',
+ OoklaQuarter(type='fixed', year='2022', quarter='2'): '2022-04-01_performance_fixed_tiles.parquet',
+ OoklaQuarter(type='fixed', year='2022', quarter='3'): '2022-07-01_performance_fixed_tiles.parquet',
+ OoklaQuarter(type='fixed', year='2022', quarter='4'): '2022-10-01_performance_fixed_tiles.parquet',
+ OoklaQuarter(type='mobile', year='2019', quarter='1'): '2019-01-01_performance_mobile_tiles.parquet',
+ OoklaQuarter(type='mobile', year='2019', quarter='2'): '2019-04-01_performance_mobile_tiles.parquet',
+ OoklaQuarter(type='mobile', year='2019', quarter='3'): '2019-07-01_performance_mobile_tiles.parquet',
+ OoklaQuarter(type='mobile', year='2019', quarter='4'): '2019-10-01_performance_mobile_tiles.parquet',
+ OoklaQuarter(type='mobile', year='2020', quarter='1'): '2020-01-01_performance_mobile_tiles.parquet',
+ OoklaQuarter(type='mobile', year='2020', quarter='2'): '2020-04-01_performance_mobile_tiles.parquet',
+ OoklaQuarter(type='mobile', year='2020', quarter='3'): '2020-07-01_performance_mobile_tiles.parquet',
+ OoklaQuarter(type='mobile', year='2020', quarter='4'): '2020-10-01_performance_mobile_tiles.parquet',
+ OoklaQuarter(type='mobile', year='2021', quarter='1'): '2021-01-01_performance_mobile_tiles.parquet',
+ OoklaQuarter(type='mobile', year='2021', quarter='2'): '2021-04-01_performance_mobile_tiles.parquet',
+ OoklaQuarter(type='mobile', year='2021', quarter='3'): '2021-07-01_performance_mobile_tiles.parquet',
+ OoklaQuarter(type='mobile', year='2021', quarter='4'): '2021-10-01_performance_mobile_tiles.parquet',
+ OoklaQuarter(type='mobile', year='2022', quarter='1'): '2022-01-01_performance_mobile_tiles.parquet',
+ OoklaQuarter(type='mobile', year='2022', quarter='2'): '2022-04-01_performance_mobile_tiles.parquet',
+ OoklaQuarter(type='mobile', year='2022', quarter='3'): '2022-07-01_performance_mobile_tiles.parquet',
+ OoklaQuarter(type='mobile', year='2022', quarter='4'): '2022-10-01_performance_mobile_tiles.parquet'}</code></pre>
+</div>
+</div>
+</section>
+<section id="downloading-an-ookla-file-to-a-directory" class="level3">
+<h3 class="anchored" data-anchor-id="downloading-an-ookla-file-to-a-directory">Downloading an ookla file to a directory</h3>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Warning
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Ookla files are &gt;300MB and can reach ~550MB. Download with caution.</p>
+</div>
+</div>
+<div id="14f4d524-e19a-44f3-a0c9-9ed494a7dc65" class="cell">
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="op">!</span>mkdir <span class="op">-</span>p ..<span class="op">/</span>test_dir</span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>downloaded_file <span class="op">=</span> ookla.download_ookla_file(</span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>    type_<span class="op">=</span><span class="st">"fixed"</span>, year<span class="op">=</span><span class="st">"2019"</span>, quarter<span class="op">=</span><span class="st">"1"</span>, directory<span class="op">=</span><span class="st">"../test_dir"</span></span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a>downloaded_file</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>Path('../test_dir/2019-01-01_performance_fixed_tiles.parquet')</code></pre>
+</div>
+</div>
+</section>
+<section id="loading-ookla-data" class="level3">
+<h3 class="anchored" data-anchor-id="loading-ookla-data">Loading ookla data</h3>
+<div id="3dd92732-2e4d-4b2b-a647-0c385f9c3cde" class="cell">
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_parquet(downloaded_file)</span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>df.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">quadkey</th>
+<th data-quarto-table-cell-role="th">tile</th>
+<th data-quarto-table-cell-role="th">avg_d_kbps</th>
+<th data-quarto-table-cell-role="th">avg_u_kbps</th>
+<th data-quarto-table-cell-role="th">avg_lat_ms</th>
+<th data-quarto-table-cell-role="th">tests</th>
+<th data-quarto-table-cell-role="th">devices</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>0022133222312322</td>
+<td>POLYGON((-160.02685546875 70.6435894914449, -1...</td>
+<td>8763</td>
+<td>3646</td>
+<td>45</td>
+<td>1</td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>0022133222330013</td>
+<td>POLYGON((-160.032348632812 70.6399478155463, -...</td>
+<td>9195</td>
+<td>3347</td>
+<td>43</td>
+<td>1</td>
+<td>1</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>0022133222330023</td>
+<td>POLYGON((-160.043334960938 70.6363054807905, -...</td>
+<td>6833</td>
+<td>3788</td>
+<td>42</td>
+<td>1</td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>0022133222330100</td>
+<td>POLYGON((-160.02685546875 70.6417687358462, -1...</td>
+<td>8895</td>
+<td>3429</td>
+<td>43</td>
+<td>2</td>
+<td>2</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>0022320121121332</td>
+<td>POLYGON((-166.739501953125 68.3526207780586, -...</td>
+<td>4877</td>
+<td>935</td>
+<td>45</td>
+<td>3</td>
+<td>2</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp("https:\/\/geowrangler\.thinkingmachin\.es\/");
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/thinkingmachines/geowrangler/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>

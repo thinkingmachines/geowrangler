@@ -1,0 +1,2166 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.5.57">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>DHS Wealth Index – geowrangler</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script><script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+
+<link rel="stylesheet" href="styles.css">
+<meta property="og:title" content="DHS Wealth Index – geowrangler">
+<meta property="og:description" content="🌏 A python package for wrangling geospatial datasets">
+<meta property="og:site_name" content="geowrangler">
+<meta name="twitter:title" content="DHS Wealth Index – geowrangler">
+<meta name="twitter:description" content="🌏 A python package for wrangling geospatial datasets">
+<meta name="twitter:card" content="summary">
+</head>
+
+<body class="nav-sidebar floating nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">geowrangler</span>
+    </a>
+  </div>
+        <div class="quarto-navbar-tools tools-end">
+</div>
+          <div id="quarto-search" class="" title="Search"></div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./tutorial.grids.html">Tutorials</a></li><li class="breadcrumb-item"><a href="./tutorial.dhs.html">DHS Wealth Index</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Geowrangler</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Tutorials</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.grids.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Grid Generation Tutorial</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.geometry_validation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Geometry Validation Tutorial</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.vector_zonal_stats.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Vector Zonal Stats Tutorial</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.raster_zonal_stats.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Raster Zonal Stats Tutorial</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.area_zonal_stats.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Vector Area Zonal Stats Tutorial</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.distance_zonal_stats.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Vector Distance Zonal Stats Tutorial</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.dhs.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">DHS Wealth Index</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.datasets.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Datasets Download</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.spatialjoin_highest_intersection.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Spatial Join Using Highest Intersection Tutorial</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.tile_clustering.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Tile Clustering Tutorial</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.raster_process.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Raster Processing Tutorial</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.raster_to_df.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Raster to Dataframe Tutorial</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Use Case Demos</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./overview.poverty_mapping_demo.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Explore Poverty Mapping Machine Learning Models</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./overview.usecase_ookla.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exploring Internet Speeds with Ookla</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">Module Reference</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./grids.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Grids</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./polygon_fill.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Polygon Fill</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./validation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Geometry Validation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./vector_zonal_stats.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Vector Zonal Stats</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./raster_zonal_stats.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Raster Zonal Stats</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./area_zonal_stats.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Area Zonal Stats</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./distance_zonal_stats.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Distance Zonal Stats</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./vector_to_raster_mask.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Vector to Raster mask</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./raster_to_dataframe.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Raster to Dataframe</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./raster_process.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Raster Processing</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./dhs.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">DHS Utilities</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./datasets_geofabrik.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Datasets Geofabrik</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./datasets_ookla.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Datasets Ookla</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./datasets_nightlights.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Night Lights</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./datasets_utils.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Datasets Utils</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tile_clustering.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Tile Clustering</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./spatialjoin_highest_intersection.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Spatial Join Highest Intersection</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#loading-dhs-data" id="toc-loading-dhs-data" class="nav-link active" data-scroll-target="#loading-dhs-data">Loading DHS Data</a></li>
+  <li><a href="#renaming-columns-to-match" id="toc-renaming-columns-to-match" class="nav-link" data-scroll-target="#renaming-columns-to-match">Renaming columns to match</a></li>
+  <li><a href="#cluster-summaries" id="toc-cluster-summaries" class="nav-link" data-scroll-target="#cluster-summaries">Cluster Summaries</a></li>
+  <li><a href="#recalculating-wealth-index-for-a-single-country" id="toc-recalculating-wealth-index-for-a-single-country" class="nav-link" data-scroll-target="#recalculating-wealth-index-for-a-single-country">Recalculating wealth index for a single country</a></li>
+  <li><a href="#recalculating-wealth-index-for-multiple-countries" id="toc-recalculating-wealth-index-for-multiple-countries" class="nav-link" data-scroll-target="#recalculating-wealth-index-for-multiple-countries">Recalculating wealth index for multiple countries</a></li>
+  </ul>
+<div class="toc-actions"><ul><li><a href="https://github.com/thinkingmachines/geowrangler/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./tutorial.grids.html">Tutorials</a></li><li class="breadcrumb-item"><a href="./tutorial.dhs.html">DHS Wealth Index</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">DHS Wealth Index</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<!-- WARNING: THIS FILE WAS AUTOGENERATED! DO NOT EDIT! -->
+<blockquote class="blockquote">
+<p>Basic introduction to processing DHS data</p>
+</blockquote>
+<p><a href="https://colab.research.google.com/github/thinkingmachines/geowrangler/blob/master/notebooks/tutorial.dhs.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg" title="Open in Colab button" class="img-fluid"></a></p>
+<section id="loading-dhs-data" class="level2">
+<h2 class="anchored" data-anchor-id="loading-dhs-data">Loading DHS Data</h2>
+<p>Note: This data is mocked data. Request official data from their <a href="https://dhsprogram.com/data/available-datasets.cfm">available datasets</a> through their <a href="https://dhsprogram.com/data/Access-Instructions.cfm">website</a>.</p>
+<div id="edac19e8-6cd2-4def-9e7e-f9c45a48d003" class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> geopandas <span class="im">as</span> gpd</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> geowrangler <span class="im">import</span> dhs</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="e9fd8f77-f10d-425c-90df-ae28a9feadc9" class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>dhs_household_data_path <span class="op">=</span> <span class="st">"../data/ph.DTA"</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>dhs_gps_coordinates <span class="op">=</span> <span class="st">"../data/ph_gps.shp"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="d252ff00-0f96-4071-aaba-f597c2d3a6ca" class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>dhs_df <span class="op">=</span> dhs.load_dhs_file(dhs_household_data_path)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>CPU times: user 11.2 ms, sys: 583 µs, total: 11.8 ms
+Wall time: 10.6 ms</code></pre>
+</div>
+</div>
+<div id="b5efe942-bad0-405e-8b71-ac5f864748db" class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>dhs_df.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">country code and phase</th>
+<th data-quarto-table-cell-role="th">cluster number</th>
+<th data-quarto-table-cell-role="th">source of drinking water</th>
+<th data-quarto-table-cell-role="th">type of toilet facility</th>
+<th data-quarto-table-cell-role="th">has electricity</th>
+<th data-quarto-table-cell-role="th">has radio</th>
+<th data-quarto-table-cell-role="th">has television</th>
+<th data-quarto-table-cell-role="th">has refrigerator</th>
+<th data-quarto-table-cell-role="th">has motorcycle/scooter</th>
+<th data-quarto-table-cell-role="th">has car/truck</th>
+<th data-quarto-table-cell-role="th">main floor material</th>
+<th data-quarto-table-cell-role="th">number of rooms used for sleeping</th>
+<th data-quarto-table-cell-role="th">has mobile telephone</th>
+<th data-quarto-table-cell-role="th">wealth index factor score combined (5 decimals)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>0</td>
+<td>PH7</td>
+<td>725</td>
+<td>80</td>
+<td>61</td>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>74</td>
+<td>20</td>
+<td>0</td>
+<td>-168581</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>1</td>
+<td>PH7</td>
+<td>1009</td>
+<td>19</td>
+<td>92</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td>51</td>
+<td>15</td>
+<td>1</td>
+<td>127550</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>2</td>
+<td>PH7</td>
+<td>1072</td>
+<td>91</td>
+<td>58</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>26</td>
+<td>5</td>
+<td>0</td>
+<td>32616</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>3</td>
+<td>PH7</td>
+<td>242</td>
+<td>39</td>
+<td>93</td>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+<td>76</td>
+<td>11</td>
+<td>0</td>
+<td>80338</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>4</td>
+<td>PH7</td>
+<td>102</td>
+<td>11</td>
+<td>27</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td>56</td>
+<td>15</td>
+<td>0</td>
+<td>-178758</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</section>
+<section id="renaming-columns-to-match" class="level2">
+<h2 class="anchored" data-anchor-id="renaming-columns-to-match">Renaming columns to match</h2>
+<p>DHS files do not have uniform column names. To make analysis easier, we rename commonnly ones. Feel free to extend the config to your usecase.</p>
+<div id="5912dee5-e816-46b3-8307-e0728ee952f5" class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>ph_config <span class="op">=</span> dhs.load_column_config(<span class="st">"ph"</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>ph_config</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>{'cluster number': 'DHSCLUST',
+ 'wealth index factor score combined (5 decimals)': 'Wealth Index',
+ 'country code and phase': 'country code and phase',
+ 'number of rooms used for sleeping': 'rooms',
+ 'has electricity': 'electric',
+ 'has mobile telephone': 'mobile telephone',
+ 'has radio': 'radio',
+ 'has television': 'television',
+ 'has car/truck': 'car/truck',
+ 'has refrigerator': 'refrigerator',
+ 'has motorcycle/scooter': 'motorcycle',
+ 'main floor material': 'floor',
+ 'type of toilet facility': 'toilet',
+ 'source of drinking water': 'drinking water'}</code></pre>
+</div>
+</div>
+<div id="421c30fc-046c-431b-8a3b-e5e0352b5d18" class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>renamed_dhs_df <span class="op">=</span> dhs_df.rename(columns<span class="op">=</span>ph_config)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="e880f321-501c-477e-919a-c4cc4737828e" class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>renamed_dhs_df.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">country code and phase</th>
+<th data-quarto-table-cell-role="th">DHSCLUST</th>
+<th data-quarto-table-cell-role="th">drinking water</th>
+<th data-quarto-table-cell-role="th">toilet</th>
+<th data-quarto-table-cell-role="th">electric</th>
+<th data-quarto-table-cell-role="th">radio</th>
+<th data-quarto-table-cell-role="th">television</th>
+<th data-quarto-table-cell-role="th">refrigerator</th>
+<th data-quarto-table-cell-role="th">motorcycle</th>
+<th data-quarto-table-cell-role="th">car/truck</th>
+<th data-quarto-table-cell-role="th">floor</th>
+<th data-quarto-table-cell-role="th">rooms</th>
+<th data-quarto-table-cell-role="th">mobile telephone</th>
+<th data-quarto-table-cell-role="th">Wealth Index</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>0</td>
+<td>PH7</td>
+<td>725</td>
+<td>80</td>
+<td>61</td>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>74</td>
+<td>20</td>
+<td>0</td>
+<td>-168581</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>1</td>
+<td>PH7</td>
+<td>1009</td>
+<td>19</td>
+<td>92</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td>51</td>
+<td>15</td>
+<td>1</td>
+<td>127550</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>2</td>
+<td>PH7</td>
+<td>1072</td>
+<td>91</td>
+<td>58</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>26</td>
+<td>5</td>
+<td>0</td>
+<td>32616</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>3</td>
+<td>PH7</td>
+<td>242</td>
+<td>39</td>
+<td>93</td>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+<td>76</td>
+<td>11</td>
+<td>0</td>
+<td>80338</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>4</td>
+<td>PH7</td>
+<td>102</td>
+<td>11</td>
+<td>27</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td>56</td>
+<td>15</td>
+<td>0</td>
+<td>-178758</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</section>
+<section id="cluster-summaries" class="level2">
+<h2 class="anchored" data-anchor-id="cluster-summaries">Cluster Summaries</h2>
+<div id="85967a79-8ff0-4ff6-9ddc-b0ba7a53b0f9" class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>wealth_col_name <span class="op">=</span> <span class="st">"Wealth Index"</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>cluster_col_name <span class="op">=</span> <span class="st">"DHSCLUST"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="fe813a03-7b9a-447c-8140-f3abb3e5b34e" class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>summarized <span class="op">=</span> (</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    renamed_dhs_df[[wealth_col_name, cluster_col_name]].groupby(cluster_col_name).mean()</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>summarized <span class="op">=</span> summarized.reset_index()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="22e2572e-3c55-4639-bfc5-5e5d002f2c5d" class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>summarized.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">DHSCLUST</th>
+<th data-quarto-table-cell-role="th">Wealth Index</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>3</td>
+<td>-232188.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>4</td>
+<td>228860.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>5</td>
+<td>157620.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>6</td>
+<td>40308.5</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>7</td>
+<td>-37595.5</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<div id="94b979ed-4a44-46a0-9604-3ff9032cedb8" class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="bu">len</span>(summarized)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>679</code></pre>
+</div>
+</div>
+<div id="c82b9dd2-0710-4ba6-bdde-d892cd2003d0" class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>summarized.DHSCLUST.isna().<span class="bu">sum</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>0</code></pre>
+</div>
+</div>
+<div id="dd6f77e9-872f-4fe2-b6e5-d2c192ecd31f" class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>summarized.DHSCLUST.isna().<span class="bu">sum</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>0</code></pre>
+</div>
+</div>
+<div id="f1d3a545-9b18-4279-885d-e5347f75c8e5" class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>dhs_shp <span class="op">=</span> gpd.read_file(dhs_gps_coordinates)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="6e560d67-296b-42a5-ab71-f6924046cc8d" class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>dhs_shp.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">DHSID</th>
+<th data-quarto-table-cell-role="th">DHSCC</th>
+<th data-quarto-table-cell-role="th">DHSYEAR</th>
+<th data-quarto-table-cell-role="th">DHSCLUST</th>
+<th data-quarto-table-cell-role="th">LATNUM</th>
+<th data-quarto-table-cell-role="th">LONGNUM</th>
+<th data-quarto-table-cell-role="th">geometry</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>PH20XX725</td>
+<td>PH</td>
+<td>0</td>
+<td>725</td>
+<td>0.409441</td>
+<td>0.220510</td>
+<td>POINT (0.22051 0.40944)</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>PH20XX1009</td>
+<td>PH</td>
+<td>0</td>
+<td>1009</td>
+<td>0.333693</td>
+<td>0.332499</td>
+<td>POINT (0.33250 0.33369)</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>PH20XX1072</td>
+<td>PH</td>
+<td>0</td>
+<td>1072</td>
+<td>0.378053</td>
+<td>0.089852</td>
+<td>POINT (0.08985 0.37805)</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>PH20XX242</td>
+<td>PH</td>
+<td>0</td>
+<td>242</td>
+<td>0.306277</td>
+<td>0.431677</td>
+<td>POINT (0.43168 0.30628)</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>PH20XX102</td>
+<td>PH</td>
+<td>0</td>
+<td>102</td>
+<td>0.535456</td>
+<td>0.716025</td>
+<td>POINT (0.71602 0.53546)</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<div id="e023089e-d5d8-4fa7-8954-457a509ffe61" class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>survey_geo <span class="op">=</span> pd.merge(summarized, dhs_shp, on<span class="op">=</span><span class="st">"DHSCLUST"</span>)</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>survey_geo</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">DHSCLUST</th>
+<th data-quarto-table-cell-role="th">Wealth Index</th>
+<th data-quarto-table-cell-role="th">DHSID</th>
+<th data-quarto-table-cell-role="th">DHSCC</th>
+<th data-quarto-table-cell-role="th">DHSYEAR</th>
+<th data-quarto-table-cell-role="th">LATNUM</th>
+<th data-quarto-table-cell-role="th">LONGNUM</th>
+<th data-quarto-table-cell-role="th">geometry</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>3</td>
+<td>-232188.000000</td>
+<td>PH20XX003</td>
+<td>PH</td>
+<td>0</td>
+<td>0.609945</td>
+<td>0.350830</td>
+<td>POINT (0.35083 0.60995)</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>4</td>
+<td>228860.000000</td>
+<td>PH20XX004</td>
+<td>PH</td>
+<td>0</td>
+<td>0.363843</td>
+<td>0.281563</td>
+<td>POINT (0.28156 0.36384)</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>5</td>
+<td>157620.000000</td>
+<td>PH20XX005</td>
+<td>PH</td>
+<td>0</td>
+<td>0.715438</td>
+<td>0.145014</td>
+<td>POINT (0.14501 0.71544)</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>6</td>
+<td>40308.500000</td>
+<td>PH20XX006</td>
+<td>PH</td>
+<td>0</td>
+<td>0.758501</td>
+<td>0.628373</td>
+<td>POINT (0.62837 0.75850)</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>6</td>
+<td>40308.500000</td>
+<td>PH20XX006</td>
+<td>PH</td>
+<td>0</td>
+<td>0.669415</td>
+<td>0.479379</td>
+<td>POINT (0.47938 0.66942)</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">995</td>
+<td>1247</td>
+<td>90273.333333</td>
+<td>PH20XX1247</td>
+<td>PH</td>
+<td>0</td>
+<td>0.214682</td>
+<td>0.419448</td>
+<td>POINT (0.41945 0.21468)</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">996</td>
+<td>1248</td>
+<td>212729.500000</td>
+<td>PH20XX1248</td>
+<td>PH</td>
+<td>0</td>
+<td>0.189401</td>
+<td>0.152806</td>
+<td>POINT (0.15281 0.18940)</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">997</td>
+<td>1248</td>
+<td>212729.500000</td>
+<td>PH20XX1248</td>
+<td>PH</td>
+<td>0</td>
+<td>0.563460</td>
+<td>0.023900</td>
+<td>POINT (0.02390 0.56346)</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">998</td>
+<td>1250</td>
+<td>101508.500000</td>
+<td>PH20XX1250</td>
+<td>PH</td>
+<td>0</td>
+<td>0.166465</td>
+<td>0.617584</td>
+<td>POINT (0.61758 0.16646)</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">999</td>
+<td>1250</td>
+<td>101508.500000</td>
+<td>PH20XX1250</td>
+<td>PH</td>
+<td>0</td>
+<td>0.252438</td>
+<td>0.668243</td>
+<td>POINT (0.66824 0.25244)</td>
+</tr>
+</tbody>
+</table>
+
+<p>1000 rows × 8 columns</p>
+</div>
+</div>
+</div>
+</section>
+<section id="recalculating-wealth-index-for-a-single-country" class="level2">
+<h2 class="anchored" data-anchor-id="recalculating-wealth-index-for-a-single-country">Recalculating wealth index for a single country</h2>
+<div id="44a1b11a-c1d4-43b3-b000-b7900c5b0c69" class="cell">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>features <span class="op">=</span> [</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"rooms"</span>,</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"electric"</span>,</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"mobile telephone"</span>,</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"radio"</span>,</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"television"</span>,</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"car/truck"</span>,</span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">"refrigerator"</span>,</span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">"motorcycle"</span>,</span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">"floor"</span>,</span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">"toilet"</span>,</span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">"drinking water"</span>,</span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cd99e58e-26c1-4be7-ba08-e4ada53dd8a8" class="cell">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co"># apply a threshold</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>dhs.apply_threshold(renamed_dhs_df, columns<span class="op">=</span>features, config<span class="op">=</span>{<span class="st">"rooms"</span>: [<span class="dv">0</span>, <span class="dv">25</span>]})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">country code and phase</th>
+<th data-quarto-table-cell-role="th">DHSCLUST</th>
+<th data-quarto-table-cell-role="th">drinking water</th>
+<th data-quarto-table-cell-role="th">toilet</th>
+<th data-quarto-table-cell-role="th">electric</th>
+<th data-quarto-table-cell-role="th">radio</th>
+<th data-quarto-table-cell-role="th">television</th>
+<th data-quarto-table-cell-role="th">refrigerator</th>
+<th data-quarto-table-cell-role="th">motorcycle</th>
+<th data-quarto-table-cell-role="th">car/truck</th>
+<th data-quarto-table-cell-role="th">floor</th>
+<th data-quarto-table-cell-role="th">rooms</th>
+<th data-quarto-table-cell-role="th">mobile telephone</th>
+<th data-quarto-table-cell-role="th">Wealth Index</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>0</td>
+<td>PH7</td>
+<td>725</td>
+<td>80</td>
+<td>61</td>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>74</td>
+<td>20</td>
+<td>0</td>
+<td>-168581</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>1</td>
+<td>PH7</td>
+<td>1009</td>
+<td>19</td>
+<td>92</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td>51</td>
+<td>15</td>
+<td>1</td>
+<td>127550</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>2</td>
+<td>PH7</td>
+<td>1072</td>
+<td>91</td>
+<td>58</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>26</td>
+<td>5</td>
+<td>0</td>
+<td>32616</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>3</td>
+<td>PH7</td>
+<td>242</td>
+<td>39</td>
+<td>93</td>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+<td>76</td>
+<td>11</td>
+<td>0</td>
+<td>80338</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>4</td>
+<td>PH7</td>
+<td>102</td>
+<td>11</td>
+<td>27</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td>56</td>
+<td>15</td>
+<td>0</td>
+<td>-178758</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">995</td>
+<td>995</td>
+<td>PH7</td>
+<td>834</td>
+<td>63</td>
+<td>83</td>
+<td>0</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>28</td>
+<td>10</td>
+<td>0</td>
+<td>241846</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">996</td>
+<td>996</td>
+<td>PH7</td>
+<td>1170</td>
+<td>74</td>
+<td>78</td>
+<td>1</td>
+<td>0</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td>34</td>
+<td>17</td>
+<td>1</td>
+<td>106424</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">997</td>
+<td>997</td>
+<td>PH7</td>
+<td>762</td>
+<td>81</td>
+<td>14</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td>83</td>
+<td>12</td>
+<td>1</td>
+<td>246898</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">998</td>
+<td>998</td>
+<td>PH7</td>
+<td>63</td>
+<td>40</td>
+<td>21</td>
+<td>0</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>12</td>
+<td>2</td>
+<td>1</td>
+<td>-212590</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">999</td>
+<td>999</td>
+<td>PH7</td>
+<td>748</td>
+<td>56</td>
+<td>38</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td>1</td>
+<td>1</td>
+<td>69</td>
+<td>7</td>
+<td>1</td>
+<td>-10774</td>
+</tr>
+</tbody>
+</table>
+
+<p>1000 rows × 15 columns</p>
+</div>
+</div>
+</div>
+<div id="f4b1774a-6a4a-4ff0-9326-f5d5c3819aca" class="cell">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>renamed_dhs_df[<span class="st">"Recomputed Wealth Index"</span>] <span class="op">=</span> dhs.assign_wealth_index(</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>    renamed_dhs_df[features], features</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>renamed_dhs_df.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">country code and phase</th>
+<th data-quarto-table-cell-role="th">DHSCLUST</th>
+<th data-quarto-table-cell-role="th">drinking water</th>
+<th data-quarto-table-cell-role="th">toilet</th>
+<th data-quarto-table-cell-role="th">electric</th>
+<th data-quarto-table-cell-role="th">radio</th>
+<th data-quarto-table-cell-role="th">television</th>
+<th data-quarto-table-cell-role="th">refrigerator</th>
+<th data-quarto-table-cell-role="th">motorcycle</th>
+<th data-quarto-table-cell-role="th">car/truck</th>
+<th data-quarto-table-cell-role="th">floor</th>
+<th data-quarto-table-cell-role="th">rooms</th>
+<th data-quarto-table-cell-role="th">mobile telephone</th>
+<th data-quarto-table-cell-role="th">Wealth Index</th>
+<th data-quarto-table-cell-role="th">Recomputed Wealth Index</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>0</td>
+<td>PH7</td>
+<td>725</td>
+<td>80</td>
+<td>61</td>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>74</td>
+<td>20</td>
+<td>0</td>
+<td>-168581</td>
+<td>-63.515731</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>1</td>
+<td>PH7</td>
+<td>1009</td>
+<td>19</td>
+<td>92</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td>51</td>
+<td>15</td>
+<td>1</td>
+<td>127550</td>
+<td>8.730482</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>2</td>
+<td>PH7</td>
+<td>1072</td>
+<td>91</td>
+<td>58</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>26</td>
+<td>5</td>
+<td>0</td>
+<td>32616</td>
+<td>-60.121255</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>3</td>
+<td>PH7</td>
+<td>242</td>
+<td>39</td>
+<td>93</td>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+<td>76</td>
+<td>11</td>
+<td>0</td>
+<td>80338</td>
+<td>-14.959946</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>4</td>
+<td>PH7</td>
+<td>102</td>
+<td>11</td>
+<td>27</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td>56</td>
+<td>15</td>
+<td>0</td>
+<td>-178758</td>
+<td>-14.060453</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</section>
+<section id="recalculating-wealth-index-for-multiple-countries" class="level2">
+<h2 class="anchored" data-anchor-id="recalculating-wealth-index-for-multiple-countries">Recalculating wealth index for multiple countries</h2>
+<div id="51ce81aa-ef8c-4aaf-89f8-d51df6831c0c" class="cell">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>dhs_ph_path <span class="op">=</span> <span class="st">"../data/ph.DTA"</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>dhs_kh_path <span class="op">=</span> <span class="st">"../data/kh.DTA"</span></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>dhs_mm_path <span class="op">=</span> <span class="st">"../data/mm.DTA"</span></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>dhs_tl_path <span class="op">=</span> <span class="st">"../data/tl.DTA"</span></span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>ph_config <span class="op">=</span> dhs.load_column_config(<span class="st">"ph"</span>)</span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>kh_config <span class="op">=</span> dhs.load_column_config(<span class="st">"kh"</span>)</span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>mm_config <span class="op">=</span> dhs.load_column_config(<span class="st">"mm"</span>)</span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>tl_config <span class="op">=</span> dhs.load_column_config(<span class="st">"tl"</span>)</span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>dhs_ph_df <span class="op">=</span> dhs.load_dhs_file(dhs_ph_path).rename(columns<span class="op">=</span>ph_config)</span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>dhs_kh_df <span class="op">=</span> dhs.load_dhs_file(dhs_kh_path).rename(columns<span class="op">=</span>kh_config)</span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>dhs_mm_df <span class="op">=</span> dhs.load_dhs_file(dhs_mm_path).rename(columns<span class="op">=</span>mm_config)</span>
+<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a>dhs_tl_df <span class="op">=</span> dhs.load_dhs_file(dhs_tl_path).rename(columns<span class="op">=</span>tl_config)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="afe5f3df-4ee4-468d-98b1-29e5bb13b5ab" class="cell">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>cols <span class="op">=</span> <span class="bu">list</span>(ph_config.values()) <span class="op">+</span> [<span class="st">"country code and phase"</span>]</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>merged_df <span class="op">=</span> pd.concat(</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>    [</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>        dhs_ph_df[cols],</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>        dhs_kh_df[cols],</span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>        dhs_mm_df[cols],</span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>        dhs_tl_df[cols],</span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>merged_df <span class="op">=</span> merged_df.fillna(<span class="dv">0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="3d383e19-4856-48cd-8510-ce5140280c6b" class="cell">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>merged_df[<span class="st">"Recomputed Wealth Index"</span>] <span class="op">=</span> dhs.assign_wealth_index(merged_df[features])</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>merged_df.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">DHSCLUST</th>
+<th data-quarto-table-cell-role="th">Wealth Index</th>
+<th data-quarto-table-cell-role="th">country code and phase</th>
+<th data-quarto-table-cell-role="th">rooms</th>
+<th data-quarto-table-cell-role="th">electric</th>
+<th data-quarto-table-cell-role="th">mobile telephone</th>
+<th data-quarto-table-cell-role="th">radio</th>
+<th data-quarto-table-cell-role="th">television</th>
+<th data-quarto-table-cell-role="th">car/truck</th>
+<th data-quarto-table-cell-role="th">refrigerator</th>
+<th data-quarto-table-cell-role="th">motorcycle</th>
+<th data-quarto-table-cell-role="th">floor</th>
+<th data-quarto-table-cell-role="th">toilet</th>
+<th data-quarto-table-cell-role="th">drinking water</th>
+<th data-quarto-table-cell-role="th">country code and phase</th>
+<th data-quarto-table-cell-role="th">Recomputed Wealth Index</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>725</td>
+<td>-168581</td>
+<td>PH7</td>
+<td>20</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>74</td>
+<td>61</td>
+<td>80.0</td>
+<td>PH7</td>
+<td>122.888238</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>1009</td>
+<td>127550</td>
+<td>PH7</td>
+<td>15</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td>1</td>
+<td>1</td>
+<td>51</td>
+<td>92</td>
+<td>19.0</td>
+<td>PH7</td>
+<td>78.430888</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>1072</td>
+<td>32616</td>
+<td>PH7</td>
+<td>5</td>
+<td>1</td>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>26</td>
+<td>58</td>
+<td>91.0</td>
+<td>PH7</td>
+<td>108.113989</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>242</td>
+<td>80338</td>
+<td>PH7</td>
+<td>11</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>76</td>
+<td>93</td>
+<td>39.0</td>
+<td>PH7</td>
+<td>105.464687</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>102</td>
+<td>-178758</td>
+<td>PH7</td>
+<td>15</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+<td>1</td>
+<td>1</td>
+<td>56</td>
+<td>27</td>
+<td>11.0</td>
+<td>PH7</td>
+<td>45.993876</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<div id="bb3ac7c3-2749-47a3-9c1f-4aaae5ccbb98" class="cell">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt  <span class="co"># noqa</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="b46e35fe-d77a-4ce9-b5f4-ae459e50f4fc" class="cell">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>merged_df.hist(<span class="st">"Recomputed Wealth Index"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>array([[&lt;Axes: title={'center': 'Recomputed Wealth Index'}&gt;]],
+      dtype=object)</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="tutorial.dhs_files/figure-html/cell-28-output-2.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<div id="5f8afc0e-c237-4a50-affa-e4c2a685ac6a" class="cell">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>merged_df[<span class="st">"Recomputed Wealth Index Not PCA"</span>] <span class="op">=</span> dhs.assign_wealth_index(</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>    merged_df[features], use_pca<span class="op">=</span><span class="va">False</span></span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>merged_df.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">DHSCLUST</th>
+<th data-quarto-table-cell-role="th">Wealth Index</th>
+<th data-quarto-table-cell-role="th">country code and phase</th>
+<th data-quarto-table-cell-role="th">rooms</th>
+<th data-quarto-table-cell-role="th">electric</th>
+<th data-quarto-table-cell-role="th">mobile telephone</th>
+<th data-quarto-table-cell-role="th">radio</th>
+<th data-quarto-table-cell-role="th">television</th>
+<th data-quarto-table-cell-role="th">car/truck</th>
+<th data-quarto-table-cell-role="th">refrigerator</th>
+<th data-quarto-table-cell-role="th">motorcycle</th>
+<th data-quarto-table-cell-role="th">floor</th>
+<th data-quarto-table-cell-role="th">toilet</th>
+<th data-quarto-table-cell-role="th">drinking water</th>
+<th data-quarto-table-cell-role="th">country code and phase</th>
+<th data-quarto-table-cell-role="th">Recomputed Wealth Index</th>
+<th data-quarto-table-cell-role="th">Recomputed Wealth Index Not PCA</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>725</td>
+<td>-168581</td>
+<td>PH7</td>
+<td>20</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>74</td>
+<td>61</td>
+<td>80.0</td>
+<td>PH7</td>
+<td>122.888238</td>
+<td>-10730.578127</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>1009</td>
+<td>127550</td>
+<td>PH7</td>
+<td>15</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td>1</td>
+<td>1</td>
+<td>51</td>
+<td>92</td>
+<td>19.0</td>
+<td>PH7</td>
+<td>78.430888</td>
+<td>-57116.290440</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>1072</td>
+<td>32616</td>
+<td>PH7</td>
+<td>5</td>
+<td>1</td>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>26</td>
+<td>58</td>
+<td>91.0</td>
+<td>PH7</td>
+<td>108.113989</td>
+<td>30004.584457</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>242</td>
+<td>80338</td>
+<td>PH7</td>
+<td>11</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>76</td>
+<td>93</td>
+<td>39.0</td>
+<td>PH7</td>
+<td>105.464687</td>
+<td>-48966.528484</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>102</td>
+<td>-178758</td>
+<td>PH7</td>
+<td>15</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+<td>1</td>
+<td>1</td>
+<td>56</td>
+<td>27</td>
+<td>11.0</td>
+<td>PH7</td>
+<td>45.993876</td>
+<td>-39722.455483</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<div id="b9ce3634-a66b-41cf-9360-9e80416a4cae" class="cell">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>merged_df.hist(<span class="st">"Recomputed Wealth Index Not PCA"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>array([[&lt;Axes: title={'center': 'Recomputed Wealth Index Not PCA'}&gt;]],
+      dtype=object)</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="tutorial.dhs_files/figure-html/cell-30-output-2.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp("https:\/\/geowrangler\.thinkingmachin\.es\/");
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/thinkingmachines/geowrangler/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>

@@ -1,0 +1,2378 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.5.57">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Explore Poverty Mapping Machine Learning Models – geowrangler</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script><script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+
+<link rel="stylesheet" href="styles.css">
+<meta property="og:title" content="Explore Poverty Mapping Machine Learning Models – geowrangler">
+<meta property="og:description" content="🌏 A python package for wrangling geospatial datasets">
+<meta property="og:image" content="https://geowrangler.thinkingmachin.es/data:image/png;base64,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">
+<meta property="og:site_name" content="geowrangler">
+<meta name="twitter:title" content="Explore Poverty Mapping Machine Learning Models – geowrangler">
+<meta name="twitter:description" content="🌏 A python package for wrangling geospatial datasets">
+<meta name="twitter:image" content="https://geowrangler.thinkingmachin.es/data:image/png;base64,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">
+<meta name="twitter:card" content="summary_large_image">
+</head>
+
+<body class="nav-sidebar floating nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">geowrangler</span>
+    </a>
+  </div>
+        <div class="quarto-navbar-tools tools-end">
+</div>
+          <div id="quarto-search" class="" title="Search"></div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./overview.poverty_mapping_demo.html">Use Case Demos</a></li><li class="breadcrumb-item"><a href="./overview.poverty_mapping_demo.html">Explore Poverty Mapping Machine Learning Models</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Geowrangler</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Tutorials</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.grids.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Grid Generation Tutorial</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.geometry_validation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Geometry Validation Tutorial</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.vector_zonal_stats.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Vector Zonal Stats Tutorial</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.raster_zonal_stats.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Raster Zonal Stats Tutorial</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.area_zonal_stats.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Vector Area Zonal Stats Tutorial</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.distance_zonal_stats.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Vector Distance Zonal Stats Tutorial</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.dhs.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">DHS Wealth Index</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.datasets.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Datasets Download</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.spatialjoin_highest_intersection.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Spatial Join Using Highest Intersection Tutorial</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.tile_clustering.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Tile Clustering Tutorial</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.raster_process.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Raster Processing Tutorial</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.raster_to_df.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Raster to Dataframe Tutorial</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Use Case Demos</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./overview.poverty_mapping_demo.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Explore Poverty Mapping Machine Learning Models</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./overview.usecase_ookla.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exploring Internet Speeds with Ookla</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">Module Reference</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./grids.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Grids</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./polygon_fill.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Polygon Fill</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./validation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Geometry Validation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./vector_zonal_stats.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Vector Zonal Stats</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./raster_zonal_stats.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Raster Zonal Stats</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./area_zonal_stats.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Area Zonal Stats</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./distance_zonal_stats.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Distance Zonal Stats</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./vector_to_raster_mask.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Vector to Raster mask</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./raster_to_dataframe.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Raster to Dataframe</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./raster_process.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Raster Processing</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./dhs.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">DHS Utilities</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./datasets_geofabrik.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Datasets Geofabrik</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./datasets_ookla.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Datasets Ookla</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./datasets_nightlights.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Night Lights</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./datasets_utils.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Datasets Utils</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tile_clustering.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Tile Clustering</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./spatialjoin_highest_intersection.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Spatial Join Highest Intersection</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#set-up" id="toc-set-up" class="nav-link active" data-scroll-target="#set-up">Set-up</a></li>
+  <li><a href="#pre-requisite-manual-data-download" id="toc-pre-requisite-manual-data-download" class="nav-link" data-scroll-target="#pre-requisite-manual-data-download">Pre-requisite: Manual Data Download</a></li>
+  <li><a href="#data-preparation" id="toc-data-preparation" class="nav-link" data-scroll-target="#data-preparation">Data Preparation</a>
+  <ul class="collapse">
+  <li><a href="#dhs-ground-truth" id="toc-dhs-ground-truth" class="nav-link" data-scroll-target="#dhs-ground-truth">DHS Ground Truth</a></li>
+  <li><a href="#download-data-and-load-them-into-memory" id="toc-download-data-and-load-them-into-memory" class="nav-link" data-scroll-target="#download-data-and-load-them-into-memory">Download data and load them into memory</a></li>
+  <li><a href="#ookla" id="toc-ookla" class="nav-link" data-scroll-target="#ookla">Ookla</a></li>
+  <li><a href="#osm-open-street-maps" id="toc-osm-open-street-maps" class="nav-link" data-scroll-target="#osm-open-street-maps">OSM (Open Street Maps)</a></li>
+  </ul></li>
+  <li><a href="#feature-engineering" id="toc-feature-engineering" class="nav-link" data-scroll-target="#feature-engineering">Feature Engineering</a>
+  <ul class="collapse">
+  <li><a href="#osm" id="toc-osm" class="nav-link" data-scroll-target="#osm">OSM</a></li>
+  <li><a href="#ookla-1" id="toc-ookla-1" class="nav-link" data-scroll-target="#ookla-1">Ookla</a></li>
+  <li><a href="#night-time-lights" id="toc-night-time-lights" class="nav-link" data-scroll-target="#night-time-lights">Night Time Lights</a></li>
+  <li><a href="#visualize-the-final-dataset" id="toc-visualize-the-final-dataset" class="nav-link" data-scroll-target="#visualize-the-final-dataset">Visualize the final dataset</a></li>
+  </ul></li>
+  <li><a href="#ml-training" id="toc-ml-training" class="nav-link" data-scroll-target="#ml-training">ML Training</a>
+  <ul class="collapse">
+  <li><a href="#prepare-data-into-x-y-and-generate-traintest-partitions" id="toc-prepare-data-into-x-y-and-generate-traintest-partitions" class="nav-link" data-scroll-target="#prepare-data-into-x-y-and-generate-traintest-partitions">Prepare data into X, y and generate train/test partitions</a></li>
+  <li><a href="#evaluation-function" id="toc-evaluation-function" class="nav-link" data-scroll-target="#evaluation-function">Evaluation Function</a></li>
+  <li><a href="#fit-and-evaluate-model" id="toc-fit-and-evaluate-model" class="nav-link" data-scroll-target="#fit-and-evaluate-model">Fit and Evaluate Model</a></li>
+  </ul></li>
+  <li><a href="#ml-rollout-phl" id="toc-ml-rollout-phl" class="nav-link" data-scroll-target="#ml-rollout-phl">ML Rollout (Phl)</a>
+  <ul class="collapse">
+  <li><a href="#generate-country-wide-tiles" id="toc-generate-country-wide-tiles" class="nav-link" data-scroll-target="#generate-country-wide-tiles">Generate country-wide tiles</a></li>
+  <li><a href="#feature-engineering-1" id="toc-feature-engineering-1" class="nav-link" data-scroll-target="#feature-engineering-1">Feature Engineering</a></li>
+  <li><a href="#make-predictions-and-viz-output" id="toc-make-predictions-and-viz-output" class="nav-link" data-scroll-target="#make-predictions-and-viz-output">Make predictions and viz output</a></li>
+  </ul></li>
+  </ul>
+<div class="toc-actions"><ul><li><a href="https://github.com/thinkingmachines/geowrangler/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./overview.poverty_mapping_demo.html">Use Case Demos</a></li><li class="breadcrumb-item"><a href="./overview.poverty_mapping_demo.html">Explore Poverty Mapping Machine Learning Models</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Explore Poverty Mapping Machine Learning Models</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<!-- WARNING: THIS FILE WAS AUTOGENERATED! DO NOT EDIT! -->
+<blockquote class="blockquote">
+<p>Building poverty mapping machine learning (ML) models with Geowrangler</p>
+</blockquote>
+<p><a href="https://colab.research.google.com/github/thinkingmachines/geowrangler/blob/master/notebooks/overview.poverty_mapping_demo.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg" title="Open in Colab button" class="img-fluid"></a></p>
+<p>The aim of this notebook is to demonstrate how Geowrangler can be used to make the process of generating ML-ready or analytics-ready datasets from raw geospatial data easier.</p>
+<p>Concretely, this shows a sample workflow for a wealth estimation model trained on a dataset constructed using:</p>
+<ul>
+<li>Ground Truth - <a href="https://dhsprogram.com/">DHS</a> household clusters + wealth indices</li>
+<li>Features - Derived from Night Time Lights, OSM POIs, and Ookla internet speeds.</li>
+</ul>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The goal here is to showcase Geowrangler’s functions for geospatial data wrangling and feature engineering. Hence, this notebook keeps the ML modelling portions as simple as possible.</p>
+</div>
+</div>
+<section id="set-up" class="level2">
+<h2 class="anchored" data-anchor-id="set-up">Set-up</h2>
+<p>Install and import some libraries.</p>
+<div id="cell-8" class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> folium</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> geopandas <span class="im">as</span> gpd</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> sklearn</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> shapely <span class="im">import</span> wkt</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.ensemble <span class="im">import</span> RandomForestRegressor</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> geowrangler.area_zonal_stats <span class="im">as</span> azs</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> geowrangler.distance_zonal_stats <span class="im">as</span> dzs</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> geowrangler.raster_zonal_stats <span class="im">as</span> rzs</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> geowrangler.vector_zonal_stats <span class="im">as</span> vzs</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> geowrangler <span class="im">import</span> grids</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> geowrangler.datasets <span class="im">import</span> geofabrik, ookla</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="pre-requisite-manual-data-download" class="level2">
+<h2 class="anchored" data-anchor-id="pre-requisite-manual-data-download">Pre-requisite: Manual Data Download</h2>
+<div id="cell-11" class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># download data if not yet available</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="op">!</span>[ <span class="op">!</span> <span class="op">-</span>e ..<span class="op">/</span>data<span class="op">/</span>phl_adm0.geojson ] <span class="op">&amp;&amp;</span> curl <span class="op">-</span>s <span class="op">-</span>o ..<span class="op">/</span>data<span class="op">/</span>phl_adm0.geojson https:<span class="op">//</span>raw.githubusercontent.com<span class="op">/</span>thinkingmachines<span class="op">/</span>geowrangler<span class="op">/</span>master<span class="op">/</span>data<span class="op">/</span>phl_adm0.geojson</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="op">!</span>[ <span class="op">!</span> <span class="op">-</span>e ..<span class="op">/</span>data<span class="op">/</span>phl_dhs_cluster_level.csv ] <span class="op">&amp;&amp;</span> curl <span class="op">-</span>s <span class="op">-</span>o ..<span class="op">/</span>data<span class="op">/</span>phl_dhs_cluster_level.csv https:<span class="op">//</span>raw.githubusercontent.com<span class="op">/</span>thinkingmachines<span class="op">/</span>geowrangler<span class="op">/</span>master<span class="op">/</span>data<span class="op">/</span>phl_dhs_cluster_level.csv</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="op">!</span>[ <span class="op">!</span> <span class="op">-</span>e ..<span class="op">/</span>data<span class="op">/</span>phl_ntl.tif ] <span class="op">&amp;&amp;</span> curl <span class="op">-</span>s <span class="op">-</span>o ..<span class="op">/</span>data<span class="op">/</span>phl_ntl.tif https:<span class="op">//</span>raw.githubusercontent.com<span class="op">/</span>thinkingmachines<span class="op">/</span>geowrangler<span class="op">/</span>master<span class="op">/</span>data<span class="op">/</span>phl_ntl.tif</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-12" class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>DATA_DIR <span class="op">=</span> Path(<span class="st">"../data/"</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Auto-creates the folder if it does not exist</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>DATA_DIR.mkdir(parents<span class="op">=</span><span class="va">True</span>, exist_ok<span class="op">=</span><span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Your data directory should look something like this.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="data:image/png;base64,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" class="img-fluid figure-img"></p>
+<figcaption>data_dir.PNG</figcaption>
+</figure>
+</div>
+</section>
+<section id="data-preparation" class="level2">
+<h2 class="anchored" data-anchor-id="data-preparation">Data Preparation</h2>
+<section id="dhs-ground-truth" class="level3">
+<h3 class="anchored" data-anchor-id="dhs-ground-truth">DHS Ground Truth</h3>
+<p>The ground truth used in this demo notebook is from a DHS 2017 on-the-ground household survey conducted in the Philippines regarding the households’ socio-demographic information.</p>
+<p>The file we provide is already a pre-processed version of the data that is aggregated on a household-cluster level, meaning the information cannot be tied back to any individual household. Specifically, we only provide a list of household clusters with their corresponding (jittered) GPS coordinate and DHS-computed wealth index.</p>
+<p>Due to the sensitive nature of the data and the DHS program terms of use, we cannot provide the raw data. You can, however, request for access to raw data yourself on the <a href="https://dhsprogram.com/data/new-user-registration.cfm">DHS website</a>. In that case, you can use GeoWrangler’s <a href="https://geowrangler.thinkingmachin.es/tutorial.dhs.html">DHS processing utils</a> help perform the said pre-processing.</p>
+<p>Our first step is to create a GeoDataFrame from the data.</p>
+<div id="cell-17" class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Load ground truth data as a DataFrame first</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>GROUND_TRUTH_CSV <span class="op">=</span> DATA_DIR <span class="op">/</span> <span class="st">"phl_dhs_cluster_level.csv"</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_csv(GROUND_TRUTH_CSV)</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Some of the coordinates in the data are invalid. This filters them out.</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> df[(df.longitude <span class="op">&gt;</span> <span class="dv">0</span>) <span class="op">&amp;</span> (df.latitude <span class="op">&gt;</span> <span class="dv">0</span>)]</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a GeoDataFrame from the longitude, latitude columns.</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>gdf <span class="op">=</span> gpd.GeoDataFrame(</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    df, geometry<span class="op">=</span>gpd.points_from_xy(df.longitude, df.latitude), crs<span class="op">=</span><span class="st">"epsg:4326"</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"There are </span><span class="sc">{</span><span class="bu">len</span>(gdf)<span class="sc">:,}</span><span class="ss"> clusters."</span>)</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>gdf.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>There are 1,213 clusters.</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">DHSCLUST</th>
+<th data-quarto-table-cell-role="th">Wealth Index</th>
+<th data-quarto-table-cell-role="th">DHSID</th>
+<th data-quarto-table-cell-role="th">longitude</th>
+<th data-quarto-table-cell-role="th">latitude</th>
+<th data-quarto-table-cell-role="th">geometry</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>1</td>
+<td>-31881.60870</td>
+<td>PH201700000001</td>
+<td>122.109807</td>
+<td>6.674652</td>
+<td>POINT (122.10981 6.67465)</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>2</td>
+<td>-2855.37500</td>
+<td>PH201700000002</td>
+<td>122.132027</td>
+<td>6.662256</td>
+<td>POINT (122.13203 6.66226)</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>3</td>
+<td>-57647.04762</td>
+<td>PH201700000003</td>
+<td>122.179496</td>
+<td>6.621822</td>
+<td>POINT (122.1795 6.62182)</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>4</td>
+<td>-54952.66667</td>
+<td>PH201700000004</td>
+<td>122.137965</td>
+<td>6.485298</td>
+<td>POINT (122.13796 6.4853)</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">5</td>
+<td>6</td>
+<td>-80701.69565</td>
+<td>PH201700000006</td>
+<td>121.916094</td>
+<td>6.629457</td>
+<td>POINT (121.91609 6.62946)</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>Next, we want to create a buffer around each cluster centroid that represents the area’s neighborhood. This is so we can engineer some features and characterize these neighborhoods using open data.</p>
+<p><em>This is a design decision, but for this demo, we’ll create a circlular area with a 2km radius following the random displacement introduced by DHS to preserve household privacy.</em></p>
+<div id="cell-19" class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Make sure to convert to PH crs first for the buffer in meters, and then back to WGS84</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>gdf <span class="op">=</span> gdf.to_crs(<span class="st">"epsg:3123"</span>)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>gdf.geometry <span class="op">=</span> gdf.geometry.<span class="bu">buffer</span>(<span class="dv">2000</span>)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>gdf <span class="op">=</span> gdf.to_crs(<span class="st">"epsg:4326"</span>)</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>gdf.head(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">DHSCLUST</th>
+<th data-quarto-table-cell-role="th">Wealth Index</th>
+<th data-quarto-table-cell-role="th">DHSID</th>
+<th data-quarto-table-cell-role="th">longitude</th>
+<th data-quarto-table-cell-role="th">latitude</th>
+<th data-quarto-table-cell-role="th">geometry</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>1</td>
+<td>-31881.60870</td>
+<td>PH201700000001</td>
+<td>122.109807</td>
+<td>6.674652</td>
+<td>POLYGON ((122.12789 6.67461, 122.1278 6.67284,...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>2</td>
+<td>-2855.37500</td>
+<td>PH201700000002</td>
+<td>122.132027</td>
+<td>6.662256</td>
+<td>POLYGON ((122.15011 6.66221, 122.15002 6.66044...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>3</td>
+<td>-57647.04762</td>
+<td>PH201700000003</td>
+<td>122.179496</td>
+<td>6.621822</td>
+<td>POLYGON ((122.19758 6.62178, 122.19749 6.62001...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>4</td>
+<td>-54952.66667</td>
+<td>PH201700000004</td>
+<td>122.137965</td>
+<td>6.485298</td>
+<td>POLYGON ((122.15604 6.48526, 122.15595 6.48349...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">5</td>
+<td>6</td>
+<td>-80701.69565</td>
+<td>PH201700000006</td>
+<td>121.916094</td>
+<td>6.629457</td>
+<td>POLYGON ((121.93418 6.62942, 121.93409 6.62765...</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>We can visualize what we’ve done so far on a map. <img src="images/dhs-cluster-ph-map.png" class="img-fluid" alt="DHS Clusters Philippines (2017)"></p>
+<div id="cell-21" class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Uncomment the next line to display an interactive map</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="co"># gdf.explore()</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="download-data-and-load-them-into-memory" class="level3">
+<h3 class="anchored" data-anchor-id="download-data-and-load-them-into-memory">Download data and load them into memory</h3>
+<p>Next, we’ll download some data from Ookla (internet speeds) and OSM (points of interest), which we’ll use to generate neighborhood characteristics to be used as ML features.</p>
+</section>
+<section id="ookla" class="level3">
+<h3 class="anchored" data-anchor-id="ookla">Ookla</h3>
+<p><a href="https://www.ookla.com/ookla-for-good/open-data">Ookla has released global open data</a> gathered from speedtests made on their platform. This gives us access to internet speed information across various geographies. In our context, this can give us a signal predictor.</p>
+<p>First, let’s download a local copy of data on fixed internet in the 1st quarter of 2019 (earliest data available).</p>
+<p>We can use <a href="https://geowrangler.thinkingmachin.es/tutorial.datasets.html#Downloading-Ookla-Data">GeoWrangler’s Ookla data utility</a> to automatically download and cache the desired data on your machine given the type, year, and quarter.</p>
+<p>This is just a simplification for the demo. In practice, you might want to aggregate data across multiple time periods or incorporate wireless data.</p>
+<div id="cell-25" class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>ookla_fixed_2019_q1_filepath <span class="op">=</span> ookla.download_ookla_file(</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    type_<span class="op">=</span><span class="st">"fixed"</span>, year<span class="op">=</span><span class="st">"2019"</span>, quarter<span class="op">=</span><span class="st">"1"</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co"># This is where the downloaded file is located.</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="co"># By default this downloads to your data/ folder, but you can customize this.</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>ookla_fixed_2019_q1_filepath</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>2024-08-12 22:32:01.747 | INFO     | geowrangler.datasets.utils:urlretrieve:25 - Retrieving https://ookla-open-data.s3.us-west-2.amazonaws.com/parquet/performance/type=fixed/year=2019/quarter=1/2019-01-01_performance_fixed_tiles.parquet into data/2019-01-01_performance_fixed_tiles.parquet</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+
+<style>
+    /* Turns off some styling */
+    progress {
+        /* gets rid of default border in Firefox and Opera. */
+        border: none;
+        /* Needs to be in here for Safari polyfill so background images work as expected. */
+        background-size: auto;
+    }
+    progress:not([value]), progress:not([value])::-webkit-progress-bar {
+        background: repeating-linear-gradient(45deg, #7e7e7e, #7e7e7e 10px, #5c5c5c 10px, #5c5c5c 20px);
+    }
+    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+        background: #F44336;
+    }
+</style>
+</div>
+<div class="cell-output cell-output-display">
+
+    <div>
+      <progress value="227835904" class="" max="227829253" style="width:300px; height:20px; vertical-align: middle;"></progress>
+      100.00% [227835904/227829253 00:16&lt;00:00]
+    </div>
+    
+</div>
+<div class="cell-output cell-output-display">
+<pre><code>Path('data/2019-01-01_performance_fixed_tiles.parquet')</code></pre>
+</div>
+</div>
+<div id="cell-26" class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># This is a function to load and do some light pre-processing on the Ookla data.</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> load_ookla_data(filename, mask<span class="op">=</span><span class="va">None</span>):</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Ookla's parquet file doesn't seem to have geo metadata so need to read through pandas first</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    ookla_df <span class="op">=</span> pd.read_parquet(filename)</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>    ookla_gdf <span class="op">=</span> gpd.GeoDataFrame(</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>        ookla_df,</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>        geometry<span class="op">=</span>ookla_df[<span class="st">"tile"</span>].<span class="bu">apply</span>(<span class="kw">lambda</span> x: wkt.loads(x)),</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>        crs<span class="op">=</span><span class="st">"epsg:4326"</span>,</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>    ookla_gdf <span class="op">=</span> ookla_gdf.drop(columns<span class="op">=</span>[<span class="st">"tile"</span>])</span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Ookla's data files contain data for the whole world.</span></span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>    <span class="co"># For our case, we're retaining only tiles that intersect with the given mask.</span></span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>    <span class="co"># This is to speed-up any processing we do later on.</span></span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> mask <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>:</span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>        keep_cols <span class="op">=</span> ookla_gdf.columns</span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>        ookla_gdf <span class="op">=</span> ookla_gdf.sjoin(mask, how<span class="op">=</span><span class="st">"inner"</span>, predicate<span class="op">=</span><span class="st">"intersects"</span>)</span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>        ookla_gdf <span class="op">=</span> ookla_gdf[keep_cols]</span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a>        ookla_gdf.head()</span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Convert kbps to mbps for easier reading</span></span>
+<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a>    ookla_gdf[<span class="st">"avg_d_mbps"</span>] <span class="op">=</span> ookla_gdf[<span class="st">"avg_d_kbps"</span>] <span class="op">/</span> <span class="dv">1000</span></span>
+<span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a>    ookla_gdf[<span class="st">"avg_u_mbps"</span>] <span class="op">=</span> ookla_gdf[<span class="st">"avg_u_kbps"</span>] <span class="op">/</span> <span class="dv">1000</span></span>
+<span id="cb11-27"><a href="#cb11-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-28"><a href="#cb11-28" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> ookla_gdf</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The Ookla data is quite large, and takes around 5 minutes to load.</p>
+<div id="cell-28" class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>ookla_gdf <span class="op">=</span> load_ookla_data(ookla_fixed_2019_q1_filepath, mask<span class="op">=</span>gdf)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>CPU times: user 22.3 s, sys: 3.6 s, total: 25.9 s
+Wall time: 28.3 s</code></pre>
+</div>
+</div>
+<div id="cell-29" class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    <span class="ss">f"</span><span class="sc">{</span><span class="bu">len</span>(ookla_gdf)<span class="sc">:,}</span><span class="ss"> Ookla data tiles retained that intersect with our DHS cluster neighborhoods."</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>ookla_gdf.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>17,245 Ookla data tiles retained that intersect with our DHS cluster neighborhoods.</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">quadkey</th>
+<th data-quarto-table-cell-role="th">avg_d_kbps</th>
+<th data-quarto-table-cell-role="th">avg_u_kbps</th>
+<th data-quarto-table-cell-role="th">avg_lat_ms</th>
+<th data-quarto-table-cell-role="th">tests</th>
+<th data-quarto-table-cell-role="th">devices</th>
+<th data-quarto-table-cell-role="th">geometry</th>
+<th data-quarto-table-cell-role="th">avg_d_mbps</th>
+<th data-quarto-table-cell-role="th">avg_u_mbps</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4368240</td>
+<td>1323011210311031</td>
+<td>10</td>
+<td>21</td>
+<td>126</td>
+<td>1</td>
+<td>1</td>
+<td>POLYGON ((121.96472 20.4579, 121.97021 20.4579...</td>
+<td>0.010</td>
+<td>0.021</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">4368240</td>
+<td>1323011210311031</td>
+<td>10</td>
+<td>21</td>
+<td>126</td>
+<td>1</td>
+<td>1</td>
+<td>POLYGON ((121.96472 20.4579, 121.97021 20.4579...</td>
+<td>0.010</td>
+<td>0.021</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4368240</td>
+<td>1323011210311031</td>
+<td>10</td>
+<td>21</td>
+<td>126</td>
+<td>1</td>
+<td>1</td>
+<td>POLYGON ((121.96472 20.4579, 121.97021 20.4579...</td>
+<td>0.010</td>
+<td>0.021</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">4368240</td>
+<td>1323011210311031</td>
+<td>10</td>
+<td>21</td>
+<td>126</td>
+<td>1</td>
+<td>1</td>
+<td>POLYGON ((121.96472 20.4579, 121.97021 20.4579...</td>
+<td>0.010</td>
+<td>0.021</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4368241</td>
+<td>1323011210311033</td>
+<td>5931</td>
+<td>10633</td>
+<td>228</td>
+<td>3</td>
+<td>2</td>
+<td>POLYGON ((121.96472 20.45275, 121.97021 20.452...</td>
+<td>5.931</td>
+<td>10.633</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</section>
+<section id="osm-open-street-maps" class="level3">
+<h3 class="anchored" data-anchor-id="osm-open-street-maps">OSM (Open Street Maps)</h3>
+<p>One source of open data on points of interest is OSM. We’ll use the version of the data provided by Geofabrik vs accessing the OSM Overpass API. This allows us to not be bottlenecked by API calls.</p>
+<p>Similar to Ookla, we can also use <a href="https://geowrangler.thinkingmachin.es/tutorial.datasets.html#Downloading-Geofabrik-Data">GeoWrangler’s OSM data download utils</a> to download and cache OSM data on your machine. All you have to do is specify the country you want.</p>
+<p>Geofabrik’s OSM data is a zip file containing different files for POIs, waterways, roads, etc. For this demo notebook, we’ll only use the POIs.</p>
+<div id="cell-31" class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># This download can take around 1-2 minutes.</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>ph_osm_zip_path <span class="op">=</span> geofabrik.download_geofabrik_region(<span class="st">"philippines"</span>)</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="co"># This line unzips the zip file if we haven't done so yet.</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="op">!</span>echo <span class="st">'None'</span> <span class="op">|</span> unzip $ph_osm_zip_path <span class="op">-</span>d data<span class="op">/</span>ph_osm<span class="op">/</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>2024-08-12 22:32:49.191 | INFO     | geowrangler.datasets.utils:urlretrieve:25 - Retrieving https://download.geofabrik.de/asia/philippines-latest-free.shp.zip into data/philippines-latest-free.shp.zip</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+
+<style>
+    /* Turns off some styling */
+    progress {
+        /* gets rid of default border in Firefox and Opera. */
+        border: none;
+        /* Needs to be in here for Safari polyfill so background images work as expected. */
+        background-size: auto;
+    }
+    progress:not([value]), progress:not([value])::-webkit-progress-bar {
+        background: repeating-linear-gradient(45deg, #7e7e7e, #7e7e7e 10px, #5c5c5c 10px, #5c5c5c 20px);
+    }
+    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+        background: #F44336;
+    }
+</style>
+</div>
+<div class="cell-output cell-output-display">
+
+    <div>
+      <progress value="1287127040" class="" max="1287122270" style="width:300px; height:20px; vertical-align: middle;"></progress>
+      100.00% [1287127040/1287122270 06:08&lt;00:00]
+    </div>
+    
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Archive:  data/philippines-latest-free.shp.zip
+  inflating: data/ph_osm/README      
+ extracting: data/ph_osm/gis_osm_buildings_a_free_1.cpg  
+  inflating: data/ph_osm/gis_osm_buildings_a_free_1.dbf  
+  inflating: data/ph_osm/gis_osm_buildings_a_free_1.prj  
+  inflating: data/ph_osm/gis_osm_buildings_a_free_1.shp  
+  inflating: data/ph_osm/gis_osm_buildings_a_free_1.shx  
+ extracting: data/ph_osm/gis_osm_landuse_a_free_1.cpg  
+  inflating: data/ph_osm/gis_osm_landuse_a_free_1.dbf  
+  inflating: data/ph_osm/gis_osm_landuse_a_free_1.prj  
+  inflating: data/ph_osm/gis_osm_landuse_a_free_1.shp  
+  inflating: data/ph_osm/gis_osm_landuse_a_free_1.shx  
+ extracting: data/ph_osm/gis_osm_natural_a_free_1.cpg  
+  inflating: data/ph_osm/gis_osm_natural_a_free_1.dbf  
+  inflating: data/ph_osm/gis_osm_natural_a_free_1.prj  
+  inflating: data/ph_osm/gis_osm_natural_a_free_1.shp  
+  inflating: data/ph_osm/gis_osm_natural_a_free_1.shx  
+ extracting: data/ph_osm/gis_osm_natural_free_1.cpg  
+  inflating: data/ph_osm/gis_osm_natural_free_1.dbf  
+  inflating: data/ph_osm/gis_osm_natural_free_1.prj  
+  inflating: data/ph_osm/gis_osm_natural_free_1.shp  
+  inflating: data/ph_osm/gis_osm_natural_free_1.shx  
+ extracting: data/ph_osm/gis_osm_places_a_free_1.cpg  
+  inflating: data/ph_osm/gis_osm_places_a_free_1.dbf  
+  inflating: data/ph_osm/gis_osm_places_a_free_1.prj  
+  inflating: data/ph_osm/gis_osm_places_a_free_1.shp  
+  inflating: data/ph_osm/gis_osm_places_a_free_1.shx  
+ extracting: data/ph_osm/gis_osm_places_free_1.cpg  
+  inflating: data/ph_osm/gis_osm_places_free_1.dbf  
+  inflating: data/ph_osm/gis_osm_places_free_1.prj  
+  inflating: data/ph_osm/gis_osm_places_free_1.shp  
+  inflating: data/ph_osm/gis_osm_places_free_1.shx  
+ extracting: data/ph_osm/gis_osm_pofw_a_free_1.cpg  
+  inflating: data/ph_osm/gis_osm_pofw_a_free_1.dbf  
+  inflating: data/ph_osm/gis_osm_pofw_a_free_1.prj  
+  inflating: data/ph_osm/gis_osm_pofw_a_free_1.shp  
+  inflating: data/ph_osm/gis_osm_pofw_a_free_1.shx  
+ extracting: data/ph_osm/gis_osm_pofw_free_1.cpg  
+  inflating: data/ph_osm/gis_osm_pofw_free_1.dbf  
+  inflating: data/ph_osm/gis_osm_pofw_free_1.prj  
+  inflating: data/ph_osm/gis_osm_pofw_free_1.shp  
+  inflating: data/ph_osm/gis_osm_pofw_free_1.shx  
+ extracting: data/ph_osm/gis_osm_pois_a_free_1.cpg  
+  inflating: data/ph_osm/gis_osm_pois_a_free_1.dbf  
+  inflating: data/ph_osm/gis_osm_pois_a_free_1.prj  
+  inflating: data/ph_osm/gis_osm_pois_a_free_1.shp  
+  inflating: data/ph_osm/gis_osm_pois_a_free_1.shx  
+ extracting: data/ph_osm/gis_osm_pois_free_1.cpg  
+  inflating: data/ph_osm/gis_osm_pois_free_1.dbf  
+  inflating: data/ph_osm/gis_osm_pois_free_1.prj  
+  inflating: data/ph_osm/gis_osm_pois_free_1.shp  
+  inflating: data/ph_osm/gis_osm_pois_free_1.shx  
+ extracting: data/ph_osm/gis_osm_railways_free_1.cpg  
+  inflating: data/ph_osm/gis_osm_railways_free_1.dbf  
+  inflating: data/ph_osm/gis_osm_railways_free_1.prj  
+  inflating: data/ph_osm/gis_osm_railways_free_1.shp  
+  inflating: data/ph_osm/gis_osm_railways_free_1.shx  
+ extracting: data/ph_osm/gis_osm_roads_free_1.cpg  
+  inflating: data/ph_osm/gis_osm_roads_free_1.dbf  
+  inflating: data/ph_osm/gis_osm_roads_free_1.prj  
+  inflating: data/ph_osm/gis_osm_roads_free_1.shp  
+  inflating: data/ph_osm/gis_osm_roads_free_1.shx  
+ extracting: data/ph_osm/gis_osm_traffic_a_free_1.cpg  
+  inflating: data/ph_osm/gis_osm_traffic_a_free_1.dbf  
+  inflating: data/ph_osm/gis_osm_traffic_a_free_1.prj  
+  inflating: data/ph_osm/gis_osm_traffic_a_free_1.shp  
+  inflating: data/ph_osm/gis_osm_traffic_a_free_1.shx  
+ extracting: data/ph_osm/gis_osm_traffic_free_1.cpg  
+  inflating: data/ph_osm/gis_osm_traffic_free_1.dbf  
+  inflating: data/ph_osm/gis_osm_traffic_free_1.prj  
+  inflating: data/ph_osm/gis_osm_traffic_free_1.shp  
+  inflating: data/ph_osm/gis_osm_traffic_free_1.shx  
+ extracting: data/ph_osm/gis_osm_transport_a_free_1.cpg  
+  inflating: data/ph_osm/gis_osm_transport_a_free_1.dbf  
+  inflating: data/ph_osm/gis_osm_transport_a_free_1.prj  
+  inflating: data/ph_osm/gis_osm_transport_a_free_1.shp  
+  inflating: data/ph_osm/gis_osm_transport_a_free_1.shx  
+ extracting: data/ph_osm/gis_osm_transport_free_1.cpg  
+  inflating: data/ph_osm/gis_osm_transport_free_1.dbf  
+  inflating: data/ph_osm/gis_osm_transport_free_1.prj  
+  inflating: data/ph_osm/gis_osm_transport_free_1.shp  
+  inflating: data/ph_osm/gis_osm_transport_free_1.shx  
+ extracting: data/ph_osm/gis_osm_water_a_free_1.cpg  
+  inflating: data/ph_osm/gis_osm_water_a_free_1.dbf  
+  inflating: data/ph_osm/gis_osm_water_a_free_1.prj  
+  inflating: data/ph_osm/gis_osm_water_a_free_1.shp  
+  inflating: data/ph_osm/gis_osm_water_a_free_1.shx  
+ extracting: data/ph_osm/gis_osm_waterways_free_1.cpg  
+  inflating: data/ph_osm/gis_osm_waterways_free_1.dbf  
+  inflating: data/ph_osm/gis_osm_waterways_free_1.prj  
+  inflating: data/ph_osm/gis_osm_waterways_free_1.shp  
+  inflating: data/ph_osm/gis_osm_waterways_free_1.shx  </code></pre>
+</div>
+</div>
+<div id="cell-32" class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Uncomment the ff line to see all the available OSM files aside from POIs.</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="co"># !ls data/ph_osm</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-33" class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>ph_osm_pois_filepath <span class="op">=</span> <span class="st">"data/ph_osm/gis_osm_pois_free_1.shp"</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>ph_osm <span class="op">=</span> gpd.read_file(ph_osm_pois_filepath)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-34" class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"There are </span><span class="sc">{</span><span class="bu">len</span>(ph_osm)<span class="sc">}</span><span class="ss"> OSM POIs."</span>)</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>ph_osm.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>There are 150311 OSM POIs.</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">osm_id</th>
+<th data-quarto-table-cell-role="th">code</th>
+<th data-quarto-table-cell-role="th">fclass</th>
+<th data-quarto-table-cell-role="th">name</th>
+<th data-quarto-table-cell-role="th">geometry</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>21717820</td>
+<td>2907</td>
+<td>camera_surveillance</td>
+<td>None</td>
+<td>POINT (121.0212 14.57608)</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>21717872</td>
+<td>2722</td>
+<td>museum</td>
+<td>Ayala Museum</td>
+<td>POINT (121.02324 14.55358)</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>24078959</td>
+<td>2907</td>
+<td>camera_surveillance</td>
+<td>None</td>
+<td>POINT (121.05945 14.60098)</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>24797511</td>
+<td>2542</td>
+<td>bicycle_shop</td>
+<td>Christine Sports Cycle Marketing</td>
+<td>POINT (120.99506 14.55224)</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>24797535</td>
+<td>2518</td>
+<td>beverages</td>
+<td>G and K wine</td>
+<td>POINT (120.99267 14.55285)</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="feature-engineering" class="level2">
+<h2 class="anchored" data-anchor-id="feature-engineering">Feature Engineering</h2>
+<p>Now that we’ve prepared the DHS data and loaded Ookla and OSM data into memory, we’re ready to generate some neighborhood features for our ML model.</p>
+<p>For convenience, we’re wrapping all the feature engineering code in functions so we can re-use them later when we apply the model to the whole country.</p>
+<p><em>Note: if you are modifying the feature engineering portions, it is recommended to run the whole section end-to-end. This ensures you’re starting fresh from a new copy of the DHS clusters GeoDataFrame. This also ensures the function definitions are up-to-date, and can be re-used properly later for model rollout.</em></p>
+<div id="cell-36" class="cell">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co"># We'll make a copy of the GDF to avoid overwriting the original DHS GeoDataFrame.</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>gdf_with_features <span class="op">=</span> gdf.copy()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<section id="osm" class="level3">
+<h3 class="anchored" data-anchor-id="osm">OSM</h3>
+<p>Our goal with OSM data is to generate neighborhood characteristics based on counts and distance to certain POIs, such as schools, hospitals, etc.</p>
+<p>To do this, we utilize GeoWrangler’s <a href="https://geowrangler.thinkingmachin.es/tutorial.vector_zonal_stats.html">vector zonal stats</a> and <a href="https://geowrangler.thinkingmachin.es/tutorial.distance_zonal_stats.html">distance zonal stats</a> features.</p>
+<div id="cell-38" class="cell">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Uncomment the ff. line if you want to see the different POI classes available</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="co"># ph_osm.fclass.sort_values().unique()</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-39" class="cell">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> generate_osm_features(aoi, osm, metric_crs<span class="op">=</span><span class="st">"epsg:3123"</span>):</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>    aoi <span class="op">=</span> aoi.copy()</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>    <span class="co"># GeoWrangler: Count number of all POIs per tile</span></span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>    aoi <span class="op">=</span> vzs.create_zonal_stats(</span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>        aoi,</span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>        osm,</span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>        overlap_method<span class="op">=</span><span class="st">"intersects"</span>,</span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>        aggregations<span class="op">=</span>[{<span class="st">"func"</span>: <span class="st">"count"</span>, <span class="st">"output"</span>: <span class="st">"poi_count"</span>, <span class="st">"fillna"</span>: <span class="va">True</span>}],</span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-13"><a href="#cb25-13" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Count specific aoi types</span></span>
+<span id="cb25-14"><a href="#cb25-14" aria-hidden="true" tabindex="-1"></a>    poi_types <span class="op">=</span> [<span class="st">"restaurant"</span>, <span class="st">"school"</span>, <span class="st">"bank"</span>, <span class="st">"supermarket"</span>, <span class="st">"mall"</span>, <span class="st">"atm"</span>]</span>
+<span id="cb25-15"><a href="#cb25-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-16"><a href="#cb25-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> poi_type <span class="kw">in</span> poi_types:</span>
+<span id="cb25-17"><a href="#cb25-17" aria-hidden="true" tabindex="-1"></a>        <span class="co"># GeoWrangler: Count with vector zonal stats</span></span>
+<span id="cb25-18"><a href="#cb25-18" aria-hidden="true" tabindex="-1"></a>        aoi <span class="op">=</span> vzs.create_zonal_stats(</span>
+<span id="cb25-19"><a href="#cb25-19" aria-hidden="true" tabindex="-1"></a>            aoi,</span>
+<span id="cb25-20"><a href="#cb25-20" aria-hidden="true" tabindex="-1"></a>            osm[osm[<span class="st">"fclass"</span>] <span class="op">==</span> poi_type],</span>
+<span id="cb25-21"><a href="#cb25-21" aria-hidden="true" tabindex="-1"></a>            overlap_method<span class="op">=</span><span class="st">"intersects"</span>,</span>
+<span id="cb25-22"><a href="#cb25-22" aria-hidden="true" tabindex="-1"></a>            aggregations<span class="op">=</span>[</span>
+<span id="cb25-23"><a href="#cb25-23" aria-hidden="true" tabindex="-1"></a>                {<span class="st">"func"</span>: <span class="st">"count"</span>, <span class="st">"output"</span>: <span class="ss">f"</span><span class="sc">{</span>poi_type<span class="sc">}</span><span class="ss">_count"</span>, <span class="st">"fillna"</span>: <span class="va">True</span>}</span>
+<span id="cb25-24"><a href="#cb25-24" aria-hidden="true" tabindex="-1"></a>            ],</span>
+<span id="cb25-25"><a href="#cb25-25" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb25-26"><a href="#cb25-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-27"><a href="#cb25-27" aria-hidden="true" tabindex="-1"></a>        <span class="co"># GeoWrangler: Distance with distance zonal stats</span></span>
+<span id="cb25-28"><a href="#cb25-28" aria-hidden="true" tabindex="-1"></a>        col_name <span class="op">=</span> <span class="ss">f"</span><span class="sc">{</span>poi_type<span class="sc">}</span><span class="ss">_nearest"</span></span>
+<span id="cb25-29"><a href="#cb25-29" aria-hidden="true" tabindex="-1"></a>        aoi <span class="op">=</span> dzs.create_distance_zonal_stats(</span>
+<span id="cb25-30"><a href="#cb25-30" aria-hidden="true" tabindex="-1"></a>            aoi.to_crs(metric_crs),</span>
+<span id="cb25-31"><a href="#cb25-31" aria-hidden="true" tabindex="-1"></a>            osm[osm[<span class="st">"fclass"</span>] <span class="op">==</span> poi_type].to_crs(metric_crs),</span>
+<span id="cb25-32"><a href="#cb25-32" aria-hidden="true" tabindex="-1"></a>            max_distance<span class="op">=</span><span class="dv">10_000</span>,</span>
+<span id="cb25-33"><a href="#cb25-33" aria-hidden="true" tabindex="-1"></a>            aggregations<span class="op">=</span>[],</span>
+<span id="cb25-34"><a href="#cb25-34" aria-hidden="true" tabindex="-1"></a>            distance_col<span class="op">=</span>col_name,</span>
+<span id="cb25-35"><a href="#cb25-35" aria-hidden="true" tabindex="-1"></a>        ).to_crs(<span class="st">"epsg:4326"</span>)</span>
+<span id="cb25-36"><a href="#cb25-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-37"><a href="#cb25-37" aria-hidden="true" tabindex="-1"></a>        <span class="co"># If no POI was found within the distance limit, set the distance to a really high value</span></span>
+<span id="cb25-38"><a href="#cb25-38" aria-hidden="true" tabindex="-1"></a>        aoi[col_name] <span class="op">=</span> aoi[col_name].fillna(value<span class="op">=</span><span class="dv">999999</span>)</span>
+<span id="cb25-39"><a href="#cb25-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-40"><a href="#cb25-40" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> aoi</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-40" class="cell">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>gdf_with_features <span class="op">=</span> generate_osm_features(gdf_with_features, ph_osm)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>CPU times: user 746 ms, sys: 29.4 ms, total: 775 ms
+Wall time: 793 ms</code></pre>
+</div>
+</div>
+<div id="cell-41" class="cell">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>gdf_with_features.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">DHSCLUST</th>
+<th data-quarto-table-cell-role="th">Wealth Index</th>
+<th data-quarto-table-cell-role="th">DHSID</th>
+<th data-quarto-table-cell-role="th">longitude</th>
+<th data-quarto-table-cell-role="th">latitude</th>
+<th data-quarto-table-cell-role="th">geometry</th>
+<th data-quarto-table-cell-role="th">poi_count</th>
+<th data-quarto-table-cell-role="th">restaurant_count</th>
+<th data-quarto-table-cell-role="th">restaurant_nearest</th>
+<th data-quarto-table-cell-role="th">school_count</th>
+<th data-quarto-table-cell-role="th">school_nearest</th>
+<th data-quarto-table-cell-role="th">bank_count</th>
+<th data-quarto-table-cell-role="th">bank_nearest</th>
+<th data-quarto-table-cell-role="th">supermarket_count</th>
+<th data-quarto-table-cell-role="th">supermarket_nearest</th>
+<th data-quarto-table-cell-role="th">mall_count</th>
+<th data-quarto-table-cell-role="th">mall_nearest</th>
+<th data-quarto-table-cell-role="th">atm_count</th>
+<th data-quarto-table-cell-role="th">atm_nearest</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>1</td>
+<td>-31881.60870</td>
+<td>PH201700000001</td>
+<td>122.109807</td>
+<td>6.674652</td>
+<td>POLYGON ((122.12789 6.67461, 122.1278 6.67284,...</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>3152.996430</td>
+<td>0.0</td>
+<td>1392.503631</td>
+<td>0.0</td>
+<td>1764.736950</td>
+<td>0.0</td>
+<td>999999.0</td>
+<td>0.0</td>
+<td>999999.0</td>
+<td>0.0</td>
+<td>999999.000000</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>2</td>
+<td>-2855.37500</td>
+<td>PH201700000002</td>
+<td>122.132027</td>
+<td>6.662256</td>
+<td>POLYGON ((122.15011 6.66221, 122.15002 6.66044...</td>
+<td>6.0</td>
+<td>0.0</td>
+<td>5788.165918</td>
+<td>0.0</td>
+<td>3601.132502</td>
+<td>1.0</td>
+<td>0.000000</td>
+<td>0.0</td>
+<td>999999.0</td>
+<td>0.0</td>
+<td>999999.0</td>
+<td>0.0</td>
+<td>999999.000000</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>3</td>
+<td>-57647.04762</td>
+<td>PH201700000003</td>
+<td>122.179496</td>
+<td>6.621822</td>
+<td>POLYGON ((122.19758 6.62178, 122.19749 6.62001...</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>999999.000000</td>
+<td>0.0</td>
+<td>642.871037</td>
+<td>0.0</td>
+<td>4026.300327</td>
+<td>0.0</td>
+<td>999999.0</td>
+<td>0.0</td>
+<td>999999.0</td>
+<td>0.0</td>
+<td>999999.000000</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>4</td>
+<td>-54952.66667</td>
+<td>PH201700000004</td>
+<td>122.137965</td>
+<td>6.485298</td>
+<td>POLYGON ((122.15604 6.48526, 122.15595 6.48349...</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>999999.000000</td>
+<td>0.0</td>
+<td>2287.839903</td>
+<td>0.0</td>
+<td>999999.000000</td>
+<td>0.0</td>
+<td>999999.0</td>
+<td>0.0</td>
+<td>999999.0</td>
+<td>0.0</td>
+<td>999999.000000</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">5</td>
+<td>6</td>
+<td>-80701.69565</td>
+<td>PH201700000006</td>
+<td>121.916094</td>
+<td>6.629457</td>
+<td>POLYGON ((121.93418 6.62942, 121.93409 6.62765...</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>8408.925995</td>
+<td>0.0</td>
+<td>3930.606257</td>
+<td>0.0</td>
+<td>8332.324084</td>
+<td>0.0</td>
+<td>999999.0</td>
+<td>0.0</td>
+<td>999999.0</td>
+<td>0.0</td>
+<td>8311.332736</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</section>
+<section id="ookla-1" class="level3">
+<h3 class="anchored" data-anchor-id="ookla-1">Ookla</h3>
+<p>Our goal with Ookla data is to generate neighborhood characteristics based on internet speeds (download, upload, latency).</p>
+<p>To do this, we utilize GeoWrangler’s <a href="https://geowrangler.thinkingmachin.es/tutorial.area_zonal_stats.html">area zonal stats</a> feature.</p>
+<div id="cell-43" class="cell">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> generate_ookla_features(aoi, ookla_gdf, metric_crs<span class="op">=</span><span class="st">"epsg:3123"</span>):</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>    aoi <span class="op">=</span> aoi.copy()</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>    orig_aoi_crs <span class="op">=</span> aoi.crs</span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>    aoi <span class="op">=</span> aoi.to_crs(metric_crs)</span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>    ookla_gdf <span class="op">=</span> ookla_gdf.to_crs(metric_crs)</span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>    <span class="co"># For better formatting, rename some columns</span></span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a>    ookla_gdf <span class="op">=</span> ookla_gdf.rename(</span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a>        columns<span class="op">=</span>{<span class="st">"avg_d_mbps"</span>: <span class="st">"d_mbps"</span>, <span class="st">"avg_u_mbps"</span>: <span class="st">"u_mbps"</span>, <span class="st">"avg_lat_ms"</span>: <span class="st">"lat_ms"</span>}</span>
+<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb29-13"><a href="#cb29-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-14"><a href="#cb29-14" aria-hidden="true" tabindex="-1"></a>    <span class="co"># GeoWrangler: Compute stats on the various columns</span></span>
+<span id="cb29-15"><a href="#cb29-15" aria-hidden="true" tabindex="-1"></a>    aoi <span class="op">=</span> azs.create_area_zonal_stats(</span>
+<span id="cb29-16"><a href="#cb29-16" aria-hidden="true" tabindex="-1"></a>        aoi,</span>
+<span id="cb29-17"><a href="#cb29-17" aria-hidden="true" tabindex="-1"></a>        ookla_gdf,</span>
+<span id="cb29-18"><a href="#cb29-18" aria-hidden="true" tabindex="-1"></a>        aggregations<span class="op">=</span>[</span>
+<span id="cb29-19"><a href="#cb29-19" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Count number of devices in the area</span></span>
+<span id="cb29-20"><a href="#cb29-20" aria-hidden="true" tabindex="-1"></a>            <span class="bu">dict</span>(column<span class="op">=</span><span class="st">"devices"</span>, func<span class="op">=</span>[<span class="st">"raw_sum"</span>], fillna<span class="op">=</span><span class="va">True</span>),</span>
+<span id="cb29-21"><a href="#cb29-21" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Get stats on the download speeds</span></span>
+<span id="cb29-22"><a href="#cb29-22" aria-hidden="true" tabindex="-1"></a>            <span class="bu">dict</span>(</span>
+<span id="cb29-23"><a href="#cb29-23" aria-hidden="true" tabindex="-1"></a>                column<span class="op">=</span><span class="st">"d_mbps"</span>,</span>
+<span id="cb29-24"><a href="#cb29-24" aria-hidden="true" tabindex="-1"></a>                func<span class="op">=</span>[<span class="st">"imputed_mean"</span>, <span class="st">"max"</span>, <span class="st">"min"</span>, <span class="st">"std"</span>],</span>
+<span id="cb29-25"><a href="#cb29-25" aria-hidden="true" tabindex="-1"></a>                fillna<span class="op">=</span>[<span class="va">True</span>, <span class="va">True</span>, <span class="va">True</span>, <span class="va">True</span>],</span>
+<span id="cb29-26"><a href="#cb29-26" aria-hidden="true" tabindex="-1"></a>            ),</span>
+<span id="cb29-27"><a href="#cb29-27" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Get stats on the upload speeds</span></span>
+<span id="cb29-28"><a href="#cb29-28" aria-hidden="true" tabindex="-1"></a>            <span class="bu">dict</span>(</span>
+<span id="cb29-29"><a href="#cb29-29" aria-hidden="true" tabindex="-1"></a>                column<span class="op">=</span><span class="st">"u_mbps"</span>,</span>
+<span id="cb29-30"><a href="#cb29-30" aria-hidden="true" tabindex="-1"></a>                func<span class="op">=</span>[<span class="st">"imputed_mean"</span>, <span class="st">"max"</span>, <span class="st">"min"</span>, <span class="st">"std"</span>],</span>
+<span id="cb29-31"><a href="#cb29-31" aria-hidden="true" tabindex="-1"></a>                fillna<span class="op">=</span>[<span class="va">True</span>, <span class="va">True</span>, <span class="va">True</span>, <span class="va">True</span>],</span>
+<span id="cb29-32"><a href="#cb29-32" aria-hidden="true" tabindex="-1"></a>            ),</span>
+<span id="cb29-33"><a href="#cb29-33" aria-hidden="true" tabindex="-1"></a>        ],</span>
+<span id="cb29-34"><a href="#cb29-34" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Don't include the land area that intersected as a column</span></span>
+<span id="cb29-35"><a href="#cb29-35" aria-hidden="true" tabindex="-1"></a>        include_intersect<span class="op">=</span><span class="va">False</span>,</span>
+<span id="cb29-36"><a href="#cb29-36" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Don't set minimum values to 0 if the neighborhood's area doesn't fully intersect with Ookla tiles.</span></span>
+<span id="cb29-37"><a href="#cb29-37" aria-hidden="true" tabindex="-1"></a>        fix_min<span class="op">=</span><span class="va">False</span>,</span>
+<span id="cb29-38"><a href="#cb29-38" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb29-39"><a href="#cb29-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-40"><a href="#cb29-40" aria-hidden="true" tabindex="-1"></a>    aoi <span class="op">=</span> aoi.fillna(value<span class="op">=</span><span class="st">"0"</span>)</span>
+<span id="cb29-41"><a href="#cb29-41" aria-hidden="true" tabindex="-1"></a>    aoi <span class="op">=</span> aoi.to_crs(orig_aoi_crs)</span>
+<span id="cb29-42"><a href="#cb29-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-43"><a href="#cb29-43" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> aoi</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-44" class="cell">
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>gdf_with_features <span class="op">=</span> generate_ookla_features(gdf_with_features, ookla_gdf)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>CPU times: user 1.01 s, sys: 27.6 ms, total: 1.04 s
+Wall time: 1.05 s</code></pre>
+</div>
+</div>
+<div id="cell-45" class="cell">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>gdf_with_features.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">DHSCLUST</th>
+<th data-quarto-table-cell-role="th">Wealth Index</th>
+<th data-quarto-table-cell-role="th">DHSID</th>
+<th data-quarto-table-cell-role="th">longitude</th>
+<th data-quarto-table-cell-role="th">latitude</th>
+<th data-quarto-table-cell-role="th">geometry</th>
+<th data-quarto-table-cell-role="th">poi_count</th>
+<th data-quarto-table-cell-role="th">restaurant_count</th>
+<th data-quarto-table-cell-role="th">restaurant_nearest</th>
+<th data-quarto-table-cell-role="th">school_count</th>
+<th data-quarto-table-cell-role="th">...</th>
+<th data-quarto-table-cell-role="th">atm_nearest</th>
+<th data-quarto-table-cell-role="th">devices_sum</th>
+<th data-quarto-table-cell-role="th">d_mbps_mean</th>
+<th data-quarto-table-cell-role="th">d_mbps_max</th>
+<th data-quarto-table-cell-role="th">d_mbps_min</th>
+<th data-quarto-table-cell-role="th">d_mbps_std</th>
+<th data-quarto-table-cell-role="th">u_mbps_mean</th>
+<th data-quarto-table-cell-role="th">u_mbps_max</th>
+<th data-quarto-table-cell-role="th">u_mbps_min</th>
+<th data-quarto-table-cell-role="th">u_mbps_std</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>1</td>
+<td>-31881.60870</td>
+<td>PH201700000001</td>
+<td>122.109807</td>
+<td>6.674652</td>
+<td>POLYGON ((122.12789 6.67461, 122.1278 6.67284,...</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>3152.996430</td>
+<td>0.0</td>
+<td>...</td>
+<td>999999.000000</td>
+<td>0.0</td>
+<td>0.000000</td>
+<td>0.000</td>
+<td>0.000</td>
+<td>0.000000</td>
+<td>0.000000</td>
+<td>0.000</td>
+<td>0.000</td>
+<td>0.000000</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>2</td>
+<td>-2855.37500</td>
+<td>PH201700000002</td>
+<td>122.132027</td>
+<td>6.662256</td>
+<td>POLYGON ((122.15011 6.66221, 122.15002 6.66044...</td>
+<td>6.0</td>
+<td>0.0</td>
+<td>5788.165918</td>
+<td>0.0</td>
+<td>...</td>
+<td>999999.000000</td>
+<td>38.0</td>
+<td>0.401851</td>
+<td>14.628</td>
+<td>2.177</td>
+<td>4.982053</td>
+<td>0.255031</td>
+<td>6.867</td>
+<td>1.866</td>
+<td>1.753667</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>3</td>
+<td>-57647.04762</td>
+<td>PH201700000003</td>
+<td>122.179496</td>
+<td>6.621822</td>
+<td>POLYGON ((122.19758 6.62178, 122.19749 6.62001...</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>999999.000000</td>
+<td>0.0</td>
+<td>...</td>
+<td>999999.000000</td>
+<td>0.0</td>
+<td>0.000000</td>
+<td>0.000</td>
+<td>0.000</td>
+<td>0.000000</td>
+<td>0.000000</td>
+<td>0.000</td>
+<td>0.000</td>
+<td>0.000000</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>4</td>
+<td>-54952.66667</td>
+<td>PH201700000004</td>
+<td>122.137965</td>
+<td>6.485298</td>
+<td>POLYGON ((122.15604 6.48526, 122.15595 6.48349...</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>999999.000000</td>
+<td>0.0</td>
+<td>...</td>
+<td>999999.000000</td>
+<td>0.0</td>
+<td>0.000000</td>
+<td>0.000</td>
+<td>0.000</td>
+<td>0.000000</td>
+<td>0.000000</td>
+<td>0.000</td>
+<td>0.000</td>
+<td>0.000000</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">5</td>
+<td>6</td>
+<td>-80701.69565</td>
+<td>PH201700000006</td>
+<td>121.916094</td>
+<td>6.629457</td>
+<td>POLYGON ((121.93418 6.62942, 121.93409 6.62765...</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>8408.925995</td>
+<td>0.0</td>
+<td>...</td>
+<td>8311.332736</td>
+<td>0.0</td>
+<td>0.000000</td>
+<td>0.000</td>
+<td>0.000</td>
+<td>0.000000</td>
+<td>0.000000</td>
+<td>0.000</td>
+<td>0.000</td>
+<td>0.000000</td>
+</tr>
+</tbody>
+</table>
+
+<p>5 rows × 28 columns</p>
+</div>
+</div>
+</div>
+</section>
+<section id="night-time-lights" class="level3">
+<h3 class="anchored" data-anchor-id="night-time-lights">Night Time Lights</h3>
+<p>Lastly, we’ll generate features based on night time lights. <a href="https://geowrangler.thinkingmachin.es/tutorial.raster_zonal_stats.html">GeoWrangler provides a raster zonal stats function</a> that acts as a thin layer on top of rasterio’s rasterstats function. It provides a little convenience in terms of formatting and automatically joins back the features to your input GeoDataFrame.</p>
+<div id="cell-47" class="cell">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> generate_ntl_features(aoi, raster_path):</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>    aoi <span class="op">=</span> aoi.copy()</span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>    aoi <span class="op">=</span> rzs.create_raster_zonal_stats(</span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>        aoi,</span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>        raster_path,</span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>        aggregation<span class="op">=</span><span class="bu">dict</span>(</span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a>            func<span class="op">=</span>[<span class="st">"mean"</span>, <span class="st">"min"</span>, <span class="st">"max"</span>, <span class="st">"std"</span>],</span>
+<span id="cb33-9"><a href="#cb33-9" aria-hidden="true" tabindex="-1"></a>            column<span class="op">=</span><span class="st">"ntl"</span>,</span>
+<span id="cb33-10"><a href="#cb33-10" aria-hidden="true" tabindex="-1"></a>        ),</span>
+<span id="cb33-11"><a href="#cb33-11" aria-hidden="true" tabindex="-1"></a>        extra_args<span class="op">=</span><span class="bu">dict</span>(nodata<span class="op">=</span><span class="dv">0</span>),</span>
+<span id="cb33-12"><a href="#cb33-12" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb33-13"><a href="#cb33-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-14"><a href="#cb33-14" aria-hidden="true" tabindex="-1"></a>    aoi <span class="op">=</span> aoi.fillna(<span class="dv">0</span>)</span>
+<span id="cb33-15"><a href="#cb33-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-16"><a href="#cb33-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> aoi</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-48" class="cell">
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>gdf_with_features <span class="op">=</span> generate_ntl_features(gdf_with_features, DATA_DIR <span class="op">/</span> <span class="st">"phl_ntl.tif"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>CPU times: user 1.24 s, sys: 198 ms, total: 1.44 s
+Wall time: 1.57 s</code></pre>
+</div>
+</div>
+</section>
+<section id="visualize-the-final-dataset" class="level3">
+<h3 class="anchored" data-anchor-id="visualize-the-final-dataset">Visualize the final dataset</h3>
+<p>Finally, let’s visualize our cluster neighborhoods now with the generated features. Hover over each cluster to see its data.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/dhs-cluster-features-zoomed.png" class="img-fluid figure-img"></p>
+<figcaption>DHS Cluster Features (Zoomed)</figcaption>
+</figure>
+</div>
+<div id="cell-50" class="cell">
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Visualize the clusters with the generated features</span></span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a><span class="co"># gdf_with_features.explore()</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+</section>
+<section id="ml-training" class="level1">
+<h1>ML Training</h1>
+<p>In this section, we will now train an ML model to predict the wealth index for an area given its features.</p>
+<section id="prepare-data-into-x-y-and-generate-traintest-partitions" class="level2">
+<h2 class="anchored" data-anchor-id="prepare-data-into-x-y-and-generate-traintest-partitions">Prepare data into X, y and generate train/test partitions</h2>
+<div id="cell-53" class="cell">
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="co"># For convenience, store the list of features in a variable. Remove all extraneous columns.</span></span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>feature_cols <span class="op">=</span> gdf_with_features.drop(</span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>    columns<span class="op">=</span>[<span class="st">"DHSCLUST"</span>, <span class="st">"DHSID"</span>, <span class="st">"Wealth Index"</span>, <span class="st">"longitude"</span>, <span class="st">"latitude"</span>, <span class="st">"geometry"</span>]</span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>).columns</span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Separate data (X) and the target (y)</span></span>
+<span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> gdf_with_features[feature_cols]</span>
+<span id="cb37-8"><a href="#cb37-8" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> gdf_with_features[<span class="st">"Wealth Index"</span>]</span>
+<span id="cb37-9"><a href="#cb37-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-10"><a href="#cb37-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Bin y into 5 buckets for stratification when splitting the dataset</span></span>
+<span id="cb37-11"><a href="#cb37-11" aria-hidden="true" tabindex="-1"></a>cat_y <span class="op">=</span> pd.cut(y, bins<span class="op">=</span><span class="dv">5</span>, labels<span class="op">=</span><span class="bu">list</span>(<span class="bu">range</span>(<span class="dv">1</span>, <span class="dv">6</span>)))</span>
+<span id="cb37-12"><a href="#cb37-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-13"><a href="#cb37-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate train and test partitions</span></span>
+<span id="cb37-14"><a href="#cb37-14" aria-hidden="true" tabindex="-1"></a>X_train, X_test, y_train, y_test <span class="op">=</span> sklearn.model_selection.train_test_split(</span>
+<span id="cb37-15"><a href="#cb37-15" aria-hidden="true" tabindex="-1"></a>    X, y, test_size<span class="op">=</span><span class="fl">0.2</span>, random_state<span class="op">=</span><span class="dv">2022</span>, stratify<span class="op">=</span>cat_y</span>
+<span id="cb37-16"><a href="#cb37-16" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-54" class="cell">
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>X_train.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">poi_count</th>
+<th data-quarto-table-cell-role="th">restaurant_count</th>
+<th data-quarto-table-cell-role="th">restaurant_nearest</th>
+<th data-quarto-table-cell-role="th">school_count</th>
+<th data-quarto-table-cell-role="th">school_nearest</th>
+<th data-quarto-table-cell-role="th">bank_count</th>
+<th data-quarto-table-cell-role="th">bank_nearest</th>
+<th data-quarto-table-cell-role="th">supermarket_count</th>
+<th data-quarto-table-cell-role="th">supermarket_nearest</th>
+<th data-quarto-table-cell-role="th">mall_count</th>
+<th data-quarto-table-cell-role="th">...</th>
+<th data-quarto-table-cell-role="th">d_mbps_min</th>
+<th data-quarto-table-cell-role="th">d_mbps_std</th>
+<th data-quarto-table-cell-role="th">u_mbps_mean</th>
+<th data-quarto-table-cell-role="th">u_mbps_max</th>
+<th data-quarto-table-cell-role="th">u_mbps_min</th>
+<th data-quarto-table-cell-role="th">u_mbps_std</th>
+<th data-quarto-table-cell-role="th">ntl_mean</th>
+<th data-quarto-table-cell-role="th">ntl_min</th>
+<th data-quarto-table-cell-role="th">ntl_max</th>
+<th data-quarto-table-cell-role="th">ntl_std</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">944</td>
+<td>1.0</td>
+<td>0.0</td>
+<td>4332.445808</td>
+<td>1.0</td>
+<td>0.000000</td>
+<td>0.0</td>
+<td>999999.000000</td>
+<td>0.0</td>
+<td>5595.357740</td>
+<td>0.0</td>
+<td>...</td>
+<td>0.000</td>
+<td>0.000000</td>
+<td>0.000000</td>
+<td>0.000</td>
+<td>0.000</td>
+<td>0.000000</td>
+<td>0.279636</td>
+<td>0.279636</td>
+<td>0.279636</td>
+<td>0.000000</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">328</td>
+<td>1203.0</td>
+<td>143.0</td>
+<td>0.000000</td>
+<td>23.0</td>
+<td>0.000000</td>
+<td>73.0</td>
+<td>0.000000</td>
+<td>14.0</td>
+<td>0.000000</td>
+<td>1.0</td>
+<td>...</td>
+<td>8.948</td>
+<td>6.519399</td>
+<td>0.033496</td>
+<td>30.564</td>
+<td>2.496</td>
+<td>5.933372</td>
+<td>9.881545</td>
+<td>4.587300</td>
+<td>17.190298</td>
+<td>2.768707</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">696</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>4396.530482</td>
+<td>0.0</td>
+<td>7331.181601</td>
+<td>0.0</td>
+<td>999999.000000</td>
+<td>0.0</td>
+<td>999999.000000</td>
+<td>0.0</td>
+<td>...</td>
+<td>0.000</td>
+<td>0.000000</td>
+<td>0.000000</td>
+<td>0.000</td>
+<td>0.000</td>
+<td>0.000000</td>
+<td>0.000000</td>
+<td>0.000000</td>
+<td>0.000000</td>
+<td>0.000000</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">155</td>
+<td>2.0</td>
+<td>0.0</td>
+<td>352.510311</td>
+<td>0.0</td>
+<td>669.141767</td>
+<td>0.0</td>
+<td>2606.478381</td>
+<td>0.0</td>
+<td>2566.227871</td>
+<td>0.0</td>
+<td>...</td>
+<td>1.215</td>
+<td>31.305303</td>
+<td>0.863634</td>
+<td>151.303</td>
+<td>0.106</td>
+<td>35.998549</td>
+<td>0.299591</td>
+<td>0.182455</td>
+<td>0.519110</td>
+<td>0.125637</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">614</td>
+<td>286.0</td>
+<td>12.0</td>
+<td>0.000000</td>
+<td>4.0</td>
+<td>0.000000</td>
+<td>14.0</td>
+<td>0.000000</td>
+<td>8.0</td>
+<td>0.000000</td>
+<td>1.0</td>
+<td>...</td>
+<td>2.986</td>
+<td>6.722738</td>
+<td>0.174738</td>
+<td>32.774</td>
+<td>0.527</td>
+<td>7.027801</td>
+<td>0.335981</td>
+<td>0.216280</td>
+<td>0.543996</td>
+<td>0.084581</td>
+</tr>
+</tbody>
+</table>
+
+<p>5 rows × 26 columns</p>
+</div>
+</div>
+</div>
+<div id="cell-55" class="cell">
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>y_train.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>944    -27114.20833
+328    175912.44440
+696    -29987.93750
+155     75826.10526
+614     54849.37500
+Name: Wealth Index, dtype: float64</code></pre>
+</div>
+</div>
+</section>
+<section id="evaluation-function" class="level2">
+<h2 class="anchored" data-anchor-id="evaluation-function">Evaluation Function</h2>
+<p>We define an evaluation function that computes R^2 and makes a plot of the actual vs predicted values.</p>
+<div id="cell-57" class="cell">
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> evaluate(model, X_train, X_test, y_train, y_test):</span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>    <span class="co"># R^2</span></span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>    train_predictions <span class="op">=</span> model.predict(X_train)</span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"Train R2 score:"</span>, sklearn.metrics.r2_score(y_train, train_predictions))</span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a>    test_predictions <span class="op">=</span> model.predict(X_test)</span>
+<span id="cb41-8"><a href="#cb41-8" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"Test R2 score:"</span>, sklearn.metrics.r2_score(y_test, test_predictions))</span>
+<span id="cb41-9"><a href="#cb41-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-10"><a href="#cb41-10" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Plot</span></span>
+<span id="cb41-11"><a href="#cb41-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-12"><a href="#cb41-12" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Train and test predictions vs actual values</span></span>
+<span id="cb41-13"><a href="#cb41-13" aria-hidden="true" tabindex="-1"></a>    plt.scatter(train_predictions, y_train, label<span class="op">=</span><span class="st">"Train samples"</span>, c<span class="op">=</span><span class="st">"#d95f02"</span>)</span>
+<span id="cb41-14"><a href="#cb41-14" aria-hidden="true" tabindex="-1"></a>    plt.scatter(test_predictions, y_test, label<span class="op">=</span><span class="st">"Test samples"</span>, c<span class="op">=</span><span class="st">"#7570b3"</span>)</span>
+<span id="cb41-15"><a href="#cb41-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-16"><a href="#cb41-16" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Identity line</span></span>
+<span id="cb41-17"><a href="#cb41-17" aria-hidden="true" tabindex="-1"></a>    xpoints <span class="op">=</span> ypoints <span class="op">=</span> plt.xlim()</span>
+<span id="cb41-18"><a href="#cb41-18" aria-hidden="true" tabindex="-1"></a>    plt.plot(</span>
+<span id="cb41-19"><a href="#cb41-19" aria-hidden="true" tabindex="-1"></a>        xpoints, ypoints, linestyle<span class="op">=</span><span class="st">"--"</span>, color<span class="op">=</span><span class="st">"k"</span>, lw<span class="op">=</span><span class="dv">3</span>, scalex<span class="op">=</span><span class="va">False</span>, scaley<span class="op">=</span><span class="va">False</span></span>
+<span id="cb41-20"><a href="#cb41-20" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb41-21"><a href="#cb41-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-22"><a href="#cb41-22" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Labels and legends</span></span>
+<span id="cb41-23"><a href="#cb41-23" aria-hidden="true" tabindex="-1"></a>    plt.xlabel(<span class="st">"Predicted value"</span>)</span>
+<span id="cb41-24"><a href="#cb41-24" aria-hidden="true" tabindex="-1"></a>    plt.ylabel(<span class="st">"True value"</span>)</span>
+<span id="cb41-25"><a href="#cb41-25" aria-hidden="true" tabindex="-1"></a>    plt.legend()</span>
+<span id="cb41-26"><a href="#cb41-26" aria-hidden="true" tabindex="-1"></a>    plt.tight_layout()</span>
+<span id="cb41-27"><a href="#cb41-27" aria-hidden="true" tabindex="-1"></a>    plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="fit-and-evaluate-model" class="level2">
+<h2 class="anchored" data-anchor-id="fit-and-evaluate-model">Fit and Evaluate Model</h2>
+<p>For ML modelling, let’s fit a simple random forest regressor.</p>
+<p>As mentioned, we are keeping the ML modelling as simple as possible in this notebook. This is definitely not the best-performing wealth estimation model out there, but should be decent enough for demo purposes.</p>
+<div id="cell-59" class="cell">
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> RandomForestRegressor()</span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>model.fit(X_train, y_train)</span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>evaluate(model, X_train, X_test, y_train, y_test)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Train R2 score: 0.9244278211179482
+Test R2 score: 0.5882081532536176</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="overview.poverty_mapping_demo_files/figure-html/cell-34-output-2.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="ml-rollout-phl" class="level1">
+<h1>ML Rollout (Phl)</h1>
+<p>Now that we have a wealth estimation model, we can apply it to the whole country.</p>
+<section id="generate-country-wide-tiles" class="level2">
+<h2 class="anchored" data-anchor-id="generate-country-wide-tiles">Generate country-wide tiles</h2>
+<p>First, we need to split the country up into smaller areas.</p>
+<p>That usually means generating grid tiles or hex tiles for your area of interest. In this notebook, we’ll generate Bing tiles at zoom level 13 (which has the closest area to our 2km neighborhoods in training).</p>
+<p><a href="https://geowrangler.web.app/tutorial.grids.html">GeoWrangler provides various grid generation utilities</a> for these different scenarios.</p>
+<div id="cell-62" class="cell">
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Read in the admin boundary for PHL.</span></span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a><span class="co"># This file is a simplified version of the admin boundary to make the file size smaller and load times faster.</span></span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>phl_adm <span class="op">=</span> gpd.read_file(<span class="ss">f"</span><span class="sc">{</span>DATA_DIR<span class="sc">}</span><span class="ss">/phl_adm0.geojson"</span>)</span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Uncomment this line if you want to visualize it</span></span>
+<span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a><span class="co"># phl_adm.explore()</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The generation can take around 1-2 minutes.</p>
+<div id="cell-64" class="cell">
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>phl_tiles <span class="op">=</span> grids.BingTileGridGenerator(<span class="dv">13</span>).generate_grid(phl_adm)</span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"There are </span><span class="sc">{</span><span class="bu">len</span>(phl_tiles)<span class="sc">:,}</span><span class="ss"> tiles."</span>)</span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>phl_tiles.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>There are 16,257 tiles.
+CPU times: user 7.34 s, sys: 57.5 ms, total: 7.39 s
+Wall time: 7.5 s</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">quadkey</th>
+<th data-quarto-table-cell-role="th">geometry</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>1323230031202</td>
+<td>POLYGON ((119.17969 4.65308, 119.17969 4.69688...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>1323230030300</td>
+<td>POLYGON ((119.00391 4.69688, 119.00391 4.74068...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>1323230030311</td>
+<td>POLYGON ((119.13574 4.69688, 119.13574 4.74068...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>1323230031201</td>
+<td>POLYGON ((119.22363 4.69688, 119.22363 4.74068...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>1323212220302</td>
+<td>POLYGON ((118.30078 6.05316, 118.30078 6.09686...</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</section>
+<section id="feature-engineering-1" class="level2">
+<h2 class="anchored" data-anchor-id="feature-engineering-1">Feature Engineering</h2>
+<p>This part is simpler, as we’re just re-using the feature engineering functions we previously created. Note though that we are generating features for a bigger area, so the runtime is a little longer (in total should be within 2 minutes).</p>
+<div id="cell-66" class="cell">
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>phl_tiles_with_features <span class="op">=</span> phl_tiles.copy()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-67" class="cell">
+<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a>phl_tiles_with_features <span class="op">=</span> generate_osm_features(phl_tiles_with_features, ph_osm)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>CPU times: user 1.17 s, sys: 39.2 ms, total: 1.21 s
+Wall time: 1.24 s</code></pre>
+</div>
+</div>
+<div id="cell-68" class="cell">
+<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a>phl_tiles_with_features <span class="op">=</span> generate_ookla_features(phl_tiles_with_features, ookla_gdf)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>CPU times: user 465 ms, sys: 16.3 ms, total: 481 ms
+Wall time: 485 ms</code></pre>
+</div>
+</div>
+<div id="cell-69" class="cell">
+<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a>phl_tiles_with_features <span class="op">=</span> generate_ntl_features(</span>
+<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a>    phl_tiles_with_features, <span class="ss">f"</span><span class="sc">{</span>DATA_DIR<span class="sc">}</span><span class="ss">/phl_ntl.tif"</span></span>
+<span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>CPU times: user 13.4 s, sys: 1.8 s, total: 15.2 s
+Wall time: 15.4 s</code></pre>
+</div>
+</div>
+</section>
+<section id="make-predictions-and-viz-output" class="level2">
+<h2 class="anchored" data-anchor-id="make-predictions-and-viz-output">Make predictions and viz output</h2>
+<p>Finally, we are ready to apply the model and make predictions throughout the whole country. We can also visualize it on a Cholorpleth map.</p>
+<div id="cell-71" class="cell">
+<div class="sourceCode cell-code" id="cb54"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a>phl_tiles_with_features[<span class="st">"predicted_wealth_index"</span>] <span class="op">=</span> model.predict(</span>
+<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a>    phl_tiles_with_features[feature_cols]</span>
+<span id="cb54-3"><a href="#cb54-3" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-72" class="cell">
+<div class="sourceCode cell-code" id="cb55"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> viz_chloropleth(gdf, target_feature<span class="op">=</span><span class="st">"predicted_wealth_index"</span>):</span>
+<span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb55-3"><a href="#cb55-3" aria-hidden="true" tabindex="-1"></a>    m <span class="op">=</span> folium.Map(location<span class="op">=</span>[<span class="fl">14.6091</span>, <span class="fl">121.0223</span>], width<span class="op">=</span><span class="dv">1000</span>, height<span class="op">=</span><span class="dv">800</span>, zoom_start<span class="op">=</span><span class="dv">7</span>)</span>
+<span id="cb55-4"><a href="#cb55-4" aria-hidden="true" tabindex="-1"></a>    subset <span class="op">=</span> gdf.copy()</span>
+<span id="cb55-5"><a href="#cb55-5" aria-hidden="true" tabindex="-1"></a>    subset[<span class="st">"id"</span>] <span class="op">=</span> <span class="bu">list</span>(<span class="bu">range</span>(<span class="bu">len</span>(subset)))</span>
+<span id="cb55-6"><a href="#cb55-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb55-7"><a href="#cb55-7" aria-hidden="true" tabindex="-1"></a>    folium.Choropleth(</span>
+<span id="cb55-8"><a href="#cb55-8" aria-hidden="true" tabindex="-1"></a>        geo_data<span class="op">=</span>subset,</span>
+<span id="cb55-9"><a href="#cb55-9" aria-hidden="true" tabindex="-1"></a>        data<span class="op">=</span>subset,</span>
+<span id="cb55-10"><a href="#cb55-10" aria-hidden="true" tabindex="-1"></a>        name<span class="op">=</span><span class="st">"Wealth Predictions"</span>,</span>
+<span id="cb55-11"><a href="#cb55-11" aria-hidden="true" tabindex="-1"></a>        columns<span class="op">=</span>[<span class="st">"id"</span>, target_feature],</span>
+<span id="cb55-12"><a href="#cb55-12" aria-hidden="true" tabindex="-1"></a>        key_on<span class="op">=</span><span class="st">"feature.properties.id"</span>,</span>
+<span id="cb55-13"><a href="#cb55-13" aria-hidden="true" tabindex="-1"></a>        fill_color<span class="op">=</span><span class="st">"Spectral"</span>,</span>
+<span id="cb55-14"><a href="#cb55-14" aria-hidden="true" tabindex="-1"></a>        legend_name<span class="op">=</span>target_feature,</span>
+<span id="cb55-15"><a href="#cb55-15" aria-hidden="true" tabindex="-1"></a>    ).add_to(m)</span>
+<span id="cb55-16"><a href="#cb55-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb55-17"><a href="#cb55-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> m</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Visualize the output</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/predicted-wealth-rollout-ph.png" class="img-fluid figure-img"></p>
+<figcaption>Predicted Wealth Index Rollout (Philippines)</figcaption>
+</figure>
+</div>
+<div id="cell-74" class="cell">
+<div class="sourceCode cell-code" id="cb56"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Uncomment the line below to visualize rollout</span></span>
+<span id="cb56-2"><a href="#cb56-2" aria-hidden="true" tabindex="-1"></a><span class="co"># viz_chloropleth(phl_tiles_with_features)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp("https:\/\/geowrangler\.thinkingmachin\.es\/");
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/thinkingmachines/geowrangler/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>

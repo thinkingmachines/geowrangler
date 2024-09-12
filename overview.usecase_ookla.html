@@ -1,0 +1,2534 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.5.57">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Exploring Internet Speeds with Ookla – geowrangler</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script><script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+
+<link rel="stylesheet" href="styles.css">
+<meta property="og:title" content="Exploring Internet Speeds with Ookla – geowrangler">
+<meta property="og:description" content="🌏 A python package for wrangling geospatial datasets">
+<meta property="og:site_name" content="geowrangler">
+<meta name="twitter:title" content="Exploring Internet Speeds with Ookla – geowrangler">
+<meta name="twitter:description" content="🌏 A python package for wrangling geospatial datasets">
+<meta name="twitter:card" content="summary">
+</head>
+
+<body class="nav-sidebar floating nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">geowrangler</span>
+    </a>
+  </div>
+        <div class="quarto-navbar-tools tools-end">
+</div>
+          <div id="quarto-search" class="" title="Search"></div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./overview.poverty_mapping_demo.html">Use Case Demos</a></li><li class="breadcrumb-item"><a href="./overview.usecase_ookla.html">Exploring Internet Speeds with Ookla</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Geowrangler</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Tutorials</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.grids.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Grid Generation Tutorial</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.geometry_validation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Geometry Validation Tutorial</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.vector_zonal_stats.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Vector Zonal Stats Tutorial</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.raster_zonal_stats.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Raster Zonal Stats Tutorial</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.area_zonal_stats.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Vector Area Zonal Stats Tutorial</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.distance_zonal_stats.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Vector Distance Zonal Stats Tutorial</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.dhs.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">DHS Wealth Index</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.datasets.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Datasets Download</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.spatialjoin_highest_intersection.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Spatial Join Using Highest Intersection Tutorial</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.tile_clustering.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Tile Clustering Tutorial</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.raster_process.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Raster Processing Tutorial</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.raster_to_df.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Raster to Dataframe Tutorial</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Use Case Demos</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./overview.poverty_mapping_demo.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Explore Poverty Mapping Machine Learning Models</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./overview.usecase_ookla.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Exploring Internet Speeds with Ookla</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">Module Reference</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./grids.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Grids</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./polygon_fill.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Polygon Fill</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./validation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Geometry Validation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./vector_zonal_stats.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Vector Zonal Stats</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./raster_zonal_stats.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Raster Zonal Stats</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./area_zonal_stats.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Area Zonal Stats</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./distance_zonal_stats.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Distance Zonal Stats</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./vector_to_raster_mask.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Vector to Raster mask</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./raster_to_dataframe.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Raster to Dataframe</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./raster_process.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Raster Processing</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./dhs.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">DHS Utilities</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./datasets_geofabrik.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Datasets Geofabrik</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./datasets_ookla.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Datasets Ookla</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./datasets_nightlights.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Night Lights</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./datasets_utils.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Datasets Utils</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tile_clustering.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Tile Clustering</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./spatialjoin_highest_intersection.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Spatial Join Highest Intersection</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#summary" id="toc-summary" class="nav-link active" data-scroll-target="#summary">Summary</a>
+  <ul class="collapse">
+  <li><a href="#how-geowrangler-can-make-this-process-easier" id="toc-how-geowrangler-can-make-this-process-easier" class="nav-link" data-scroll-target="#how-geowrangler-can-make-this-process-easier">How geowrangler can make this process easier</a></li>
+  <li><a href="#what-you-need-to-do" id="toc-what-you-need-to-do" class="nav-link" data-scroll-target="#what-you-need-to-do">What you need to do</a></li>
+  </ul></li>
+  <li><a href="#tutorial" id="toc-tutorial" class="nav-link" data-scroll-target="#tutorial">Tutorial</a>
+  <ul class="collapse">
+  <li><a href="#import-libraries" id="toc-import-libraries" class="nav-link" data-scroll-target="#import-libraries">Import libraries</a></li>
+  <li><a href="#download-admin-areas" id="toc-download-admin-areas" class="nav-link" data-scroll-target="#download-admin-areas">Download Admin Areas</a></li>
+  <li><a href="#download-ookla-data" id="toc-download-ookla-data" class="nav-link" data-scroll-target="#download-ookla-data">Download Ookla data</a></li>
+  <li><a href="#convert-ookla-data-into-a-geodataframe" id="toc-convert-ookla-data-into-a-geodataframe" class="nav-link" data-scroll-target="#convert-ookla-data-into-a-geodataframe">Convert ookla data into a GeoDataFrame</a></li>
+  <li><a href="#validate-aoi-and-data-geometries" id="toc-validate-aoi-and-data-geometries" class="nav-link" data-scroll-target="#validate-aoi-and-data-geometries">Validate AOI and Data Geometries</a></li>
+  <li><a href="#generate-zonal-stats" id="toc-generate-zonal-stats" class="nav-link" data-scroll-target="#generate-zonal-stats">Generate Zonal Stats</a></li>
+  <li><a href="#analyze-zonal-stats" id="toc-analyze-zonal-stats" class="nav-link" data-scroll-target="#analyze-zonal-stats">Analyze Zonal Stats</a></li>
+  <li><a href="#additional-exercises" id="toc-additional-exercises" class="nav-link" data-scroll-target="#additional-exercises">Additional Exercises</a></li>
+  </ul></li>
+  </ul>
+<div class="toc-actions"><ul><li><a href="https://github.com/thinkingmachines/geowrangler/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./overview.poverty_mapping_demo.html">Use Case Demos</a></li><li class="breadcrumb-item"><a href="./overview.usecase_ookla.html">Exploring Internet Speeds with Ookla</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Exploring Internet Speeds with Ookla</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<!-- WARNING: THIS FILE WAS AUTOGENERATED! DO NOT EDIT! -->
+<blockquote class="blockquote">
+<p>A simple use case demo for using geowrangler modules to find the Philippine provinces/towns with the slowest/fastest internet speeds.</p>
+</blockquote>
+<p><a href="https://colab.research.google.com/github/thinkingmachines/geowrangler/blob/master/notebooks/overview.usecase_ookla.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg" title="Open in Colab button" class="img-fluid"></a></p>
+<section id="summary" class="level2">
+<h2 class="anchored" data-anchor-id="summary">Summary</h2>
+<p>This <strong>Use Case Demo</strong> shows how to use the <a href="./datasets_ookla.html"><em>geowrangler.datasets.ookla</em></a> and the <a href="./area_zonal_stats.html"><em>geowrangler.area_zonal_stats</em></a> modules to find the slowest/fastest internet speeds within an area or region of interest.</p>
+<section id="how-geowrangler-can-make-this-process-easier" class="level3">
+<h3 class="anchored" data-anchor-id="how-geowrangler-can-make-this-process-easier">How geowrangler can make this process easier</h3>
+<p>Geowrangler can:</p>
+<ul>
+<li>Validate your geodataframes</li>
+<li>Help you download Ookla data (internet speed)</li>
+<li>Generate zonal stats for your province/town</li>
+</ul>
+</section>
+<section id="what-you-need-to-do" class="level3">
+<h3 class="anchored" data-anchor-id="what-you-need-to-do">What you need to do</h3>
+<ul>
+<li>Get your AOIs (areas of interest) - get the boundaries of your administrative regions</li>
+<li>Download ookla data</li>
+<li>Validate AOIs and ookla data</li>
+<li>Generate zonal Stats</li>
+<li>Analyze and find fastest/slowest internet speeds</li>
+</ul>
+</section>
+</section>
+<section id="tutorial" class="level2">
+<h2 class="anchored" data-anchor-id="tutorial">Tutorial</h2>
+<section id="import-libraries" class="level3">
+<h3 class="anchored" data-anchor-id="import-libraries">Import libraries</h3>
+<p>Lets start by importing the required libraries</p>
+<div id="cc74ec47-221e-4fab-92ad-996dc9834061" class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> geopandas <span class="im">as</span> gpd</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> geowrangler.area_zonal_stats <span class="im">as</span> azs</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="download-admin-areas" class="level3">
+<h3 class="anchored" data-anchor-id="download-admin-areas">Download Admin Areas</h3>
+<p>Next, we get the administrative boundaries geodataset using <a href="https://data.humdata.org/dataset/cod-ab-phl">data from Humanitarian Data Exchange</a></p>
+<section id="set-region-filter" class="level4">
+<h4 class="anchored" data-anchor-id="set-region-filter">Set Region Filter</h4>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Important
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Setting the region filter to <code>None</code> will compute the zonal stats for the whole Philippines and can take a lot longer than for a region.</p>
+</div>
+</div>
+<p>Set the <strong>REGION_FILTER</strong> to your Region (or <code>None</code> for the whole Philippines).</p>
+<div id="15d927a7-5137-46bf-8dca-81c4abf77b5b" class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># REGION_FILTER = None  # All regions</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>REGION_FILTER <span class="op">=</span> <span class="st">"National Capital Region (NCR)"</span>  <span class="co"># limit to 1 to speed up processin</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Download the geodataset containing the admin areas of your country.</p>
+<p>Here we are using the data for the Philippines.</p>
+<div id="2f1f58e5-f202-43a9-807a-25958dc15b56" class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>phl_admin_file <span class="op">=</span> <span class="st">"phl_adminboundaries"</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>phl_admin_zip <span class="op">=</span> <span class="ss">f"</span><span class="sc">{</span>phl_admin_file<span class="sc">}</span><span class="ss">.zip"</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co"># shapefiles</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>phl_admin_link <span class="op">=</span> <span class="ss">f"https://data.humdata.org/dataset/caf116df-f984-4deb-85ca-41b349d3f313/resource/12457689-6a86-4474-8032-5ca9464d38a8/download/phl_adm_psa_namria_20231106_shp.zip"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Download the zipped file. Depending on your internet connection, it can take several minutes.</p>
+<div id="7c0dab3f-9f36-4eac-9e15-ed42c39a824b" class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="op">!</span>[ <span class="op">!</span> <span class="op">-</span>e ..<span class="op">/</span>data<span class="op">/</span>{phl_admin_zip} ] <span class="op">&amp;&amp;</span> curl <span class="op">-</span>L <span class="op">-</span>o ..<span class="op">/</span>data<span class="op">/</span>{phl_admin_zip} {phl_admin_link}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>CPU times: user 901 µs, sys: 2.68 ms, total: 3.59 ms
+Wall time: 279 ms</code></pre>
+</div>
+</div>
+<div id="c1ef633d-e4be-4eab-bbae-d16f052c38f5" class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="op">!</span>mkdir <span class="op">-</span>p ..<span class="op">/</span>data<span class="op">/</span>{phl_admin_file}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="c3fac509-20ce-40a5-8bea-97775a4393f7" class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>main_file <span class="op">=</span> <span class="st">"phl_admbnda_adm3_psa_namria_20231106"</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>phl_admin3_shp <span class="op">=</span> <span class="ss">f"../data/</span><span class="sc">{</span>phl_admin_file<span class="sc">}</span><span class="ss">/</span><span class="sc">{</span>main_file<span class="sc">}</span><span class="ss">.shp"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="a7db3cef-6123-4d52-af11-3f0f70eb14aa" class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="op">!</span>[ <span class="op">!</span> <span class="op">-</span>e {phl_admin3_shp} ] <span class="op">&amp;&amp;</span> unzip <span class="op">-</span>d ..<span class="op">/</span>data<span class="op">/</span>{phl_admin_file} ..<span class="op">/</span>data<span class="op">/</span>{phl_admin_zip}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>CPU times: user 907 µs, sys: 2.5 ms, total: 3.41 ms
+Wall time: 279 ms</code></pre>
+</div>
+</div>
+<p>Load the admin area geo dataset.</p>
+<p>In our example we are loading the <code>.shp</code> or shape file as a geopandas dataframe.</p>
+<div id="1d66af46-02d8-496a-9fd7-fe597cb927ac" class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"loading </span><span class="sc">{</span>phl_admin3_shp<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>admin3 <span class="op">=</span> gpd.read_file(phl_admin3_shp)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>loading ../data/phl_adminboundaries/phl_admbnda_adm3_psa_namria_20231106.shp
+CPU times: user 245 ms, sys: 68.7 ms, total: 313 ms
+Wall time: 327 ms</code></pre>
+</div>
+</div>
+<div id="41e18049-3aba-4b81-a2a3-e0948eb11927" class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>admin3.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">ADM3_EN</th>
+<th data-quarto-table-cell-role="th">ADM3_PCODE</th>
+<th data-quarto-table-cell-role="th">ADM2_EN</th>
+<th data-quarto-table-cell-role="th">ADM2_PCODE</th>
+<th data-quarto-table-cell-role="th">ADM1_EN</th>
+<th data-quarto-table-cell-role="th">ADM1_PCODE</th>
+<th data-quarto-table-cell-role="th">ADM0_EN</th>
+<th data-quarto-table-cell-role="th">ADM0_PCODE</th>
+<th data-quarto-table-cell-role="th">date</th>
+<th data-quarto-table-cell-role="th">validOn</th>
+<th data-quarto-table-cell-role="th">validTo</th>
+<th data-quarto-table-cell-role="th">ADM3_REF</th>
+<th data-quarto-table-cell-role="th">ADM3ALT1EN</th>
+<th data-quarto-table-cell-role="th">Shape_Leng</th>
+<th data-quarto-table-cell-role="th">Shape_Area</th>
+<th data-quarto-table-cell-role="th">AREA_SQKM</th>
+<th data-quarto-table-cell-role="th">geometry</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>Adams</td>
+<td>PH0102801</td>
+<td>Ilocos Norte</td>
+<td>PH01028</td>
+<td>Region I (Ilocos Region)</td>
+<td>PH01</td>
+<td>Philippines (the)</td>
+<td>PH</td>
+<td>2022-11-09</td>
+<td>2023-11-06</td>
+<td>0000/00/00</td>
+<td>None</td>
+<td>None</td>
+<td>0.423604</td>
+<td>0.009506</td>
+<td>111.143026</td>
+<td>POLYGON ((120.96915 18.51012, 120.95867 18.463...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>Bacarra</td>
+<td>PH0102802</td>
+<td>Ilocos Norte</td>
+<td>PH01028</td>
+<td>Region I (Ilocos Region)</td>
+<td>PH01</td>
+<td>Philippines (the)</td>
+<td>PH</td>
+<td>2022-11-09</td>
+<td>2023-11-06</td>
+<td>0000/00/00</td>
+<td>None</td>
+<td>None</td>
+<td>0.309136</td>
+<td>0.004725</td>
+<td>55.303195</td>
+<td>POLYGON ((120.66821 18.28705, 120.66441 18.282...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>Badoc</td>
+<td>PH0102803</td>
+<td>Ilocos Norte</td>
+<td>PH01028</td>
+<td>Region I (Ilocos Region)</td>
+<td>PH01</td>
+<td>Philippines (the)</td>
+<td>PH</td>
+<td>2022-11-09</td>
+<td>2023-11-06</td>
+<td>0000/00/00</td>
+<td>None</td>
+<td>None</td>
+<td>0.599295</td>
+<td>0.006880</td>
+<td>80.683970</td>
+<td>POLYGON ((120.47814 17.97717, 120.47816 17.977...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>Bangui</td>
+<td>PH0102804</td>
+<td>Ilocos Norte</td>
+<td>PH01028</td>
+<td>Region I (Ilocos Region)</td>
+<td>PH01</td>
+<td>Philippines (the)</td>
+<td>PH</td>
+<td>2022-11-09</td>
+<td>2023-11-06</td>
+<td>0000/00/00</td>
+<td>None</td>
+<td>None</td>
+<td>0.483066</td>
+<td>0.009843</td>
+<td>115.059041</td>
+<td>POLYGON ((120.81318 18.53457, 120.81358 18.533...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>City of Batac</td>
+<td>PH0102805</td>
+<td>Ilocos Norte</td>
+<td>PH01028</td>
+<td>Region I (Ilocos Region)</td>
+<td>PH01</td>
+<td>Philippines (the)</td>
+<td>PH</td>
+<td>2022-11-09</td>
+<td>2023-11-06</td>
+<td>0000/00/00</td>
+<td>None</td>
+<td>None</td>
+<td>0.613500</td>
+<td>0.013493</td>
+<td>158.123132</td>
+<td>POLYGON ((120.61242 18.10947, 120.612 18.10679...</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<div id="cfdb6f7f-fa54-47bc-8f8d-cb2544963d5d" class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="bu">list</span>(admin3.columns.values)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>['ADM3_EN',
+ 'ADM3_PCODE',
+ 'ADM2_EN',
+ 'ADM2_PCODE',
+ 'ADM1_EN',
+ 'ADM1_PCODE',
+ 'ADM0_EN',
+ 'ADM0_PCODE',
+ 'date',
+ 'validOn',
+ 'validTo',
+ 'ADM3_REF',
+ 'ADM3ALT1EN',
+ 'Shape_Leng',
+ 'Shape_Area',
+ 'AREA_SQKM',
+ 'geometry']</code></pre>
+</div>
+</div>
+<div id="9f08fb29-2e3b-4ccb-a5b6-36394e79fe22" class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>admin3.ADM1_EN.unique()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>array(['Region I (Ilocos Region)', 'Region II (Cagayan Valley)',
+       'Region III (Central Luzon)', 'Region IV-A (Calabarzon)',
+       'Region V (Bicol Region)', 'Region VI (Western Visayas)',
+       'Region VII (Central Visayas)', 'Region VIII (Eastern Visayas)',
+       'Region IX (Zamboanga Peninsula)', 'Region X (Northern Mindanao)',
+       'Region XI (Davao Region)', 'Region XII (Soccsksargen)',
+       'National Capital Region (NCR)',
+       'Cordillera Administrative Region (CAR)', 'Region XIII (Caraga)',
+       'Mimaropa Region',
+       'Bangsamoro Autonomous Region In Muslim Mindanao (BARMM)'],
+      dtype=object)</code></pre>
+</div>
+</div>
+<p>Limit the admin regions to only 1 in order to make the process run faster.</p>
+<p>The <strong>REGION FILTER</strong> is set in the <a href="#Set-Region-Filter">Set Region Filter Section</a></p>
+<div id="27290d99-847d-4696-a081-601562a26ced" class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> REGION_FILTER:</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>    admin3 <span class="op">=</span> admin3[admin3.ADM1_EN <span class="op">==</span> REGION_FILTER]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="bdf663f2-b0db-47b6-846f-03370d832d67" class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="e7b2e213-83a1-4682-98ac-389e0b05c0d6" class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> plt.axes()</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> admin3.plot(ax<span class="op">=</span>ax, facecolor<span class="op">=</span><span class="st">"none"</span>, edgecolor<span class="op">=</span><span class="st">"blue"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="overview.usecase_ookla_files/figure-html/cell-21-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/admin3-ncr.png" class="img-fluid figure-img"></p>
+<figcaption>Admin 3 Levels for NCR</figcaption>
+</figure>
+</div>
+<div id="91a038e7-1305-4046-a616-0227422fd927" class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> plt.axes()</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> admin3[admin3.ADM3_EN <span class="op">==</span> <span class="st">"Pateros"</span>].plot(ax<span class="op">=</span>ax, facecolor<span class="op">=</span><span class="st">"none"</span>, edgecolor<span class="op">=</span><span class="st">"blue"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>CPU times: user 22.8 ms, sys: 1.43 ms, total: 24.2 ms
+Wall time: 23.7 ms</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="overview.usecase_ookla_files/figure-html/cell-23-output-2.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<div id="21841988-833f-4ce9-8bc9-fdb1d46274f9" class="cell">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>admin3.crs</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>&lt;Geographic 2D CRS: EPSG:4326&gt;
+Name: WGS 84
+Axis Info [ellipsoidal]:
+- Lat[north]: Geodetic latitude (degree)
+- Lon[east]: Geodetic longitude (degree)
+Area of Use:
+- name: World.
+- bounds: (-180.0, -90.0, 180.0, 90.0)
+Datum: World Geodetic System 1984 ensemble
+- Ellipsoid: WGS 84
+- Prime Meridian: Greenwich</code></pre>
+</div>
+</div>
+<div id="4d177300-62d1-475e-bd63-1ab9005bb366" class="cell">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>admin3.total_bounds</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>array([120.90639543,  14.35172957, 121.13503641,  14.78529173])</code></pre>
+</div>
+</div>
+<div id="f84652a6-2edc-4815-a398-1f84d7e47fae" class="cell">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="bu">len</span>(admin3)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>17</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="download-ookla-data" class="level3">
+<h3 class="anchored" data-anchor-id="download-ookla-data">Download Ookla data</h3>
+<p>Use the <code>geowrangler.datasets.ookla</code> module to explore and download ookla (internet speed) data</p>
+<div id="6f4e629a-6189-4020-af5d-8c794a26306e" class="cell">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> geowrangler.datasets <span class="im">import</span> ookla</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>List the publically available ookla datasets</p>
+<div id="0c0791a1-5002-471e-99c6-aef6c378a519" class="cell">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>ookla_dsets <span class="op">=</span> ookla.list_ookla_files()</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>ookla_dsets</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>CPU times: user 34.2 ms, sys: 2.73 ms, total: 36.9 ms
+Wall time: 639 ms</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<pre><code>{OoklaQuarter(type='fixed', year='2019', quarter='1'): '2019-01-01_performance_fixed_tiles.parquet',
+ OoklaQuarter(type='fixed', year='2019', quarter='2'): '2019-04-01_performance_fixed_tiles.parquet',
+ OoklaQuarter(type='fixed', year='2019', quarter='3'): '2019-07-01_performance_fixed_tiles.parquet',
+ OoklaQuarter(type='fixed', year='2019', quarter='4'): '2019-10-01_performance_fixed_tiles.parquet',
+ OoklaQuarter(type='fixed', year='2020', quarter='1'): '2020-01-01_performance_fixed_tiles.parquet',
+ OoklaQuarter(type='fixed', year='2020', quarter='2'): '2020-04-01_performance_fixed_tiles.parquet',
+ OoklaQuarter(type='fixed', year='2020', quarter='3'): '2020-07-01_performance_fixed_tiles.parquet',
+ OoklaQuarter(type='fixed', year='2020', quarter='4'): '2020-10-01_performance_fixed_tiles.parquet',
+ OoklaQuarter(type='fixed', year='2021', quarter='1'): '2021-01-01_performance_fixed_tiles.parquet',
+ OoklaQuarter(type='fixed', year='2021', quarter='2'): '2021-04-01_performance_fixed_tiles.parquet',
+ OoklaQuarter(type='fixed', year='2021', quarter='3'): '2021-07-01_performance_fixed_tiles.parquet',
+ OoklaQuarter(type='fixed', year='2021', quarter='4'): '2021-10-01_performance_fixed_tiles.parquet',
+ OoklaQuarter(type='fixed', year='2022', quarter='1'): '2022-01-01_performance_fixed_tiles.parquet',
+ OoklaQuarter(type='fixed', year='2022', quarter='2'): '2022-04-01_performance_fixed_tiles.parquet',
+ OoklaQuarter(type='fixed', year='2022', quarter='3'): '2022-07-01_performance_fixed_tiles.parquet',
+ OoklaQuarter(type='fixed', year='2022', quarter='4'): '2022-10-01_performance_fixed_tiles.parquet',
+ OoklaQuarter(type='fixed', year='2023', quarter='1'): '2023-01-01_performance_fixed_tiles.parquet',
+ OoklaQuarter(type='fixed', year='2023', quarter='2'): '2023-04-01_performance_fixed_tiles.parquet',
+ OoklaQuarter(type='fixed', year='2023', quarter='3'): '2023-07-01_performance_fixed_tiles.parquet',
+ OoklaQuarter(type='fixed', year='2023', quarter='4'): '2023-10-01_performance_fixed_tiles.parquet',
+ OoklaQuarter(type='fixed', year='2024', quarter='1'): '2024-01-01_performance_fixed_tiles.parquet',
+ OoklaQuarter(type='fixed', year='2024', quarter='2'): '2024-04-01_performance_fixed_tiles.parquet',
+ OoklaQuarter(type='mobile', year='2019', quarter='1'): '2019-01-01_performance_mobile_tiles.parquet',
+ OoklaQuarter(type='mobile', year='2019', quarter='2'): '2019-04-01_performance_mobile_tiles.parquet',
+ OoklaQuarter(type='mobile', year='2019', quarter='3'): '2019-07-01_performance_mobile_tiles.parquet',
+ OoklaQuarter(type='mobile', year='2019', quarter='4'): '2019-10-01_performance_mobile_tiles.parquet',
+ OoklaQuarter(type='mobile', year='2020', quarter='1'): '2020-01-01_performance_mobile_tiles.parquet',
+ OoklaQuarter(type='mobile', year='2020', quarter='2'): '2020-04-01_performance_mobile_tiles.parquet',
+ OoklaQuarter(type='mobile', year='2020', quarter='3'): '2020-07-01_performance_mobile_tiles.parquet',
+ OoklaQuarter(type='mobile', year='2020', quarter='4'): '2020-10-01_performance_mobile_tiles.parquet',
+ OoklaQuarter(type='mobile', year='2021', quarter='1'): '2021-01-01_performance_mobile_tiles.parquet',
+ OoklaQuarter(type='mobile', year='2021', quarter='2'): '2021-04-01_performance_mobile_tiles.parquet',
+ OoklaQuarter(type='mobile', year='2021', quarter='3'): '2021-07-01_performance_mobile_tiles.parquet',
+ OoklaQuarter(type='mobile', year='2021', quarter='4'): '2021-10-01_performance_mobile_tiles.parquet',
+ OoklaQuarter(type='mobile', year='2022', quarter='1'): '2022-01-01_performance_mobile_tiles.parquet',
+ OoklaQuarter(type='mobile', year='2022', quarter='2'): '2022-04-01_performance_mobile_tiles.parquet',
+ OoklaQuarter(type='mobile', year='2022', quarter='3'): '2022-07-01_performance_mobile_tiles.parquet',
+ OoklaQuarter(type='mobile', year='2022', quarter='4'): '2022-10-01_performance_mobile_tiles.parquet',
+ OoklaQuarter(type='mobile', year='2023', quarter='1'): '2023-01-01_performance_mobile_tiles.parquet',
+ OoklaQuarter(type='mobile', year='2023', quarter='2'): '2023-04-01_performance_mobile_tiles.parquet',
+ OoklaQuarter(type='mobile', year='2023', quarter='3'): '2023-07-01_performance_mobile_tiles.parquet',
+ OoklaQuarter(type='mobile', year='2023', quarter='4'): '2023-10-01_performance_mobile_tiles.parquet',
+ OoklaQuarter(type='mobile', year='2024', quarter='1'): '2024-01-01_performance_mobile_tiles.parquet',
+ OoklaQuarter(type='mobile', year='2024', quarter='2'): '2024-04-01_performance_mobile_tiles.parquet'}</code></pre>
+</div>
+</div>
+<p>Download the latest data (as of the time of writing this)</p>
+<div id="7b88c6b6-9144-41be-8cfd-bb7082da0786" class="cell">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>ookla_params <span class="op">=</span> <span class="bu">dict</span>(year<span class="op">=</span><span class="st">"2022"</span>, quarter<span class="op">=</span><span class="st">"2"</span>, directory<span class="op">=</span><span class="st">"../data"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="df724ed7-64f7-45d5-bc7c-6a0d51d1f95f" class="cell">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>ookla_fixed <span class="op">=</span> ookla.download_ookla_file(type_<span class="op">=</span><span class="st">"fixed"</span>, <span class="op">**</span>ookla_params)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>CPU times: user 126 µs, sys: 63 µs, total: 189 µs
+Wall time: 139 µs</code></pre>
+</div>
+</div>
+<div id="6a86f9a6-bd8d-451c-8ba1-7482df06eedc" class="cell">
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>ookla_fixed</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>Path('../data/2022-04-01_performance_fixed_tiles.parquet')</code></pre>
+</div>
+</div>
+</section>
+<section id="convert-ookla-data-into-a-geodataframe" class="level3">
+<h3 class="anchored" data-anchor-id="convert-ookla-data-into-a-geodataframe">Convert ookla data into a GeoDataFrame</h3>
+<p>The downloaded file from ookla is not yet a geodataset, so we will h have to convert it into a <code>GeoDataFrame</code> suitable for use in geowrangler.</p>
+<div id="46303e4e-9dcd-4331-a4b6-f60c112a95d2" class="cell">
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The downloaded ookla data contains the internet speed data for the whole world and can take a minute or two to load.</p>
+<p>Later, we will show how to filter the data to only include the data relevant to our AOI.</p>
+<div id="752dee1f-08d6-4082-9ae6-6a59e76f9e70" class="cell">
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>fixed <span class="op">=</span> pd.read_parquet(ookla_fixed)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>CPU times: user 3.1 s, sys: 1.57 s, total: 4.67 s
+Wall time: 4.27 s</code></pre>
+</div>
+</div>
+<div id="2c990ddb-065c-4bcf-a9ac-ea5a2b52f9b2" class="cell">
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="bu">len</span>(fixed)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>6598700</code></pre>
+</div>
+</div>
+<div id="fc1a6b26-2954-42f1-b439-1d599ad49ce2" class="cell">
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>fixed.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">quadkey</th>
+<th data-quarto-table-cell-role="th">tile</th>
+<th data-quarto-table-cell-role="th">tile_x</th>
+<th data-quarto-table-cell-role="th">tile_y</th>
+<th data-quarto-table-cell-role="th">avg_d_kbps</th>
+<th data-quarto-table-cell-role="th">avg_u_kbps</th>
+<th data-quarto-table-cell-role="th">avg_lat_ms</th>
+<th data-quarto-table-cell-role="th">avg_lat_down_ms</th>
+<th data-quarto-table-cell-role="th">avg_lat_up_ms</th>
+<th data-quarto-table-cell-role="th">tests</th>
+<th data-quarto-table-cell-role="th">devices</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>0022133222312322</td>
+<td>POLYGON((-160.02685546875 70.6435894914449, -1...</td>
+<td>-160.0241</td>
+<td>70.6427</td>
+<td>8324</td>
+<td>3798</td>
+<td>91</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>2</td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>0022133222330100</td>
+<td>POLYGON((-160.02685546875 70.6417687358462, -1...</td>
+<td>-160.0241</td>
+<td>70.6409</td>
+<td>14972</td>
+<td>4461</td>
+<td>94</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>29</td>
+<td>2</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>0022133222330201</td>
+<td>POLYGON((-160.043334960938 70.6344840663086, -...</td>
+<td>-160.0406</td>
+<td>70.6336</td>
+<td>6253</td>
+<td>2818</td>
+<td>91</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>1</td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>0022202203233313</td>
+<td>POLYGON((-179.478149414062 68.9169336615194, -...</td>
+<td>-179.4754</td>
+<td>68.9159</td>
+<td>700</td>
+<td>126</td>
+<td>1090</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>1</td>
+<td>1</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>0022222211003013</td>
+<td>POLYGON((-178.884887695312 67.048162117316, -1...</td>
+<td>-178.8821</td>
+<td>67.0471</td>
+<td>6617</td>
+<td>2019</td>
+<td>977</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>1</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<div id="374be97f-f3fc-4348-97ad-2d668a659395" class="cell">
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>fixed.dtypes</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>quadkey             object
+tile                object
+tile_x             float64
+tile_y             float64
+avg_d_kbps           int64
+avg_u_kbps           int64
+avg_lat_ms           int64
+avg_lat_down_ms    float64
+avg_lat_up_ms      float64
+tests                int64
+devices              int64
+dtype: object</code></pre>
+</div>
+</div>
+<p>The data is now a Pandas <code>DataFrame</code> but this needs to be converted to a <code>GeoDataFrame</code> by converting the <code>tile</code> column into a <code>geometry</code> with a <code>crs</code> (Coordinate Reference System).</p>
+<p>See <a href="https://epsg.io/4326">EPSG:4326</a> for more details about the CRS.</p>
+<p>Converting the data can also take a minute or two.</p>
+<div id="9254e1e5-2e95-4b82-92f3-83a96c9785e8" class="cell">
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>fixed[<span class="st">"geometry"</span>] <span class="op">=</span> gpd.GeoSeries.from_wkt(fixed.tile, crs<span class="op">=</span><span class="st">"EPSG:4326"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>CPU times: user 7.99 s, sys: 775 ms, total: 8.77 s
+Wall time: 9.25 s</code></pre>
+</div>
+</div>
+<div id="dab820d6-a7a3-458d-aa9d-88d9b57de79b" class="cell">
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>fixed.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">quadkey</th>
+<th data-quarto-table-cell-role="th">tile</th>
+<th data-quarto-table-cell-role="th">tile_x</th>
+<th data-quarto-table-cell-role="th">tile_y</th>
+<th data-quarto-table-cell-role="th">avg_d_kbps</th>
+<th data-quarto-table-cell-role="th">avg_u_kbps</th>
+<th data-quarto-table-cell-role="th">avg_lat_ms</th>
+<th data-quarto-table-cell-role="th">avg_lat_down_ms</th>
+<th data-quarto-table-cell-role="th">avg_lat_up_ms</th>
+<th data-quarto-table-cell-role="th">tests</th>
+<th data-quarto-table-cell-role="th">devices</th>
+<th data-quarto-table-cell-role="th">geometry</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>0022133222312322</td>
+<td>POLYGON((-160.02685546875 70.6435894914449, -1...</td>
+<td>-160.0241</td>
+<td>70.6427</td>
+<td>8324</td>
+<td>3798</td>
+<td>91</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>2</td>
+<td>1</td>
+<td>POLYGON ((-160.02686 70.64359, -160.02136 70.6...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>0022133222330100</td>
+<td>POLYGON((-160.02685546875 70.6417687358462, -1...</td>
+<td>-160.0241</td>
+<td>70.6409</td>
+<td>14972</td>
+<td>4461</td>
+<td>94</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>29</td>
+<td>2</td>
+<td>POLYGON ((-160.02686 70.64177, -160.02136 70.6...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>0022133222330201</td>
+<td>POLYGON((-160.043334960938 70.6344840663086, -...</td>
+<td>-160.0406</td>
+<td>70.6336</td>
+<td>6253</td>
+<td>2818</td>
+<td>91</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>1</td>
+<td>1</td>
+<td>POLYGON ((-160.04333 70.63448, -160.03784 70.6...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>0022202203233313</td>
+<td>POLYGON((-179.478149414062 68.9169336615194, -...</td>
+<td>-179.4754</td>
+<td>68.9159</td>
+<td>700</td>
+<td>126</td>
+<td>1090</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>1</td>
+<td>1</td>
+<td>POLYGON ((-179.47815 68.91693, -179.47266 68.9...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>0022222211003013</td>
+<td>POLYGON((-178.884887695312 67.048162117316, -1...</td>
+<td>-178.8821</td>
+<td>67.0471</td>
+<td>6617</td>
+<td>2019</td>
+<td>977</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>1</td>
+<td>1</td>
+<td>POLYGON ((-178.88489 67.04816, -178.87939 67.0...</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<div id="b8164e99-2363-46b8-8a49-de1e3e882a6e" class="cell">
+<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a>fixed <span class="op">=</span> fixed.drop(columns<span class="op">=</span>[<span class="st">"tile"</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>CPU times: user 106 ms, sys: 276 ms, total: 382 ms
+Wall time: 592 ms</code></pre>
+</div>
+</div>
+<div id="004e4c2e-9e6e-4bd3-81f5-2887e989255e" class="cell">
+<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a>fixed <span class="op">=</span> gpd.GeoDataFrame(fixed, geometry<span class="op">=</span><span class="st">"geometry"</span>, crs<span class="op">=</span><span class="st">"EPSG:4326"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>CPU times: user 161 ms, sys: 105 ms, total: 266 ms
+Wall time: 343 ms</code></pre>
+</div>
+</div>
+</section>
+<section id="validate-aoi-and-data-geometries" class="level3">
+<h3 class="anchored" data-anchor-id="validate-aoi-and-data-geometries">Validate AOI and Data Geometries</h3>
+<p>In order to prevent more headaches as we process and analyze geospatial datasets down the line, it is prudent to check that our datasets have valid geometries.</p>
+<p>We can use the <code>geowrangler.validation</code> module to check as well fix these problems.</p>
+<div id="b115aba3-8b60-41fa-b6f8-5c46bf09fc85" class="cell">
+<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> geowrangler.validation <span class="im">import</span> GeometryValidation</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<section id="validate-aoi" class="level4">
+<h4 class="anchored" data-anchor-id="validate-aoi">Validate AOI</h4>
+<div id="c53ec61f-46eb-4ff9-950e-7f4800077b75" class="cell">
+<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a>admin3_gvm <span class="op">=</span> GeometryValidation(admin3)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="44700266-63e5-4850-8081-b3f1358f7e51" class="cell">
+<div class="sourceCode cell-code" id="cb54"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a>valid_admin3 <span class="op">=</span> admin3_gvm.validate_all()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>CPU times: user 33 ms, sys: 2.37 ms, total: 35.4 ms
+Wall time: 35 ms</code></pre>
+</div>
+</div>
+<div id="4bf71c9f-daac-47b6-91f0-0e661dedd7c7" class="cell">
+<div class="sourceCode cell-code" id="cb56"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a>valid_admin3.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">ADM3_EN</th>
+<th data-quarto-table-cell-role="th">ADM3_PCODE</th>
+<th data-quarto-table-cell-role="th">ADM2_EN</th>
+<th data-quarto-table-cell-role="th">ADM2_PCODE</th>
+<th data-quarto-table-cell-role="th">ADM1_EN</th>
+<th data-quarto-table-cell-role="th">ADM1_PCODE</th>
+<th data-quarto-table-cell-role="th">ADM0_EN</th>
+<th data-quarto-table-cell-role="th">ADM0_PCODE</th>
+<th data-quarto-table-cell-role="th">date</th>
+<th data-quarto-table-cell-role="th">validOn</th>
+<th data-quarto-table-cell-role="th">validTo</th>
+<th data-quarto-table-cell-role="th">ADM3_REF</th>
+<th data-quarto-table-cell-role="th">ADM3ALT1EN</th>
+<th data-quarto-table-cell-role="th">Shape_Leng</th>
+<th data-quarto-table-cell-role="th">Shape_Area</th>
+<th data-quarto-table-cell-role="th">AREA_SQKM</th>
+<th data-quarto-table-cell-role="th">geometry</th>
+<th data-quarto-table-cell-role="th">is_not_null</th>
+<th data-quarto-table-cell-role="th">is_not_self_intersecting</th>
+<th data-quarto-table-cell-role="th">is_oriented_properly</th>
+<th data-quarto-table-cell-role="th">is_within_crs_bounds</th>
+<th data-quarto-table-cell-role="th">area_is_not_zero</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1275</td>
+<td>City of Manila</td>
+<td>PH1303901</td>
+<td>Metropolitan Manila First District</td>
+<td>PH13039</td>
+<td>National Capital Region (NCR)</td>
+<td>PH13</td>
+<td>Philippines (the)</td>
+<td>PH</td>
+<td>2022-11-09</td>
+<td>2023-11-06</td>
+<td>0000/00/00</td>
+<td>None</td>
+<td>None</td>
+<td>0.600152</td>
+<td>0.003520</td>
+<td>41.960090</td>
+<td>POLYGON ((120.98508 14.63998, 120.98502 14.639...</td>
+<td>True</td>
+<td>True</td>
+<td>False</td>
+<td>True</td>
+<td>True</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1276</td>
+<td>City of Mandaluyong</td>
+<td>PH1307401</td>
+<td>Metropolitan Manila Second District</td>
+<td>PH13074</td>
+<td>National Capital Region (NCR)</td>
+<td>PH13</td>
+<td>Philippines (the)</td>
+<td>PH</td>
+<td>2022-11-09</td>
+<td>2023-11-06</td>
+<td>0000/00/00</td>
+<td>None</td>
+<td>None</td>
+<td>0.141520</td>
+<td>0.000949</td>
+<td>11.314034</td>
+<td>POLYGON ((121.05966 14.59007, 121.05729 14.589...</td>
+<td>True</td>
+<td>True</td>
+<td>False</td>
+<td>True</td>
+<td>True</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1277</td>
+<td>City of Marikina</td>
+<td>PH1307402</td>
+<td>Metropolitan Manila Second District</td>
+<td>PH13074</td>
+<td>National Capital Region (NCR)</td>
+<td>PH13</td>
+<td>Philippines (the)</td>
+<td>PH</td>
+<td>2022-11-09</td>
+<td>2023-11-06</td>
+<td>0000/00/00</td>
+<td>None</td>
+<td>None</td>
+<td>0.257017</td>
+<td>0.001924</td>
+<td>22.931403</td>
+<td>POLYGON ((121.13338 14.65369, 121.13344 14.653...</td>
+<td>True</td>
+<td>True</td>
+<td>False</td>
+<td>True</td>
+<td>True</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1278</td>
+<td>City of Pasig</td>
+<td>PH1307403</td>
+<td>Metropolitan Manila Second District</td>
+<td>PH13074</td>
+<td>National Capital Region (NCR)</td>
+<td>PH13</td>
+<td>Philippines (the)</td>
+<td>PH</td>
+<td>2022-11-09</td>
+<td>2023-11-06</td>
+<td>0000/00/00</td>
+<td>None</td>
+<td>None</td>
+<td>0.344848</td>
+<td>0.002626</td>
+<td>31.304225</td>
+<td>POLYGON ((121.10188 14.62066, 121.09785 14.619...</td>
+<td>True</td>
+<td>True</td>
+<td>False</td>
+<td>True</td>
+<td>True</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1279</td>
+<td>Quezon City</td>
+<td>PH1307404</td>
+<td>Metropolitan Manila Second District</td>
+<td>PH13074</td>
+<td>National Capital Region (NCR)</td>
+<td>PH13</td>
+<td>Philippines (the)</td>
+<td>PH</td>
+<td>2022-11-09</td>
+<td>2023-11-06</td>
+<td>0000/00/00</td>
+<td>None</td>
+<td>None</td>
+<td>0.773902</td>
+<td>0.013630</td>
+<td>162.439224</td>
+<td>POLYGON ((121.12563 14.71782, 121.1256 14.7178...</td>
+<td>True</td>
+<td>True</td>
+<td>False</td>
+<td>True</td>
+<td>True</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<div id="68d77869-6013-45a4-babb-ba7c8f7f7dd7" class="cell">
+<div class="sourceCode cell-code" id="cb57"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a>valid_cols <span class="op">=</span> [</span>
+<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"is_oriented_properly"</span>,</span>
+<span id="cb57-3"><a href="#cb57-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"is_not_null"</span>,</span>
+<span id="cb57-4"><a href="#cb57-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"is_not_self_intersecting"</span>,</span>
+<span id="cb57-5"><a href="#cb57-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"is_within_crs_bounds"</span>,</span>
+<span id="cb57-6"><a href="#cb57-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"area_is_not_zero"</span>,</span>
+<span id="cb57-7"><a href="#cb57-7" aria-hidden="true" tabindex="-1"></a>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="2df9d710-0de7-4904-aa1c-446430585905" class="cell">
+<div class="sourceCode cell-code" id="cb58"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a>[valid_admin3[col].value_counts() <span class="cf">for</span> col <span class="kw">in</span> valid_cols]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>[is_oriented_properly
+ False    17
+ Name: count, dtype: int64,
+ is_not_null
+ True    17
+ Name: count, dtype: int64,
+ is_not_self_intersecting
+ True    17
+ Name: count, dtype: int64,
+ is_within_crs_bounds
+ True    17
+ Name: count, dtype: int64,
+ area_is_not_zero
+ True    17
+ Name: count, dtype: int64]</code></pre>
+</div>
+</div>
+<p>So the admin areas have their geometry <em>improperly oriented</em> (i.e.&nbsp;layed out in a counter clockwise direction instead of clockwise direction) and this has been fixed, but passes all the other default validations.</p>
+<div id="4c70a12b-1f9b-4b4e-bd23-de32923d9ee3" class="cell">
+<div class="sourceCode cell-code" id="cb60"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a>valid_admin3 <span class="op">=</span> valid_admin3.drop(columns<span class="op">=</span>valid_cols)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="validate-data-geometries" class="level4">
+<h4 class="anchored" data-anchor-id="validate-data-geometries">Validate Data Geometries</h4>
+<p>Before validating, let’s filter the data to only those intersecting our AOI because we don’t need to check all the data from around the world when we’re only interested in our AOI.</p>
+<p>Before we validate, we need to create the spatial indexes for both the AOI and data geometries. Generating the spatial indexes of the data geometries can take a minute or two due to the size of the data and their geometries.</p>
+<div id="46ecadee-805a-4aa4-a7a9-e544b1f6c071" class="cell">
+<div class="sourceCode cell-code" id="cb61"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a>valid_admin3.geometry.sindex</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>CPU times: user 181 µs, sys: 7 µs, total: 188 µs
+Wall time: 190 µs</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<pre><code>&lt;geopandas.sindex.SpatialIndex&gt;</code></pre>
+</div>
+</div>
+<div id="7e9b73fc-6bf4-475a-af1a-be417f15c28b" class="cell">
+<div class="sourceCode cell-code" id="cb64"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a>fixed.geometry.sindex</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>CPU times: user 1.31 s, sys: 1.4 s, total: 2.71 s
+Wall time: 3.52 s</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<pre><code>&lt;geopandas.sindex.SpatialIndex&gt;</code></pre>
+</div>
+</div>
+<p>Lets now filter the data (<code>filtered_fixed</code>).</p>
+<p>Filtering the data using a spatial join can also take a minute or two.</p>
+<div id="cea62825-b28e-4392-86b5-fe7423b78edf" class="cell">
+<div class="sourceCode cell-code" id="cb67"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb67-1"><a href="#cb67-1" aria-hidden="true" tabindex="-1"></a>filtered_fixed <span class="op">=</span> fixed.sjoin(</span>
+<span id="cb67-2"><a href="#cb67-2" aria-hidden="true" tabindex="-1"></a>    valid_admin3[[<span class="st">"geometry"</span>]], how<span class="op">=</span><span class="st">"inner"</span>, predicate<span class="op">=</span><span class="st">"intersects"</span></span>
+<span id="cb67-3"><a href="#cb67-3" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>CPU times: user 244 ms, sys: 587 ms, total: 830 ms
+Wall time: 1.42 s</code></pre>
+</div>
+</div>
+<div id="86780b3e-62c8-4df1-ab9c-fbd85a255b3c" class="cell">
+<div class="sourceCode cell-code" id="cb69"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb69-1"><a href="#cb69-1" aria-hidden="true" tabindex="-1"></a>filtered_fixed <span class="op">=</span> filtered_fixed.drop(columns<span class="op">=</span>[<span class="st">"index_right"</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="04acfb15-d0b6-4474-ae31-a12c6ae1c502" class="cell">
+<div class="sourceCode cell-code" id="cb70"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb70-1"><a href="#cb70-1" aria-hidden="true" tabindex="-1"></a>fixed_gvm <span class="op">=</span> GeometryValidation(filtered_fixed)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cf4b88b8-6620-419c-a12f-8b150aea3ae5" class="cell">
+<div class="sourceCode cell-code" id="cb71"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb71-1"><a href="#cb71-1" aria-hidden="true" tabindex="-1"></a>valid_fixed <span class="op">=</span> fixed_gvm.validate_all()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>CPU times: user 182 ms, sys: 5.59 ms, total: 188 ms
+Wall time: 202 ms</code></pre>
+</div>
+</div>
+<div id="7b64a35b-57ca-4851-b20f-dfe74993d231" class="cell">
+<div class="sourceCode cell-code" id="cb73"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb73-1"><a href="#cb73-1" aria-hidden="true" tabindex="-1"></a>[valid_fixed[col].value_counts() <span class="cf">for</span> col <span class="kw">in</span> valid_cols]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>CPU times: user 595 µs, sys: 97 µs, total: 692 µs
+Wall time: 695 µs</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<pre><code>[is_oriented_properly
+ False    2202
+ Name: count, dtype: int64,
+ is_not_null
+ True    2202
+ Name: count, dtype: int64,
+ is_not_self_intersecting
+ True    2202
+ Name: count, dtype: int64,
+ is_within_crs_bounds
+ True    2202
+ Name: count, dtype: int64,
+ area_is_not_zero
+ True    2202
+ Name: count, dtype: int64]</code></pre>
+</div>
+</div>
+<p>Again the data geometries have an improperly oriented geometry and have been fixed by the validator</p>
+<div id="85508f64-1665-4e36-b009-edc673dbbd68" class="cell">
+<div class="sourceCode cell-code" id="cb76"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb76-1"><a href="#cb76-1" aria-hidden="true" tabindex="-1"></a>valid_fixed <span class="op">=</span> valid_fixed.drop(columns<span class="op">=</span>valid_cols)</span>
+<span id="cb76-2"><a href="#cb76-2" aria-hidden="true" tabindex="-1"></a>filtered_fixed <span class="op">=</span> valid_fixed</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/fixed-ookla-admin3-ncr-2020q2.png" class="img-fluid figure-img"></p>
+<figcaption>filtered fixed ookla data</figcaption>
+</figure>
+</div>
+</section>
+</section>
+<section id="generate-zonal-stats" class="level3">
+<h3 class="anchored" data-anchor-id="generate-zonal-stats">Generate Zonal Stats</h3>
+<p>Lets now generate the zonal stats – the statistics of the data we are interested in.</p>
+<div id="055c2c87-728a-4659-be9a-d39dc39e0a2c" class="cell">
+<div class="sourceCode cell-code" id="cb77"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb77-1"><a href="#cb77-1" aria-hidden="true" tabindex="-1"></a>filtered_fixed.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">quadkey</th>
+<th data-quarto-table-cell-role="th">tile_x</th>
+<th data-quarto-table-cell-role="th">tile_y</th>
+<th data-quarto-table-cell-role="th">avg_d_kbps</th>
+<th data-quarto-table-cell-role="th">avg_u_kbps</th>
+<th data-quarto-table-cell-role="th">avg_lat_ms</th>
+<th data-quarto-table-cell-role="th">avg_lat_down_ms</th>
+<th data-quarto-table-cell-role="th">avg_lat_up_ms</th>
+<th data-quarto-table-cell-role="th">tests</th>
+<th data-quarto-table-cell-role="th">devices</th>
+<th data-quarto-table-cell-role="th">geometry</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">5658690</td>
+<td>1323030313311323</td>
+<td>120.9238</td>
+<td>14.7350</td>
+<td>43033</td>
+<td>47711</td>
+<td>9</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>92</td>
+<td>23</td>
+<td>POLYGON ((120.92102 14.7377, 120.92102 14.7323...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">5658692</td>
+<td>1323030313311332</td>
+<td>120.9293</td>
+<td>14.7350</td>
+<td>72579</td>
+<td>91717</td>
+<td>11</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>149</td>
+<td>36</td>
+<td>POLYGON ((120.92651 14.7377, 120.92651 14.7323...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">5658693</td>
+<td>1323030313311333</td>
+<td>120.9348</td>
+<td>14.7350</td>
+<td>52572</td>
+<td>67337</td>
+<td>3</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>1</td>
+<td>1</td>
+<td>POLYGON ((120.93201 14.7377, 120.93201 14.7323...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">5658698</td>
+<td>1323030313313033</td>
+<td>120.9128</td>
+<td>14.7138</td>
+<td>7615</td>
+<td>11991</td>
+<td>14</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>14</td>
+<td>3</td>
+<td>POLYGON ((120.91003 14.71645, 120.91003 14.711...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">5658702</td>
+<td>1323030313313110</td>
+<td>120.9293</td>
+<td>14.7297</td>
+<td>63551</td>
+<td>77540</td>
+<td>14</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>600</td>
+<td>69</td>
+<td>POLYGON ((120.92651 14.73239, 120.92651 14.727...</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<div id="43cc6792-18db-494d-ae1e-dfdafec36f96" class="cell">
+<div class="sourceCode cell-code" id="cb78"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb78-1"><a href="#cb78-1" aria-hidden="true" tabindex="-1"></a><span class="bu">list</span>(filtered_fixed.columns.values)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>['quadkey',
+ 'tile_x',
+ 'tile_y',
+ 'avg_d_kbps',
+ 'avg_u_kbps',
+ 'avg_lat_ms',
+ 'avg_lat_down_ms',
+ 'avg_lat_up_ms',
+ 'tests',
+ 'devices',
+ 'geometry']</code></pre>
+</div>
+</div>
+<div id="3fab265e-908c-4a69-9da3-94204a8c16b8" class="cell">
+<div class="sourceCode cell-code" id="cb80"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb80-1"><a href="#cb80-1" aria-hidden="true" tabindex="-1"></a><span class="bu">len</span>(filtered_fixed)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>2202</code></pre>
+</div>
+</div>
+<p>Convert to planar CRS (since we are computing areas)</p>
+<div id="0a8e14d2-4113-4387-937e-b9f5129c9557" class="cell">
+<div class="sourceCode cell-code" id="cb82"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb82-1"><a href="#cb82-1" aria-hidden="true" tabindex="-1"></a>valid_admin3 <span class="op">=</span> valid_admin3.to_crs(<span class="st">"EPSG:3857"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>CPU times: user 5.53 ms, sys: 2.28 ms, total: 7.81 ms
+Wall time: 13 ms</code></pre>
+</div>
+</div>
+<div id="e8e2ff47-bba6-4a6c-9436-5988c9feeec3" class="cell">
+<div class="sourceCode cell-code" id="cb84"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb84-1"><a href="#cb84-1" aria-hidden="true" tabindex="-1"></a>filtered_fixed <span class="op">=</span> filtered_fixed.to_crs(<span class="st">"EPSG:3857"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>CPU times: user 3.5 ms, sys: 1.08 ms, total: 4.58 ms
+Wall time: 4.43 ms</code></pre>
+</div>
+</div>
+<p>Lets save the files so we can retrieve them as necessary without having to reprocess them again.</p>
+<div id="93ea17d1-532b-40b7-a17a-c67d6eb27dec" class="cell">
+<div class="sourceCode cell-code" id="cb86"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb86-1"><a href="#cb86-1" aria-hidden="true" tabindex="-1"></a>valid_admin3.to_file(<span class="st">"../data/valid_admin3.geojson"</span>, driver<span class="op">=</span><span class="st">"GeoJSON"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>CPU times: user 81.4 ms, sys: 3.95 ms, total: 85.3 ms
+Wall time: 87.2 ms</code></pre>
+</div>
+</div>
+<div id="e7ee9053-5726-456d-a941-293db991c3d6" class="cell">
+<div class="sourceCode cell-code" id="cb88"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb88-1"><a href="#cb88-1" aria-hidden="true" tabindex="-1"></a>filtered_fixed.to_file(<span class="st">"../data/filtered_fixed.geojson"</span>, driver<span class="op">=</span><span class="st">"GeoJSON"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>CPU times: user 45.2 ms, sys: 2.77 ms, total: 47.9 ms
+Wall time: 48.9 ms</code></pre>
+</div>
+</div>
+<div id="d5f76eab-e106-4f26-8c1e-5ccb62d9144b" class="cell">
+<div class="sourceCode cell-code" id="cb90"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb90-1"><a href="#cb90-1" aria-hidden="true" tabindex="-1"></a><span class="co"># %%time</span></span>
+<span id="cb90-2"><a href="#cb90-2" aria-hidden="true" tabindex="-1"></a><span class="co"># valid_admin3 = gpd.read_file("../data/valid_admin3.geojson")</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="029d9c9e-d502-499c-ab91-4cdd9ab75089" class="cell">
+<div class="sourceCode cell-code" id="cb91"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb91-1"><a href="#cb91-1" aria-hidden="true" tabindex="-1"></a><span class="co"># %%time</span></span>
+<span id="cb91-2"><a href="#cb91-2" aria-hidden="true" tabindex="-1"></a><span class="co"># filtered_fixed = gpd.read_file("../data/filtered_fixed.geojson")</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We want the following statistics - <code>mean</code> (aka average), <code>min</code> (minimum), <code>max</code> (maximum) and the standard deviation (<code>std</code>) for the 3 data columns that ookla provides - average download speed (<code>avg_d_kbps</code>), average upload speed (<code>avg_u_kbps</code>) and average latency in milliseconds (<code>avg_lat_ms</code>)</p>
+<div id="aa1b3b4a-0ab7-4431-91d3-d2a001ac8c27" class="cell">
+<div class="sourceCode cell-code" id="cb92"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb92-1"><a href="#cb92-1" aria-hidden="true" tabindex="-1"></a>funcs <span class="op">=</span> [<span class="st">"mean"</span>, <span class="st">"min"</span>, <span class="st">"max"</span>, <span class="st">"std"</span>]</span>
+<span id="cb92-2"><a href="#cb92-2" aria-hidden="true" tabindex="-1"></a>columns <span class="op">=</span> [<span class="st">"avg_d_kbps"</span>, <span class="st">"avg_u_kbps"</span>, <span class="st">"avg_lat_ms"</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="9c659af8-48fb-4621-b42f-5c97622ef54c" class="cell">
+<div class="sourceCode cell-code" id="cb93"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb93-1"><a href="#cb93-1" aria-hidden="true" tabindex="-1"></a>aggregations <span class="op">=</span> [<span class="bu">dict</span>(func<span class="op">=</span>funcs, column<span class="op">=</span>c) <span class="cf">for</span> c <span class="kw">in</span> columns]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>These are the aggregations to be performed for each data column</p>
+<div id="c069d560-8c21-4c75-a0ea-5ac1e1171ee7" class="cell">
+<div class="sourceCode cell-code" id="cb94"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb94-1"><a href="#cb94-1" aria-hidden="true" tabindex="-1"></a>aggregations</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>[{'func': ['mean', 'min', 'max', 'std'], 'column': 'avg_d_kbps'},
+ {'func': ['mean', 'min', 'max', 'std'], 'column': 'avg_u_kbps'},
+ {'func': ['mean', 'min', 'max', 'std'], 'column': 'avg_lat_ms'}]</code></pre>
+</div>
+</div>
+<p>The output columns use the default <code>{column}_{func}</code> format if not explicitly specified.</p>
+<div id="00af125d-e5b2-4a7c-bdde-09dbbc73c845" class="cell">
+<div class="sourceCode cell-code" id="cb96"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb96-1"><a href="#cb96-1" aria-hidden="true" tabindex="-1"></a>aoi <span class="op">=</span> azs.create_area_zonal_stats(</span>
+<span id="cb96-2"><a href="#cb96-2" aria-hidden="true" tabindex="-1"></a>    valid_admin3, filtered_fixed, aggregations<span class="op">=</span>aggregations</span>
+<span id="cb96-3"><a href="#cb96-3" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>CPU times: user 287 ms, sys: 12.5 ms, total: 300 ms
+Wall time: 304 ms</code></pre>
+</div>
+</div>
+</section>
+<section id="analyze-zonal-stats" class="level3">
+<h3 class="anchored" data-anchor-id="analyze-zonal-stats">Analyze Zonal Stats</h3>
+<p>These are the results - the same dataframe as the original, with the addition of zonal statistics we specified as the aggregations.</p>
+<div id="44b4c4f4-1641-4f5a-8d37-bffbef2ae6dd" class="cell">
+<div class="sourceCode cell-code" id="cb98"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb98-1"><a href="#cb98-1" aria-hidden="true" tabindex="-1"></a>aoi.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">ADM3_EN</th>
+<th data-quarto-table-cell-role="th">ADM3_PCODE</th>
+<th data-quarto-table-cell-role="th">ADM2_EN</th>
+<th data-quarto-table-cell-role="th">ADM2_PCODE</th>
+<th data-quarto-table-cell-role="th">ADM1_EN</th>
+<th data-quarto-table-cell-role="th">ADM1_PCODE</th>
+<th data-quarto-table-cell-role="th">ADM0_EN</th>
+<th data-quarto-table-cell-role="th">ADM0_PCODE</th>
+<th data-quarto-table-cell-role="th">date</th>
+<th data-quarto-table-cell-role="th">validOn</th>
+<th data-quarto-table-cell-role="th">validTo</th>
+<th data-quarto-table-cell-role="th">ADM3_REF</th>
+<th data-quarto-table-cell-role="th">ADM3ALT1EN</th>
+<th data-quarto-table-cell-role="th">Shape_Leng</th>
+<th data-quarto-table-cell-role="th">Shape_Area</th>
+<th data-quarto-table-cell-role="th">AREA_SQKM</th>
+<th data-quarto-table-cell-role="th">geometry</th>
+<th data-quarto-table-cell-role="th">intersect_area_sum</th>
+<th data-quarto-table-cell-role="th">avg_d_kbps_mean</th>
+<th data-quarto-table-cell-role="th">avg_d_kbps_min</th>
+<th data-quarto-table-cell-role="th">avg_d_kbps_max</th>
+<th data-quarto-table-cell-role="th">avg_d_kbps_std</th>
+<th data-quarto-table-cell-role="th">avg_u_kbps_mean</th>
+<th data-quarto-table-cell-role="th">avg_u_kbps_min</th>
+<th data-quarto-table-cell-role="th">avg_u_kbps_max</th>
+<th data-quarto-table-cell-role="th">avg_u_kbps_std</th>
+<th data-quarto-table-cell-role="th">avg_lat_ms_mean</th>
+<th data-quarto-table-cell-role="th">avg_lat_ms_min</th>
+<th data-quarto-table-cell-role="th">avg_lat_ms_max</th>
+<th data-quarto-table-cell-role="th">avg_lat_ms_std</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1275</td>
+<td>City of Manila</td>
+<td>PH1303901</td>
+<td>Metropolitan Manila First District</td>
+<td>PH13039</td>
+<td>National Capital Region (NCR)</td>
+<td>PH13</td>
+<td>Philippines (the)</td>
+<td>PH</td>
+<td>2022-11-09</td>
+<td>2023-11-06</td>
+<td>0000/00/00</td>
+<td>None</td>
+<td>None</td>
+<td>0.600152</td>
+<td>0.003520</td>
+<td>41.960090</td>
+<td>POLYGON ((13467997.788 1647743.669, 13467990.2...</td>
+<td>5.319784e+07</td>
+<td>480.501342</td>
+<td>0.0</td>
+<td>208079</td>
+<td>19451.400409</td>
+<td>401.935738</td>
+<td>0.0</td>
+<td>252268</td>
+<td>21777.859621</td>
+<td>0.042510</td>
+<td>0.0</td>
+<td>160</td>
+<td>11.038219</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1276</td>
+<td>City of Mandaluyong</td>
+<td>PH1307401</td>
+<td>Metropolitan Manila Second District</td>
+<td>PH13074</td>
+<td>National Capital Region (NCR)</td>
+<td>PH13</td>
+<td>Philippines (the)</td>
+<td>PH</td>
+<td>2022-11-09</td>
+<td>2023-11-06</td>
+<td>0000/00/00</td>
+<td>None</td>
+<td>None</td>
+<td>0.141520</td>
+<td>0.000949</td>
+<td>11.314034</td>
+<td>POLYGON ((13476299.72 1642002.083, 13476035.58...</td>
+<td>1.861584e+07</td>
+<td>1556.122992</td>
+<td>0.0</td>
+<td>169221</td>
+<td>19460.297726</td>
+<td>1391.349828</td>
+<td>0.0</td>
+<td>192392</td>
+<td>22225.667081</td>
+<td>0.141840</td>
+<td>0.0</td>
+<td>15</td>
+<td>2.309665</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1277</td>
+<td>City of Marikina</td>
+<td>PH1307402</td>
+<td>Metropolitan Manila Second District</td>
+<td>PH13074</td>
+<td>National Capital Region (NCR)</td>
+<td>PH13</td>
+<td>Philippines (the)</td>
+<td>PH</td>
+<td>2022-11-09</td>
+<td>2023-11-06</td>
+<td>0000/00/00</td>
+<td>None</td>
+<td>None</td>
+<td>0.257017</td>
+<td>0.001924</td>
+<td>22.931403</td>
+<td>POLYGON ((13484505.693 1649321.548, 13484512.7...</td>
+<td>2.925728e+07</td>
+<td>890.018039</td>
+<td>0.0</td>
+<td>144549</td>
+<td>15060.305627</td>
+<td>814.873754</td>
+<td>0.0</td>
+<td>132992</td>
+<td>15016.269054</td>
+<td>0.060550</td>
+<td>0.0</td>
+<td>22</td>
+<td>2.928328</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1278</td>
+<td>City of Pasig</td>
+<td>PH1307403</td>
+<td>Metropolitan Manila Second District</td>
+<td>PH13074</td>
+<td>National Capital Region (NCR)</td>
+<td>PH13</td>
+<td>Philippines (the)</td>
+<td>PH</td>
+<td>2022-11-09</td>
+<td>2023-11-06</td>
+<td>0000/00/00</td>
+<td>None</td>
+<td>None</td>
+<td>0.344848</td>
+<td>0.002626</td>
+<td>31.304225</td>
+<td>POLYGON ((13480999.467 1645520.671, 13480550.6...</td>
+<td>4.235474e+07</td>
+<td>654.028552</td>
+<td>0.0</td>
+<td>148007</td>
+<td>17091.663647</td>
+<td>589.939054</td>
+<td>0.0</td>
+<td>142586</td>
+<td>19958.543519</td>
+<td>0.052444</td>
+<td>0.0</td>
+<td>25</td>
+<td>3.773210</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1279</td>
+<td>Quezon City</td>
+<td>PH1307404</td>
+<td>Metropolitan Manila Second District</td>
+<td>PH13074</td>
+<td>National Capital Region (NCR)</td>
+<td>PH13</td>
+<td>Philippines (the)</td>
+<td>PH</td>
+<td>2022-11-09</td>
+<td>2023-11-06</td>
+<td>0000/00/00</td>
+<td>None</td>
+<td>None</td>
+<td>0.773902</td>
+<td>0.013630</td>
+<td>162.439224</td>
+<td>POLYGON ((13483643.002 1656701.652, 13483639.5...</td>
+<td>1.744956e+08</td>
+<td>145.327232</td>
+<td>0.0</td>
+<td>269544</td>
+<td>20256.330164</td>
+<td>133.237247</td>
+<td>0.0</td>
+<td>260425</td>
+<td>20148.610313</td>
+<td>0.011825</td>
+<td>0.0</td>
+<td>29</td>
+<td>2.907006</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>Lets save the results</p>
+<div id="f303907c-62e6-40d5-9fd5-4c99ea39860a" class="cell">
+<div class="sourceCode cell-code" id="cb99"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb99-1"><a href="#cb99-1" aria-hidden="true" tabindex="-1"></a>aoi.to_file(<span class="st">"../data/admin3_internet_aoi.geojson"</span>, driver<span class="op">=</span><span class="st">"GeoJSON"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>CPU times: user 83.8 ms, sys: 2.89 ms, total: 86.7 ms
+Wall time: 101 ms</code></pre>
+</div>
+</div>
+<div id="f928d3af-9f82-4812-807d-a073d01e66b6" class="cell">
+<div class="sourceCode cell-code" id="cb101"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb101-1"><a href="#cb101-1" aria-hidden="true" tabindex="-1"></a><span class="bu">list</span>(aoi.columns.values)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>['ADM3_EN',
+ 'ADM3_PCODE',
+ 'ADM2_EN',
+ 'ADM2_PCODE',
+ 'ADM1_EN',
+ 'ADM1_PCODE',
+ 'ADM0_EN',
+ 'ADM0_PCODE',
+ 'date',
+ 'validOn',
+ 'validTo',
+ 'ADM3_REF',
+ 'ADM3ALT1EN',
+ 'Shape_Leng',
+ 'Shape_Area',
+ 'AREA_SQKM',
+ 'geometry',
+ 'intersect_area_sum',
+ 'avg_d_kbps_mean',
+ 'avg_d_kbps_min',
+ 'avg_d_kbps_max',
+ 'avg_d_kbps_std',
+ 'avg_u_kbps_mean',
+ 'avg_u_kbps_min',
+ 'avg_u_kbps_max',
+ 'avg_u_kbps_std',
+ 'avg_lat_ms_mean',
+ 'avg_lat_ms_min',
+ 'avg_lat_ms_max',
+ 'avg_lat_ms_std']</code></pre>
+</div>
+</div>
+<p>Let’s sort the different admin level 3 areas (cities/municipalities/district) by average download speed (<code>avg_d_kbps_mean</code>) in descending order</p>
+<div id="97099816-94c5-426b-9ce0-a94d1823e12d" class="cell">
+<div class="sourceCode cell-code" id="cb103"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb103-1"><a href="#cb103-1" aria-hidden="true" tabindex="-1"></a>fastest_mean_download <span class="op">=</span> aoi.sort_values(<span class="st">"avg_d_kbps_mean"</span>, ascending<span class="op">=</span><span class="va">False</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>CPU times: user 423 µs, sys: 61 µs, total: 484 µs
+Wall time: 452 µs</code></pre>
+</div>
+</div>
+<div id="b79ed5ca-35fd-4486-aff8-bb6e2b3a667c" class="cell">
+<div class="sourceCode cell-code" id="cb105"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb105-1"><a href="#cb105-1" aria-hidden="true" tabindex="-1"></a><span class="bu">len</span>(fastest_mean_download)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>17</code></pre>
+</div>
+</div>
+<p>So according the latest ookla data (as of this writing) the district/town/province within the NCR Region with the fastest average download speed is <strong>Pateros</strong>!! :)</p>
+<div id="f97ca617-a2fe-4891-ad0d-3de47b7ea3a8" class="cell">
+<div class="sourceCode cell-code" id="cb107"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb107-1"><a href="#cb107-1" aria-hidden="true" tabindex="-1"></a>fastest_mean_download.iloc[<span class="dv">0</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>ADM3_EN                                                         Pateros
+ADM3_PCODE                                                    PH1307606
+ADM2_EN                             Metropolitan Manila Fourth District
+ADM2_PCODE                                                      PH13076
+ADM1_EN                                   National Capital Region (NCR)
+ADM1_PCODE                                                         PH13
+ADM0_EN                                               Philippines (the)
+ADM0_PCODE                                                           PH
+date                                                2022-11-09 00:00:00
+validOn                                             2023-11-06 00:00:00
+validTo                                                      0000/00/00
+ADM3_REF                                                           None
+ADM3ALT1EN                                                         None
+Shape_Leng                                                     0.068193
+Shape_Area                                                     0.000135
+AREA_SQKM                                                      1.609302
+geometry              POLYGON ((13478347.724949818 1637036.020144811...
+intersect_area_sum                                        3712583.54692
+avg_d_kbps_mean                                             7583.799743
+avg_d_kbps_min                                                      0.0
+avg_d_kbps_max                                                   111120
+avg_d_kbps_std                                             14196.753913
+avg_u_kbps_mean                                             7591.256832
+avg_u_kbps_min                                                      0.0
+avg_u_kbps_max                                                   111569
+avg_u_kbps_std                                             16428.535646
+avg_lat_ms_mean                                                0.653218
+avg_lat_ms_min                                                      0.0
+avg_lat_ms_max                                                       22
+avg_lat_ms_std                                                 6.301402
+Name: 1290, dtype: object</code></pre>
+</div>
+</div>
+<p>While the district/city/municipality within the NCR Regions with the slowest average download speed is <strong>Quezon City</strong>!!!</p>
+<div id="7af62fe8-19a3-40fd-b4d0-2f40aeb20fdb" class="cell">
+<div class="sourceCode cell-code" id="cb109"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb109-1"><a href="#cb109-1" aria-hidden="true" tabindex="-1"></a>fastest_mean_download.iloc[<span class="op">-</span><span class="dv">1</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>ADM3_EN                                                     Quezon City
+ADM3_PCODE                                                    PH1307404
+ADM2_EN                             Metropolitan Manila Second District
+ADM2_PCODE                                                      PH13074
+ADM1_EN                                   National Capital Region (NCR)
+ADM1_PCODE                                                         PH13
+ADM0_EN                                               Philippines (the)
+ADM0_PCODE                                                           PH
+date                                                2022-11-09 00:00:00
+validOn                                             2023-11-06 00:00:00
+validTo                                                      0000/00/00
+ADM3_REF                                                           None
+ADM3ALT1EN                                                         None
+Shape_Leng                                                     0.773902
+Shape_Area                                                      0.01363
+AREA_SQKM                                                    162.439224
+geometry              POLYGON ((13483643.001879975 1656701.652220414...
+intersect_area_sum                                     174495583.968927
+avg_d_kbps_mean                                              145.327232
+avg_d_kbps_min                                                      0.0
+avg_d_kbps_max                                                   269544
+avg_d_kbps_std                                             20256.330164
+avg_u_kbps_mean                                              133.237247
+avg_u_kbps_min                                                      0.0
+avg_u_kbps_max                                                   260425
+avg_u_kbps_std                                             20148.610313
+avg_lat_ms_mean                                                0.011825
+avg_lat_ms_min                                                      0.0
+avg_lat_ms_max                                                       29
+avg_lat_ms_std                                                 2.907006
+Name: 1279, dtype: object</code></pre>
+</div>
+</div>
+<p>The top 5 fastest areas are</p>
+<div id="aadf0459-e05c-495e-855e-4d8cf9d60a5c" class="cell">
+<div class="sourceCode cell-code" id="cb111"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb111-1"><a href="#cb111-1" aria-hidden="true" tabindex="-1"></a>fastest_mean_download[[<span class="st">"ADM3_EN"</span>, <span class="st">"ADM2_EN"</span>, <span class="st">"avg_d_kbps_mean"</span>]].head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">ADM3_EN</th>
+<th data-quarto-table-cell-role="th">ADM2_EN</th>
+<th data-quarto-table-cell-role="th">avg_d_kbps_mean</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1290</td>
+<td>Pateros</td>
+<td>Metropolitan Manila Fourth District</td>
+<td>7583.799743</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1280</td>
+<td>City of San Juan</td>
+<td>Metropolitan Manila Second District</td>
+<td>3060.079907</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1276</td>
+<td>City of Mandaluyong</td>
+<td>Metropolitan Manila Second District</td>
+<td>1556.122992</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1283</td>
+<td>City of Navotas</td>
+<td>Metropolitan Manila Third District</td>
+<td>1065.788943</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1282</td>
+<td>City of Malabon</td>
+<td>Metropolitan Manila Third District</td>
+<td>1006.571673</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>The top 5 slowest areas are</p>
+<div id="175d329b-c7dc-4e0e-b2b8-4f37fd48b88c" class="cell">
+<div class="sourceCode cell-code" id="cb112"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb112-1"><a href="#cb112-1" aria-hidden="true" tabindex="-1"></a>fastest_mean_download[[<span class="st">"ADM3_EN"</span>, <span class="st">"ADM2_EN"</span>, <span class="st">"avg_d_kbps_mean"</span>]].tail()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">ADM3_EN</th>
+<th data-quarto-table-cell-role="th">ADM2_EN</th>
+<th data-quarto-table-cell-role="th">avg_d_kbps_mean</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1275</td>
+<td>City of Manila</td>
+<td>Metropolitan Manila First District</td>
+<td>480.501342</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1288</td>
+<td>City of Parañaque</td>
+<td>Metropolitan Manila Fourth District</td>
+<td>470.097380</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1284</td>
+<td>City of Valenzuela</td>
+<td>Metropolitan Manila Third District</td>
+<td>419.877335</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1281</td>
+<td>Caloocan City</td>
+<td>Metropolitan Manila Third District</td>
+<td>311.217504</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1279</td>
+<td>Quezon City</td>
+<td>Metropolitan Manila Second District</td>
+<td>145.327232</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<div id="64712071-46f8-47d4-8676-b3901771c7fd" class="cell">
+<div class="sourceCode cell-code" id="cb113"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb113-1"><a href="#cb113-1" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> plt.axes()</span>
+<span id="cb113-2"><a href="#cb113-2" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> fastest_mean_download.plot(ax<span class="op">=</span>ax, facecolor<span class="op">=</span><span class="st">"none"</span>, edgecolor<span class="op">=</span><span class="st">"blue"</span>)</span>
+<span id="cb113-3"><a href="#cb113-3" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> fastest_mean_download.iloc[:<span class="dv">1</span>].plot(ax<span class="op">=</span>ax, facecolor<span class="op">=</span><span class="st">"red"</span>, edgecolor<span class="op">=</span><span class="st">"red"</span>)</span>
+<span id="cb113-4"><a href="#cb113-4" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> fastest_mean_download.iloc[<span class="op">-</span><span class="dv">1</span>:].plot(ax<span class="op">=</span>ax, facecolor<span class="op">=</span><span class="st">"green"</span>, edgecolor<span class="op">=</span><span class="st">"green"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="overview.usecase_ookla_files/figure-html/cell-79-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/fastest-fixed-ookla-by-adm3.png" class="img-fluid figure-img"></p>
+<figcaption>fastest fixed ookla by adm3</figcaption>
+</figure>
+</div>
+<p>So now, we’ve answered the question of where the fastest/slowest internet speeds are for the National Capital Region (NCR)</p>
+</section>
+<section id="additional-exercises" class="level3">
+<h3 class="anchored" data-anchor-id="additional-exercises">Additional Exercises</h3>
+<p>You can further experiment and try out other exercises to explore ookla data, or even try it out using a different country using a different geodataset from the Humanitarian Data Exchange site.</p>
+<p>The following are more exercises you can try:</p>
+<ul>
+<li>Repeat the same process to find the fastest and slowest <strong>mobile</strong> internet speeds</li>
+<li>Repeat the same process for a different REGION_FILTER</li>
+<li>Aggregate by adm2 level instead of adm3</li>
+</ul>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp("https:\/\/geowrangler\.thinkingmachin\.es\/");
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/thinkingmachines/geowrangler/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>

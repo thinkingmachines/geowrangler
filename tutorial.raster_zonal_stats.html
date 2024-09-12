@@ -1,0 +1,2063 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.5.57">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Raster Zonal Stats Tutorial – geowrangler</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script><script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+
+<link rel="stylesheet" href="styles.css">
+<meta property="og:title" content="Raster Zonal Stats Tutorial – geowrangler">
+<meta property="og:description" content="🌏 A python package for wrangling geospatial datasets">
+<meta property="og:site_name" content="geowrangler">
+<meta name="twitter:title" content="Raster Zonal Stats Tutorial – geowrangler">
+<meta name="twitter:description" content="🌏 A python package for wrangling geospatial datasets">
+<meta name="twitter:card" content="summary">
+</head>
+
+<body class="nav-sidebar floating nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">geowrangler</span>
+    </a>
+  </div>
+        <div class="quarto-navbar-tools tools-end">
+</div>
+          <div id="quarto-search" class="" title="Search"></div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./tutorial.grids.html">Tutorials</a></li><li class="breadcrumb-item"><a href="./tutorial.raster_zonal_stats.html">Raster Zonal Stats Tutorial</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Geowrangler</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Tutorials</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.grids.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Grid Generation Tutorial</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.geometry_validation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Geometry Validation Tutorial</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.vector_zonal_stats.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Vector Zonal Stats Tutorial</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.raster_zonal_stats.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Raster Zonal Stats Tutorial</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.area_zonal_stats.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Vector Area Zonal Stats Tutorial</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.distance_zonal_stats.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Vector Distance Zonal Stats Tutorial</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.dhs.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">DHS Wealth Index</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.datasets.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Datasets Download</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.spatialjoin_highest_intersection.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Spatial Join Using Highest Intersection Tutorial</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.tile_clustering.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Tile Clustering Tutorial</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.raster_process.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Raster Processing Tutorial</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.raster_to_df.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Raster to Dataframe Tutorial</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Use Case Demos</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./overview.poverty_mapping_demo.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Explore Poverty Mapping Machine Learning Models</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./overview.usecase_ookla.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exploring Internet Speeds with Ookla</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">Module Reference</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./grids.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Grids</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./polygon_fill.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Polygon Fill</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./validation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Geometry Validation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./vector_zonal_stats.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Vector Zonal Stats</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./raster_zonal_stats.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Raster Zonal Stats</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./area_zonal_stats.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Area Zonal Stats</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./distance_zonal_stats.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Distance Zonal Stats</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./vector_to_raster_mask.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Vector to Raster mask</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./raster_to_dataframe.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Raster to Dataframe</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./raster_process.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Raster Processing</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./dhs.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">DHS Utilities</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./datasets_geofabrik.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Datasets Geofabrik</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./datasets_ookla.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Datasets Ookla</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./datasets_nightlights.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Night Lights</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./datasets_utils.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Datasets Utils</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tile_clustering.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Tile Clustering</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./spatialjoin_highest_intersection.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Spatial Join Highest Intersection</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#basic-usage" id="toc-basic-usage" class="nav-link active" data-scroll-target="#basic-usage">Basic Usage</a>
+  <ul class="collapse">
+  <li><a href="#load-aoi" id="toc-load-aoi" class="nav-link" data-scroll-target="#load-aoi">Load AOI</a></li>
+  <li><a href="#download-philippine-population-data" id="toc-download-philippine-population-data" class="nav-link" data-scroll-target="#download-philippine-population-data">Download Philippine Population Data</a></li>
+  <li><a href="#using-grid-tile-aois" id="toc-using-grid-tile-aois" class="nav-link" data-scroll-target="#using-grid-tile-aois">Using Grid Tile AOIs</a></li>
+  <li><a href="#using-bing-tile-grid-tile-aois" id="toc-using-bing-tile-grid-tile-aois" class="nav-link" data-scroll-target="#using-bing-tile-grid-tile-aois">Using Bing Tile Grid Tile AOIs</a></li>
+  </ul></li>
+  <li><a href="#exactextract-usage-experimental" id="toc-exactextract-usage-experimental" class="nav-link" data-scroll-target="#exactextract-usage-experimental">Exactextract Usage (experimental)</a>
+  <ul class="collapse">
+  <li><a href="#replicate-basic-usage-using-exactextract" id="toc-replicate-basic-usage-using-exactextract" class="nav-link" data-scroll-target="#replicate-basic-usage-using-exactextract">Replicate basic usage using exactextract</a></li>
+  <li><a href="#multi-band-usage" id="toc-multi-band-usage" class="nav-link" data-scroll-target="#multi-band-usage">Multi-band Usage</a></li>
+  <li><a href="#other-options" id="toc-other-options" class="nav-link" data-scroll-target="#other-options">Other options</a></li>
+  <li><a href="#comparison-of-exactextract-and-rasterstats" id="toc-comparison-of-exactextract-and-rasterstats" class="nav-link" data-scroll-target="#comparison-of-exactextract-and-rasterstats">Comparison of <code>exactextract</code> and <code>rasterstats</code></a></li>
+  </ul></li>
+  </ul>
+<div class="toc-actions"><ul><li><a href="https://github.com/thinkingmachines/geowrangler/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./tutorial.grids.html">Tutorials</a></li><li class="breadcrumb-item"><a href="./tutorial.raster_zonal_stats.html">Raster Zonal Stats Tutorial</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Raster Zonal Stats Tutorial</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<!-- WARNING: THIS FILE WAS AUTOGENERATED! DO NOT EDIT! -->
+<blockquote class="blockquote">
+<p>A basic introduction to raster zonal stats</p>
+</blockquote>
+<p><a href="https://colab.research.google.com/github/thinkingmachines/geowrangler/blob/master/notebooks/tutorial.raster_zonal_stats.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg" title="Open in Colab button" class="img-fluid"></a></p>
+<section id="basic-usage" class="level2">
+<h2 class="anchored" data-anchor-id="basic-usage">Basic Usage</h2>
+<p>Generate zonal stats for a GeoDataframe containing areas of interest using raster data</p>
+<p>Terms:</p>
+<ul>
+<li><strong>aoi</strong> - (area of interest) a geodataframe which we are interested in generating zonal statistics for</li>
+<li><strong>raster data</strong> - the source raster containing the features which we are interested in collecting zonal stats for our aoi.</li>
+</ul>
+<div id="82012947-cc3e-4b8b-850e-dcd565ad160d" class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> geopandas <span class="im">as</span> gpd</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> geowrangler.raster_zonal_stats <span class="im">as</span> rzs</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<section id="load-aoi" class="level3">
+<h3 class="anchored" data-anchor-id="load-aoi">Load AOI</h3>
+<p>Our areas of interest (AOI) are three (3) Level 1 administration regions (ADM1) of the Philippines located in the island of Luzon.</p>
+<div id="4ff9f2cc-397e-44cc-938c-fa8525ef8aeb" class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># area multipolygons for regions 3,4,ncr of the philippines</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>aoi <span class="op">=</span> gpd.read_file(<span class="st">"../data/region34ncr_admin.geojson"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>CPU times: user 1.42 s, sys: 118 ms, total: 1.54 s
+Wall time: 1.57 s</code></pre>
+</div>
+</div>
+<div id="0e362332-71a6-4be2-b9f8-3c4964d9258c" class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> aoi.plot(</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    ax<span class="op">=</span>plt.axes(),</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    facecolor<span class="op">=</span><span class="st">"none"</span>,</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    edgecolor<span class="op">=</span>[</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>        <span class="st">"#C62828"</span>,</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>        <span class="st">"#283593"</span>,</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>        <span class="st">"#FF9800"</span>,</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    ],</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="tutorial.raster_zonal_stats_files/figure-html/cell-9-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<div id="b8b0b302-5f49-421d-ad0e-f11c935bf724" class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>aoi</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">Reg_Code</th>
+<th data-quarto-table-cell-role="th">Reg_Name</th>
+<th data-quarto-table-cell-role="th">Reg_Alt_Name</th>
+<th data-quarto-table-cell-role="th">geometry</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>130000000</td>
+<td>National Capital Region</td>
+<td>NCR</td>
+<td>MULTIPOLYGON (((121.03842 14.78525, 121.03815 ...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>030000000</td>
+<td>Region III</td>
+<td>Central Luzon</td>
+<td>MULTIPOLYGON (((120.11687 14.76309, 120.11684 ...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>040000000</td>
+<td>Region IV-A</td>
+<td>Calabarzon</td>
+<td>MULTIPOLYGON (((122.72165 13.36485, 122.72143 ...</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</section>
+<section id="download-philippine-population-data" class="level3">
+<h3 class="anchored" data-anchor-id="download-philippine-population-data">Download Philippine Population Data</h3>
+<blockquote class="blockquote">
+<p>see the <a href="https://data.humdata.org/dataset/worldpop-population-counts-for-philippines">Humanitarian Data Exchange World Population Counts - Philippines</a></p>
+</blockquote>
+<p>We download our raster Data as GeoTiff files from the Humanitarian Data Exchange site.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>This maybe slow as the file is about 180 Mb and depending on your internet download speed may take more than 5 minutes.</p>
+</div>
+</div>
+<div id="ec56b48e-1938-4500-8437-f2569a5902ad" class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># PHL population HDX links</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>phil_pop_link <span class="op">=</span> <span class="st">"https://data.worldpop.org/GIS/Population/Global_2000_2020/2020/PHL/phl_ppp_2020.tif"</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>phil_pop_dset <span class="op">=</span> <span class="st">"phl_pop_2020.tif"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="815b64bc-d836-4193-80bf-214b1bd96dba" class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="op">!</span>[ <span class="op">!</span> <span class="op">-</span>e ..<span class="op">/</span>data<span class="op">/</span>{phil_pop_dset} ] <span class="op">&amp;&amp;</span> curl <span class="op">-</span>o ..<span class="op">/</span>data<span class="op">/</span>{phil_pop_dset} {phil_pop_link}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>CPU times: user 988 µs, sys: 3.26 ms, total: 4.25 ms
+Wall time: 287 ms</code></pre>
+</div>
+</div>
+<p>To create our raster zonal stats, we just need to set the aggregations, as well as some extra arguments, such as the <code>nodata</code> value in the raster.</p>
+<div id="165bcc06-a884-461c-ac4f-4fc7819ceb49" class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>results <span class="op">=</span> rzs.create_raster_zonal_stats(</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    aoi,</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    <span class="ss">f"../data/</span><span class="sc">{</span>phil_pop_dset<span class="sc">}</span><span class="ss">"</span>,</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    aggregation<span class="op">=</span><span class="bu">dict</span>(</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>        func<span class="op">=</span>[<span class="st">"sum"</span>, <span class="st">"count"</span>],</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>        column<span class="op">=</span><span class="st">"population"</span>,</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>        output<span class="op">=</span>[<span class="st">"population_count"</span>, <span class="st">"samples"</span>],</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    extra_args<span class="op">=</span><span class="bu">dict</span>(nodata<span class="op">=-</span><span class="dv">99999</span>),  <span class="co"># nodata value is -99999</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>CPU times: user 6.15 s, sys: 195 ms, total: 6.34 s
+Wall time: 6.49 s</code></pre>
+</div>
+</div>
+<div id="130133bf-c84d-401c-b5ff-b9bb6acfe9c4" class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>results</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">Reg_Code</th>
+<th data-quarto-table-cell-role="th">Reg_Name</th>
+<th data-quarto-table-cell-role="th">Reg_Alt_Name</th>
+<th data-quarto-table-cell-role="th">geometry</th>
+<th data-quarto-table-cell-role="th">samples</th>
+<th data-quarto-table-cell-role="th">population_count</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>130000000</td>
+<td>National Capital Region</td>
+<td>NCR</td>
+<td>MULTIPOLYGON (((121.03842 14.78525, 121.03815 ...</td>
+<td>70786</td>
+<td>13165866.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>030000000</td>
+<td>Region III</td>
+<td>Central Luzon</td>
+<td>MULTIPOLYGON (((120.11687 14.76309, 120.11684 ...</td>
+<td>2558377</td>
+<td>11493727.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>040000000</td>
+<td>Region IV-A</td>
+<td>Calabarzon</td>
+<td>MULTIPOLYGON (((122.72165 13.36485, 122.72143 ...</td>
+<td>1876244</td>
+<td>15952383.0</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</section>
+<section id="using-grid-tile-aois" class="level3">
+<h3 class="anchored" data-anchor-id="using-grid-tile-aois">Using Grid Tile AOIs</h3>
+<p>We can also use tile grids as our AOIs.</p>
+<div id="676487db-5a59-424c-bcdb-612ed0a09a1a" class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># note that you don't need to load the aoi first</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>grid_aoi_file <span class="op">=</span> <span class="st">"../data/region3_admin_grids.geojson"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="c0604f18-7541-448b-bf00-47959bf5378b" class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>grid_aoi_results <span class="op">=</span> rzs.create_raster_zonal_stats(</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    grid_aoi_file,</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    <span class="ss">f"../data/</span><span class="sc">{</span>phil_pop_dset<span class="sc">}</span><span class="ss">"</span>,</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    aggregation<span class="op">=</span><span class="bu">dict</span>(</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>        func<span class="op">=</span>[<span class="st">"sum"</span>, <span class="st">"count"</span>],</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>        column<span class="op">=</span><span class="st">"population"</span>,</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>        output<span class="op">=</span>[<span class="st">"population_count"</span>, <span class="st">"samples"</span>],</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>        fillna<span class="op">=</span>[<span class="va">True</span>, <span class="va">True</span>],</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>    extra_args<span class="op">=</span><span class="bu">dict</span>(nodata<span class="op">=-</span><span class="dv">99999</span>),  <span class="co"># nodata value is -99999</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>CPU times: user 5.15 s, sys: 657 ms, total: 5.81 s
+Wall time: 5.97 s</code></pre>
+</div>
+</div>
+<div id="c4dd4b52-0a7b-4d6a-b6aa-68e80d02ce2c" class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>grid_aoi_results.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">x</th>
+<th data-quarto-table-cell-role="th">y</th>
+<th data-quarto-table-cell-role="th">geometry</th>
+<th data-quarto-table-cell-role="th">samples</th>
+<th data-quarto-table-cell-role="th">population_count</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>0</td>
+<td>30</td>
+<td>POLYGON ((119.78583 15.7087, 119.83075 15.7087...</td>
+<td>171</td>
+<td>1171.764038</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>0</td>
+<td>31</td>
+<td>POLYGON ((119.78583 15.75193, 119.83075 15.751...</td>
+<td>329</td>
+<td>278.567200</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>0</td>
+<td>32</td>
+<td>POLYGON ((119.78583 15.79516, 119.83075 15.795...</td>
+<td>345</td>
+<td>279.140198</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>1</td>
+<td>30</td>
+<td>POLYGON ((119.83075 15.7087, 119.87566 15.7087...</td>
+<td>158</td>
+<td>808.681152</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>1</td>
+<td>32</td>
+<td>POLYGON ((119.83075 15.79516, 119.87566 15.795...</td>
+<td>20</td>
+<td>0.000000</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<div id="d1de6e04-3657-455e-8b83-646c8d4479bf" class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> aoi[aoi.Reg_Name <span class="op">==</span> <span class="st">"Region III"</span>].plot(</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    ax<span class="op">=</span>plt.axes(), facecolor<span class="op">=</span><span class="st">"none"</span>, edgecolor<span class="op">=</span><span class="st">"black"</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> grid_aoi_results.plot(</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>    ax<span class="op">=</span>ax, column<span class="op">=</span><span class="st">"population_count"</span>, edgecolor<span class="op">=</span><span class="st">"blue"</span>, alpha<span class="op">=</span><span class="fl">0.5</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="tutorial.raster_zonal_stats_files/figure-html/cell-18-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="using-bing-tile-grid-tile-aois" class="level3">
+<h3 class="anchored" data-anchor-id="using-bing-tile-grid-tile-aois">Using Bing Tile Grid Tile AOIs</h3>
+<p>We can also use pre-existing Bing tile grids as our AOIs.</p>
+<div id="5654528f-3503-4346-9974-fd5a2be3e7b8" class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># note that you don't need to load the aoi first</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>bingtile_grid_aoi_file <span class="op">=</span> <span class="st">"../data/region3_bingtile_grid13.geojson"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="f7dff6ef-545e-483f-a27c-fbbe7fe0950a" class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>bingtile_grid_aoi_results <span class="op">=</span> rzs.create_raster_zonal_stats(</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>    bingtile_grid_aoi_file,</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>    <span class="ss">f"../data/</span><span class="sc">{</span>phil_pop_dset<span class="sc">}</span><span class="ss">"</span>,</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>    aggregation<span class="op">=</span><span class="bu">dict</span>(</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>        func<span class="op">=</span>[<span class="st">"sum"</span>, <span class="st">"count"</span>],</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>        column<span class="op">=</span><span class="st">"population"</span>,</span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>        output<span class="op">=</span>[<span class="st">"population_count"</span>, <span class="st">"samples"</span>],</span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>        fillna<span class="op">=</span>[<span class="va">True</span>, <span class="va">True</span>],</span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>    extra_args<span class="op">=</span><span class="bu">dict</span>(nodata<span class="op">=-</span><span class="dv">99999</span>),  <span class="co"># nodata value is -99999</span></span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>CPU times: user 5.17 s, sys: 486 ms, total: 5.65 s
+Wall time: 5.71 s</code></pre>
+</div>
+</div>
+<div id="669fbb44-0888-4d65-9a46-0a678043838c" class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>bingtile_grid_aoi_results.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">quadkey</th>
+<th data-quarto-table-cell-role="th">geometry</th>
+<th data-quarto-table-cell-role="th">samples</th>
+<th data-quarto-table-cell-role="th">population_count</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>1323030303301</td>
+<td>POLYGON ((120.10254 14.73239, 120.10254 14.774...</td>
+<td>737</td>
+<td>196.756744</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>1323030303300</td>
+<td>POLYGON ((120.05859 14.73239, 120.05859 14.774...</td>
+<td>50</td>
+<td>35.732861</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>1323030303311</td>
+<td>POLYGON ((120.19043 14.73239, 120.19043 14.774...</td>
+<td>248</td>
+<td>383.338013</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>1323030303133</td>
+<td>POLYGON ((120.19043 14.77488, 120.19043 14.817...</td>
+<td>901</td>
+<td>5621.879395</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>1323030303131</td>
+<td>POLYGON ((120.19043 14.81737, 120.19043 14.859...</td>
+<td>1328</td>
+<td>6584.988770</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<div id="f3372847-4041-49b6-995d-2e4ec612ef7c" class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> aoi[aoi.Reg_Name <span class="op">==</span> <span class="st">"Region III"</span>].plot(</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>    ax<span class="op">=</span>plt.axes(), facecolor<span class="op">=</span><span class="st">"none"</span>, edgecolor<span class="op">=</span><span class="st">"black"</span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> bingtile_grid_aoi_results.plot(</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>    ax<span class="op">=</span>ax, column<span class="op">=</span><span class="st">"population_count"</span>, edgecolor<span class="op">=</span><span class="st">"blue"</span>, alpha<span class="op">=</span><span class="fl">0.5</span></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="tutorial.raster_zonal_stats_files/figure-html/cell-22-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="exactextract-usage-experimental" class="level2">
+<h2 class="anchored" data-anchor-id="exactextract-usage-experimental">Exactextract Usage (experimental)</h2>
+<p><code>raster_zonal_stats</code> also includes an experimental method <code>create_exactextract_zonal_stats()</code> which uses the <a href="https://github.com/isciences/exactextract"><code>exactextract</code></a> python package. This method offers the ff.&nbsp;advantages over the basic usage: - Faster and more accurate statistics vs basic method - Support for multi-band rasters - Support for weighted statistics</p>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Warning
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The exactextract method is still experimental and is subject to change in future releases. Values between the basic and exactextract method will also differ for the same input AOI and raster.</p>
+</div>
+</div>
+<section id="replicate-basic-usage-using-exactextract" class="level3">
+<h3 class="anchored" data-anchor-id="replicate-basic-usage-using-exactextract">Replicate basic usage using exactextract</h3>
+<p>In this section, we demonstrate the zonal statistics performed for the same ff.&nbsp;aois using the <a href="https://geowrangler.thinkingmachin.es/raster_zonal_stats.html#create_exactextract_zonal_stats"><code>create_exactextract_zonal_stats</code></a> method. 1. Philippines ADM1 regions 2. Grid Tile AOIs 3. Bing Tile Grid Tile AOIs</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>While <code>create_raster_zonal_stats()</code> and <code>create_exactextract_zonal_stats()</code> share a similar interface, in for the latter method, it is required to specify a <code>band</code> for each entry for <code>aggregation</code>.</p>
+</div>
+</div>
+<section id="adm1-aois-exactextract" class="level4">
+<h4 class="anchored" data-anchor-id="adm1-aois-exactextract">ADM1 AOIs (exactextract)</h4>
+<div id="5098fa59" class="cell">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>results <span class="op">=</span> rzs.create_exactextract_zonal_stats(</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>    aoi,</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>    <span class="ss">f"../data/</span><span class="sc">{</span>phil_pop_dset<span class="sc">}</span><span class="ss">"</span>,</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>    aggregation<span class="op">=</span><span class="bu">dict</span>(</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>        func<span class="op">=</span>[<span class="st">"sum"</span>, <span class="st">"count"</span>],</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>        band<span class="op">=</span><span class="dv">1</span>,</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>        output<span class="op">=</span>[<span class="st">"population_count"</span>, <span class="st">"samples"</span>],</span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>CPU times: user 1.74 s, sys: 135 ms, total: 1.88 s
+Wall time: 1.9 s</code></pre>
+</div>
+</div>
+<div id="7e02ec01" class="cell">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>results</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">Reg_Code</th>
+<th data-quarto-table-cell-role="th">Reg_Name</th>
+<th data-quarto-table-cell-role="th">Reg_Alt_Name</th>
+<th data-quarto-table-cell-role="th">geometry</th>
+<th data-quarto-table-cell-role="th">population_count</th>
+<th data-quarto-table-cell-role="th">samples</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>130000000</td>
+<td>National Capital Region</td>
+<td>NCR</td>
+<td>MULTIPOLYGON (((121.03842 14.78525, 121.03815 ...</td>
+<td>13165218.0</td>
+<td>7.076045e+04</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>030000000</td>
+<td>Region III</td>
+<td>Central Luzon</td>
+<td>MULTIPOLYGON (((120.11687 14.76309, 120.11684 ...</td>
+<td>11497926.0</td>
+<td>2.558353e+06</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>040000000</td>
+<td>Region IV-A</td>
+<td>Calabarzon</td>
+<td>MULTIPOLYGON (((122.72165 13.36485, 122.72143 ...</td>
+<td>15954625.0</td>
+<td>1.876141e+06</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</section>
+<section id="grid-tile-aois-exactextract" class="level4">
+<h4 class="anchored" data-anchor-id="grid-tile-aois-exactextract">Grid Tile AOIs (exactextract)</h4>
+<div id="ef9935dd" class="cell">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>grid_aoi_results <span class="op">=</span> rzs.create_exactextract_zonal_stats(</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>    grid_aoi_file,</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>    <span class="ss">f"../data/</span><span class="sc">{</span>phil_pop_dset<span class="sc">}</span><span class="ss">"</span>,</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>    aggregation<span class="op">=</span><span class="bu">dict</span>(</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>        func<span class="op">=</span>[<span class="st">"sum"</span>, <span class="st">"count"</span>],</span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>        band<span class="op">=</span><span class="dv">1</span>,</span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>        output<span class="op">=</span>[<span class="st">"population_count"</span>, <span class="st">"samples"</span>]</span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>CPU times: user 533 ms, sys: 15.7 ms, total: 549 ms
+Wall time: 551 ms</code></pre>
+</div>
+</div>
+<div id="6f966a0c" class="cell">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>grid_aoi_results</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">x</th>
+<th data-quarto-table-cell-role="th">y</th>
+<th data-quarto-table-cell-role="th">geometry</th>
+<th data-quarto-table-cell-role="th">population_count</th>
+<th data-quarto-table-cell-role="th">samples</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>0</td>
+<td>30</td>
+<td>POLYGON ((119.78583 15.7087, 119.83075 15.7087...</td>
+<td>1212.030518</td>
+<td>173.795197</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>0</td>
+<td>31</td>
+<td>POLYGON ((119.78583 15.75193, 119.83075 15.751...</td>
+<td>275.465424</td>
+<td>323.370850</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>0</td>
+<td>32</td>
+<td>POLYGON ((119.78583 15.79516, 119.83075 15.795...</td>
+<td>292.621063</td>
+<td>355.625183</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>1</td>
+<td>30</td>
+<td>POLYGON ((119.83075 15.7087, 119.87566 15.7087...</td>
+<td>794.559692</td>
+<td>162.660583</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>1</td>
+<td>32</td>
+<td>POLYGON ((119.83075 15.79516, 119.87566 15.795...</td>
+<td>0.000000</td>
+<td>20.000000</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1069</td>
+<td>54</td>
+<td>44</td>
+<td>POLYGON ((122.21128 16.31312, 122.2562 16.3131...</td>
+<td>328.646301</td>
+<td>43.474117</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1070</td>
+<td>54</td>
+<td>45</td>
+<td>POLYGON ((122.21128 16.35623, 122.2562 16.3562...</td>
+<td>2358.856445</td>
+<td>1147.846558</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1071</td>
+<td>54</td>
+<td>46</td>
+<td>POLYGON ((122.21128 16.39932, 122.2562 16.3993...</td>
+<td>1703.188232</td>
+<td>493.368500</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1072</td>
+<td>54</td>
+<td>47</td>
+<td>POLYGON ((122.21128 16.4424, 122.2562 16.4424,...</td>
+<td>416.854004</td>
+<td>980.471924</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1073</td>
+<td>54</td>
+<td>48</td>
+<td>POLYGON ((122.21128 16.48548, 122.2562 16.4854...</td>
+<td>1106.191162</td>
+<td>2172.363037</td>
+</tr>
+</tbody>
+</table>
+
+<p>1074 rows × 5 columns</p>
+</div>
+</div>
+</div>
+</section>
+<section id="bing-tile-grid-tile-aois-exactextract" class="level4">
+<h4 class="anchored" data-anchor-id="bing-tile-grid-tile-aois-exactextract">Bing Tile Grid Tile AOIs (exactextract)</h4>
+<div id="c491e70f" class="cell">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>bingtile_grid_aoi_results <span class="op">=</span> rzs.create_exactextract_zonal_stats(</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>    bingtile_grid_aoi_file,</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>    <span class="ss">f"../data/</span><span class="sc">{</span>phil_pop_dset<span class="sc">}</span><span class="ss">"</span>,</span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>    aggregation<span class="op">=</span><span class="bu">dict</span>(</span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>        func<span class="op">=</span>[<span class="st">"sum"</span>, <span class="st">"count"</span>],</span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>        band<span class="op">=</span><span class="dv">1</span>,</span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>        output<span class="op">=</span>[<span class="st">"population_count"</span>, <span class="st">"samples"</span>]</span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>CPU times: user 554 ms, sys: 16.4 ms, total: 570 ms
+Wall time: 581 ms</code></pre>
+</div>
+</div>
+<div id="cc2243f5" class="cell">
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>bingtile_grid_aoi_results</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">quadkey</th>
+<th data-quarto-table-cell-role="th">geometry</th>
+<th data-quarto-table-cell-role="th">population_count</th>
+<th data-quarto-table-cell-role="th">samples</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>1323030303301</td>
+<td>POLYGON ((120.10254 14.73239, 120.10254 14.774...</td>
+<td>201.693375</td>
+<td>756.642822</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>1323030303300</td>
+<td>POLYGON ((120.05859 14.73239, 120.05859 14.774...</td>
+<td>33.127304</td>
+<td>44.116634</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>1323030303311</td>
+<td>POLYGON ((120.19043 14.73239, 120.19043 14.774...</td>
+<td>388.166870</td>
+<td>253.282425</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>1323030303133</td>
+<td>POLYGON ((120.19043 14.77488, 120.19043 14.817...</td>
+<td>5789.487793</td>
+<td>904.081543</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>1323030303131</td>
+<td>POLYGON ((120.19043 14.81737, 120.19043 14.859...</td>
+<td>6430.809570</td>
+<td>1322.331665</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1119</td>
+<td>1323030120123</td>
+<td>POLYGON ((119.75098 15.79225, 119.75098 15.834...</td>
+<td>155.952072</td>
+<td>227.437897</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1120</td>
+<td>1323030120301</td>
+<td>POLYGON ((119.75098 15.74996, 119.75098 15.792...</td>
+<td>109.296829</td>
+<td>128.834396</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1121</td>
+<td>1323030120132</td>
+<td>POLYGON ((119.79492 15.79225, 119.79492 15.834...</td>
+<td>177.168594</td>
+<td>193.092102</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1122</td>
+<td>1323030120310</td>
+<td>POLYGON ((119.79492 15.74996, 119.79492 15.792...</td>
+<td>136.064529</td>
+<td>134.635620</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1123</td>
+<td>1323030120133</td>
+<td>POLYGON ((119.83887 15.79225, 119.83887 15.834...</td>
+<td>0.000000</td>
+<td>25.502230</td>
+</tr>
+</tbody>
+</table>
+
+<p>1124 rows × 4 columns</p>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="multi-band-usage" class="level3">
+<h3 class="anchored" data-anchor-id="multi-band-usage">Multi-band Usage</h3>
+<p><code>create_exactextract_zonal_stats()</code> supports multi-band statistics calculations by specifying a different <code>aggregation</code> per band.</p>
+<p>For this demo, we use Sentinel-5P aerosol absorbing index, which contains 2 bands for aersols at 340nm and 380nm diameter.</p>
+<div id="bd1e8bde" class="cell">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>exactextract_multiband_results <span class="op">=</span> rzs.create_exactextract_zonal_stats(</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>    grid_aoi_file,</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"../data/ph_s5p_AER_AI_340_380.tiff"</span>,</span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>    aggregation<span class="op">=</span>[</span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>        <span class="bu">dict</span>(band<span class="op">=</span><span class="dv">1</span>, func<span class="op">=</span>[<span class="st">"mean"</span>, <span class="st">"sum"</span>], output<span class="op">=</span>[<span class="st">"mean absorbing aerosol index (340nm)"</span>, <span class="st">"sample_count"</span>]),</span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>        <span class="bu">dict</span>(band<span class="op">=</span><span class="dv">2</span>, func<span class="op">=</span>[<span class="st">"mean"</span>, <span class="st">"sum"</span>], output<span class="op">=</span><span class="st">"aer_ai_380nm"</span>), </span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="9bcba180" class="cell">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>exactextract_multiband_results.sort_values(by<span class="op">=</span><span class="st">"sample_count"</span>, ascending<span class="op">=</span><span class="va">False</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">x</th>
+<th data-quarto-table-cell-role="th">y</th>
+<th data-quarto-table-cell-role="th">geometry</th>
+<th data-quarto-table-cell-role="th">mean absorbing aerosol index (340nm)</th>
+<th data-quarto-table-cell-role="th">sample_count</th>
+<th data-quarto-table-cell-role="th">aer_ai_380nm_mean</th>
+<th data-quarto-table-cell-role="th">aer_ai_380nm_sum</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">34</td>
+<td>4</td>
+<td>25</td>
+<td>POLYGON ((119.9655 15.49239, 120.01041 15.4923...</td>
+<td>0.098937</td>
+<td>0.049710</td>
+<td>0.753341</td>
+<td>0.378512</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">33</td>
+<td>4</td>
+<td>24</td>
+<td>POLYGON ((119.9655 15.4491, 120.01041 15.4491,...</td>
+<td>0.087453</td>
+<td>0.043949</td>
+<td>0.665897</td>
+<td>0.334646</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">56</td>
+<td>5</td>
+<td>25</td>
+<td>POLYGON ((120.01041 15.49239, 120.05533 15.492...</td>
+<td>0.030743</td>
+<td>0.015447</td>
+<td>0.242179</td>
+<td>0.121682</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">55</td>
+<td>5</td>
+<td>24</td>
+<td>POLYGON ((120.01041 15.4491, 120.05533 15.4491...</td>
+<td>0.027175</td>
+<td>0.013657</td>
+<td>0.239243</td>
+<td>0.120231</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">20</td>
+<td>3</td>
+<td>25</td>
+<td>POLYGON ((119.92058 15.49239, 119.9655 15.4923...</td>
+<td>0.009051</td>
+<td>0.004548</td>
+<td>0.068916</td>
+<td>0.034626</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">367</td>
+<td>16</td>
+<td>30</td>
+<td>POLYGON ((120.50449 15.7087, 120.5494 15.7087,...</td>
+<td>0.000000</td>
+<td>0.000000</td>
+<td>0.000048</td>
+<td>0.000024</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">368</td>
+<td>16</td>
+<td>31</td>
+<td>POLYGON ((120.50449 15.75193, 120.5494 15.7519...</td>
+<td>0.000000</td>
+<td>0.000000</td>
+<td>0.000000</td>
+<td>0.000000</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">369</td>
+<td>17</td>
+<td>0</td>
+<td>POLYGON ((120.5494 14.40753, 120.59432 14.4075...</td>
+<td>0.000000</td>
+<td>0.000000</td>
+<td>0.003331</td>
+<td>0.001682</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">370</td>
+<td>17</td>
+<td>1</td>
+<td>POLYGON ((120.5494 14.45102, 120.59432 14.4510...</td>
+<td>0.000000</td>
+<td>0.000000</td>
+<td>0.000000</td>
+<td>0.000000</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1073</td>
+<td>54</td>
+<td>48</td>
+<td>POLYGON ((122.21128 16.48548, 122.2562 16.4854...</td>
+<td>0.000000</td>
+<td>0.000000</td>
+<td>0.000000</td>
+<td>0.000000</td>
+</tr>
+</tbody>
+</table>
+
+<p>1074 rows × 7 columns</p>
+</div>
+</div>
+</div>
+</section>
+<section id="other-options" class="level3">
+<h3 class="anchored" data-anchor-id="other-options">Other options</h3>
+<p>This section demonstrates other options that you can pass to <code>create_exactextract_zonal_stats()</code></p>
+<p>If <code>include_geom=False</code> the result is returned without the active geometry column.</p>
+<div id="2702926d" class="cell">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>no_geom_results <span class="op">=</span> rzs.create_exactextract_zonal_stats(</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>    grid_aoi_file,</span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>    <span class="ss">f"../data/</span><span class="sc">{</span>phil_pop_dset<span class="sc">}</span><span class="ss">"</span>,</span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>    aggregation<span class="op">=</span><span class="bu">dict</span>(</span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>        func<span class="op">=</span>[<span class="st">"sum"</span>, <span class="st">"count"</span>],</span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>        band<span class="op">=</span><span class="dv">1</span>,</span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>        output<span class="op">=</span>[<span class="st">"population_count"</span>, <span class="st">"samples"</span>]</span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb33-9"><a href="#cb33-9" aria-hidden="true" tabindex="-1"></a>    include_geom<span class="op">=</span><span class="va">False</span></span>
+<span id="cb33-10"><a href="#cb33-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb33-11"><a href="#cb33-11" aria-hidden="true" tabindex="-1"></a>no_geom_results</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>CPU times: user 536 ms, sys: 14.8 ms, total: 551 ms
+Wall time: 552 ms</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">x</th>
+<th data-quarto-table-cell-role="th">y</th>
+<th data-quarto-table-cell-role="th">population_count</th>
+<th data-quarto-table-cell-role="th">samples</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>0</td>
+<td>30</td>
+<td>1212.030518</td>
+<td>173.795197</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>0</td>
+<td>31</td>
+<td>275.465424</td>
+<td>323.370850</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>0</td>
+<td>32</td>
+<td>292.621063</td>
+<td>355.625183</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>1</td>
+<td>30</td>
+<td>794.559692</td>
+<td>162.660583</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>1</td>
+<td>32</td>
+<td>0.000000</td>
+<td>20.000000</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1069</td>
+<td>54</td>
+<td>44</td>
+<td>328.646301</td>
+<td>43.474117</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1070</td>
+<td>54</td>
+<td>45</td>
+<td>2358.856445</td>
+<td>1147.846558</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1071</td>
+<td>54</td>
+<td>46</td>
+<td>1703.188232</td>
+<td>493.368500</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1072</td>
+<td>54</td>
+<td>47</td>
+<td>416.854004</td>
+<td>980.471924</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1073</td>
+<td>54</td>
+<td>48</td>
+<td>1106.191162</td>
+<td>2172.363037</td>
+</tr>
+</tbody>
+</table>
+
+<p>1074 rows × 4 columns</p>
+</div>
+</div>
+</div>
+<p>By specifying <code>include_cols</code>, the result will return only the specified columns from the AOI in addition to the aggregation results.</p>
+<div id="e36beed4" class="cell">
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>include_cols_results <span class="op">=</span> rzs.create_exactextract_zonal_stats(</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>    grid_aoi_file,</span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>    <span class="ss">f"../data/</span><span class="sc">{</span>phil_pop_dset<span class="sc">}</span><span class="ss">"</span>,</span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>    aggregation<span class="op">=</span><span class="bu">dict</span>(</span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>        func<span class="op">=</span>[<span class="st">"sum"</span>, <span class="st">"count"</span>],</span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a>        band<span class="op">=</span><span class="dv">1</span>,</span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a>        output<span class="op">=</span>[<span class="st">"population_count"</span>, <span class="st">"samples"</span>]</span>
+<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a>    include_cols<span class="op">=</span>[<span class="st">"x"</span>]</span>
+<span id="cb35-10"><a href="#cb35-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb35-11"><a href="#cb35-11" aria-hidden="true" tabindex="-1"></a>include_cols_results</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>CPU times: user 534 ms, sys: 15.7 ms, total: 550 ms
+Wall time: 557 ms</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">x</th>
+<th data-quarto-table-cell-role="th">population_count</th>
+<th data-quarto-table-cell-role="th">samples</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>0</td>
+<td>1212.030518</td>
+<td>173.795197</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>0</td>
+<td>275.465424</td>
+<td>323.370850</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>0</td>
+<td>292.621063</td>
+<td>355.625183</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>1</td>
+<td>794.559692</td>
+<td>162.660583</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>1</td>
+<td>0.000000</td>
+<td>20.000000</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1069</td>
+<td>54</td>
+<td>328.646301</td>
+<td>43.474117</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1070</td>
+<td>54</td>
+<td>2358.856445</td>
+<td>1147.846558</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1071</td>
+<td>54</td>
+<td>1703.188232</td>
+<td>493.368500</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1072</td>
+<td>54</td>
+<td>416.854004</td>
+<td>980.471924</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1073</td>
+<td>54</td>
+<td>1106.191162</td>
+<td>2172.363037</td>
+</tr>
+</tbody>
+</table>
+
+<p>1074 rows × 3 columns</p>
+</div>
+</div>
+</div>
+</section>
+<section id="comparison-of-exactextract-and-rasterstats" class="level3">
+<h3 class="anchored" data-anchor-id="comparison-of-exactextract-and-rasterstats">Comparison of <code>exactextract</code> and <code>rasterstats</code></h3>
+<section id="processing-time" class="level4">
+<h4 class="anchored" data-anchor-id="processing-time">Processing time</h4>
+<p>The following section compares the mean processing time of <code>exactextract</code> vs <code>rasterstats</code> over 10 iterations of equivalent function calls.</p>
+<p>As an example from one notebook run: - <code>rasterstats</code>: 11.6 s ± 1.16 s -&gt; equivalent to 11,600 ms - <code>exactextract</code>: 763 ms ± 46.1 ms - Resulting speed-up: <strong>~15x faster</strong></p>
+<div id="79b0a81c" class="cell">
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>rasterstats_results <span class="op">=</span> rzs.create_raster_zonal_stats(</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>    grid_aoi_file,</span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>    <span class="ss">f"../data/</span><span class="sc">{</span>phil_pop_dset<span class="sc">}</span><span class="ss">"</span>,</span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>    aggregation<span class="op">=</span><span class="bu">dict</span>(</span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a>        func<span class="op">=</span>[<span class="st">"sum"</span>, <span class="st">"count"</span>],</span>
+<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a>        column<span class="op">=</span><span class="st">"population"</span>,</span>
+<span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a>        output<span class="op">=</span>[<span class="st">"population_count"</span>, <span class="st">"samples"</span>]</span>
+<span id="cb37-8"><a href="#cb37-8" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb37-9"><a href="#cb37-9" aria-hidden="true" tabindex="-1"></a>    extra_args<span class="op">=</span><span class="bu">dict</span>(nodata<span class="op">=-</span><span class="dv">99999</span>),  <span class="co"># nodata value is -99999</span></span>
+<span id="cb37-10"><a href="#cb37-10" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>5.43 s ± 73.1 ms per loop (mean ± std. dev. of 10 runs, 1 loop each)</code></pre>
+</div>
+</div>
+<div id="dc4bdb4d" class="cell">
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>exactextract_results <span class="op">=</span> rzs.create_exactextract_zonal_stats(</span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>    grid_aoi_file,</span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>    <span class="ss">f"../data/</span><span class="sc">{</span>phil_pop_dset<span class="sc">}</span><span class="ss">"</span>,</span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>    aggregation<span class="op">=</span><span class="bu">dict</span>(</span>
+<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a>        func<span class="op">=</span>[<span class="st">"sum"</span>, <span class="st">"count"</span>],</span>
+<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a>        band<span class="op">=</span><span class="dv">1</span>,</span>
+<span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a>        output<span class="op">=</span>[<span class="st">"population_count"</span>, <span class="st">"samples"</span>]</span>
+<span id="cb39-8"><a href="#cb39-8" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb39-9"><a href="#cb39-9" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>552 ms ± 5.91 ms per loop (mean ± std. dev. of 10 runs, 1 loop each)</code></pre>
+</div>
+</div>
+</section>
+<section id="output-value-comparison" class="level4">
+<h4 class="anchored" data-anchor-id="output-value-comparison">Output value comparison</h4>
+<p>We also compare the difference in values between the two methods. Output from the two methods may differ significantly because of the way the pixels are distributed to each AOI. The difference also becomes more significant with smaller AOIs and coarser input rasters, as these factors increase the amount of pixels that are located along AOI boundaries.</p>
+<div id="d2d39817" class="cell">
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>rasterstats_results <span class="op">=</span> rzs.create_raster_zonal_stats(</span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>    grid_aoi_file,</span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>    <span class="ss">f"../data/</span><span class="sc">{</span>phil_pop_dset<span class="sc">}</span><span class="ss">"</span>,</span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>    aggregation<span class="op">=</span><span class="bu">dict</span>(</span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a>        func<span class="op">=</span>[<span class="st">"sum"</span>],</span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a>        column<span class="op">=</span><span class="st">"population"</span>,</span>
+<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a>        output<span class="op">=</span>[<span class="st">"population_count"</span>]</span>
+<span id="cb41-8"><a href="#cb41-8" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb41-9"><a href="#cb41-9" aria-hidden="true" tabindex="-1"></a>    extra_args<span class="op">=</span><span class="bu">dict</span>(nodata<span class="op">=-</span><span class="dv">99999</span>),  <span class="co"># nodata value is -99999</span></span>
+<span id="cb41-10"><a href="#cb41-10" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="8016b7d9" class="cell">
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>exactextract_results <span class="op">=</span> rzs.create_exactextract_zonal_stats(</span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>    grid_aoi_file,</span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>    <span class="ss">f"../data/</span><span class="sc">{</span>phil_pop_dset<span class="sc">}</span><span class="ss">"</span>,</span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>    aggregation<span class="op">=</span><span class="bu">dict</span>(</span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a>        func<span class="op">=</span>[<span class="st">"sum"</span>],</span>
+<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a>        band<span class="op">=</span><span class="dv">1</span>,</span>
+<span id="cb42-7"><a href="#cb42-7" aria-hidden="true" tabindex="-1"></a>        output<span class="op">=</span>[<span class="st">"population_count"</span>]</span>
+<span id="cb42-8"><a href="#cb42-8" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb42-9"><a href="#cb42-9" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="254941ca" class="cell">
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>percent_difference <span class="op">=</span> (np.<span class="bu">abs</span>(exactextract_results[<span class="st">"population_count"</span>] <span class="op">-</span> rasterstats_results[<span class="st">"population_count"</span>])<span class="op">/</span>rasterstats_results[<span class="st">"population_count"</span>]) <span class="op">*</span> <span class="dv">100</span></span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Mean percent difference between exactextract and rasterstats: </span><span class="sc">{</span>np<span class="sc">.</span>mean(percent_difference)<span class="sc">:.2f}</span><span class="ss">%"</span>)</span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Median percent difference: </span><span class="sc">{</span>np<span class="sc">.</span>nanmedian(percent_difference)<span class="sc">:.2f}</span><span class="ss">%"</span>)</span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Max percent difference: </span><span class="sc">{</span>np<span class="sc">.</span><span class="bu">max</span>(percent_difference)<span class="sc">:.2f}</span><span class="ss">%"</span>)</span>
+<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Min percent difference: </span><span class="sc">{</span>np<span class="sc">.</span><span class="bu">min</span>(percent_difference)<span class="sc">:.2f}</span><span class="ss">%"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Mean percent difference between exactextract and rasterstats: 1.33%
+Median percent difference: 0.80%
+Max percent difference: 25.71%
+Min percent difference: 0.00%</code></pre>
+</div>
+</div>
+</section>
+<section id="recommendations" class="level4">
+<h4 class="anchored" data-anchor-id="recommendations">Recommendations</h4>
+<p>We make the following recommendations on when to use each method.</p>
+<p>Use <code>create_raster_zonal_stats()</code> (<code>rasterstats</code>) if: - You are working with kilometer-scale AOIs, where the processing time trade-off is acceptable - You need to set the NODATA value during the function call - You are working with legacy projects using older versions of <code>geowrangler</code>, and/or relying on results previously generated from <code>create_raster_zonal_stats()</code>.</p>
+<p>Use <code>create_exactextract_zonal_stats()</code> (<code>exactextract</code>) if: - You are working with meter-scale AOIs, such that the processing time improvement is crucial - Your rasters are well-defined with <code>NODATA</code> properly set in the metadata. The method does not currently support setting NODATA in the function call and only relies on reading the raster metadata. - You are working on a new project with no prior dependencies to <code>create_raster_zonal_stats()</code>.</p>
+
+
+</section>
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp("https:\/\/geowrangler\.thinkingmachin\.es\/");
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/thinkingmachines/geowrangler/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>
