@@ -438,11 +438,17 @@ class H3GridGenerator:
 # %% ../notebooks/00_grids.ipynb 19
 @patch
 def get_hexes_for_polygon(self: H3GridGenerator, poly: Polygon):
-    return h3.polyfill(
-        poly.__geo_interface__,
-        self.resolution,
-        geo_json_conformant=True,
-    )
+    if h3.__version__[0] == "3":
+        return h3.polyfill(
+            poly.__geo_interface__,
+            self.resolution,
+            geo_json_conformant=True,
+        )
+    else:
+        return h3.polygon_to_cells(
+            h3.geo_to_h3shape(poly.__geo_interface__),
+            self.resolution,
+        )
 
 # %% ../notebooks/00_grids.ipynb 20
 @patch
@@ -459,9 +465,12 @@ def generate_grid(self: H3GridGenerator, aoi_gdf: GeoDataFrame) -> DataFrame:
     df = DataFrame({"hex_id": list(hex_ids)})
     if self.return_geometry is False:
         return df
-    hexes = df.hex_id.apply(
-        lambda id: Polygon(h3.h3_to_geo_boundary(id, geo_json=True))
-    )
+    if h3.__version__[0] == "3":
+        hexes = df.hex_id.apply(
+            lambda id: Polygon(h3.h3_to_geo_boundary(id, geojson=True))
+        )
+    else:
+        hexes = df.hex_id.apply(lambda id: Polygon(h3.cell_to_boundary(id)))
     h3_gdf = GeoDataFrame(
         df,
         geometry=hexes,
