@@ -1,0 +1,1738 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.6.42">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="description" content="polygon fill algorithms for speeding up grid generation">
+
+<title>Polygon Fill – geowrangler</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script><script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-2f5df379a58b258e96c21c0638c20c03.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-ae44de7e3b26b230a7801128389852ee.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+
+<link rel="stylesheet" href="styles.css">
+<meta property="og:title" content="Polygon Fill – geowrangler">
+<meta property="og:description" content="polygon fill algorithms for speeding up grid generation">
+<meta property="og:image" content="https://geowrangler.thinkingmachin.es/15_polygon_fill_files/figure-html/cell-6-output-1.png">
+<meta property="og:site_name" content="geowrangler">
+<meta property="og:image:height" content="1589">
+<meta property="og:image:width" content="1178">
+<meta name="twitter:title" content="Polygon Fill – geowrangler">
+<meta name="twitter:description" content="polygon fill algorithms for speeding up grid generation">
+<meta name="twitter:image" content="https://geowrangler.thinkingmachin.es/15_polygon_fill_files/figure-html/cell-6-output-1.png">
+<meta name="twitter:image-height" content="1589">
+<meta name="twitter:image-width" content="1178">
+<meta name="twitter:card" content="summary_large_image">
+</head>
+
+<body class="nav-sidebar floating nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">geowrangler</span>
+    </a>
+  </div>
+        <div class="quarto-navbar-tools tools-end">
+</div>
+          <div id="quarto-search" class="" title="Search"></div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./grids.html">Module Reference</a></li><li class="breadcrumb-item"><a href="./polygon_fill.html">Polygon Fill</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Geowrangler</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Tutorials</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.grids.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Grid Generation Tutorial</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.geometry_validation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Geometry Validation Tutorial</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.vector_zonal_stats.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Vector Zonal Stats Tutorial</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.raster_zonal_stats.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Raster Zonal Stats Tutorial</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.area_zonal_stats.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Vector Area Zonal Stats Tutorial</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.distance_zonal_stats.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Vector Distance Zonal Stats Tutorial</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.dhs.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">DHS Wealth Index</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.datasets.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Datasets Download</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.spatialjoin_highest_intersection.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Spatial Join Using Highest Intersection Tutorial</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.tile_clustering.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Tile Clustering Tutorial</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.raster_process.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Raster Processing Tutorial</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorial.raster_to_df.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Raster to Dataframe Tutorial</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Use Case Demos</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./overview.poverty_mapping_demo.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Explore Poverty Mapping Machine Learning Models</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./overview.usecase_ookla.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exploring Internet Speeds with Ookla</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">Module Reference</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./grids.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Grids</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./polygon_fill.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Polygon Fill</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./validation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Geometry Validation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./vector_zonal_stats.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Vector Zonal Stats</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./raster_zonal_stats.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Raster Zonal Stats</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./area_zonal_stats.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Area Zonal Stats</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./distance_zonal_stats.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Distance Zonal Stats</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./vector_to_raster_mask.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Vector to Raster mask</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./raster_to_dataframe.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Raster to Dataframe</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./raster_process.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Raster Processing</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./dhs.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">DHS Utilities</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./datasets_geofabrik.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Datasets Geofabrik</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./datasets_ookla.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Datasets Ookla</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./datasets_nightlights.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Night Lights</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./datasets_utils.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Datasets Utils</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tile_clustering.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Tile Clustering</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./spatialjoin_highest_intersection.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Spatial Join Highest Intersection</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview">Overview</a>
+  <ul class="collapse">
+  <li><a href="#in-a-nutshell-how-do-we-speed-up-polygon-fill" id="toc-in-a-nutshell-how-do-we-speed-up-polygon-fill" class="nav-link" data-scroll-target="#in-a-nutshell-how-do-we-speed-up-polygon-fill">In a nutshell, how do we speed up polygon fill?</a></li>
+  </ul></li>
+  <li><a href="#voxel-traversal" id="toc-voxel-traversal" class="nav-link" data-scroll-target="#voxel-traversal">Voxel Traversal</a>
+  <ul class="collapse">
+  <li><a href="#voxel_traversal_2d" id="toc-voxel_traversal_2d" class="nav-link" data-scroll-target="#voxel_traversal_2d">voxel_traversal_2d</a></li>
+  </ul></li>
+  <li><a href="#scanline-fill-algorithm" id="toc-scanline-fill-algorithm" class="nav-link" data-scroll-target="#scanline-fill-algorithm">Scanline Fill Algorithm</a>
+  <ul class="collapse">
+  <li><a href="#scanline_fill" id="toc-scanline_fill" class="nav-link" data-scroll-target="#scanline_fill">scanline_fill</a></li>
+  </ul></li>
+  <li><a href="#combining-voxel-traversal-and-scanline-fill-for-our-polygon-fill-algorithm" id="toc-combining-voxel-traversal-and-scanline-fill-for-our-polygon-fill-algorithm" class="nav-link" data-scroll-target="#combining-voxel-traversal-and-scanline-fill-for-our-polygon-fill-algorithm">Combining Voxel Traversal and Scanline Fill for our Polygon Fill Algorithm</a>
+  <ul class="collapse">
+  <li><a href="#voxel_traversal_scanline_fill" id="toc-voxel_traversal_scanline_fill" class="nav-link" data-scroll-target="#voxel_traversal_scanline_fill">voxel_traversal_scanline_fill</a></li>
+  </ul></li>
+  <li><a href="#putting-it-all-together-to-fill-multiple-polygons-in-a-geodataframe" id="toc-putting-it-all-together-to-fill-multiple-polygons-in-a-geodataframe" class="nav-link" data-scroll-target="#putting-it-all-together-to-fill-multiple-polygons-in-a-geodataframe">Putting it all together to fill multiple polygons in a GeoDataFrame</a>
+  <ul class="collapse">
+  <li><a href="#converting-polygons-and-multipolygons-to-a-list-of-vertices" id="toc-converting-polygons-and-multipolygons-to-a-list-of-vertices" class="nav-link" data-scroll-target="#converting-polygons-and-multipolygons-to-a-list-of-vertices">Converting <code>Polygons</code> and <code>MultiPolygons</code> to a list of vertices</a></li>
+  <li><a href="#polygons_to_vertices" id="toc-polygons_to_vertices" class="nav-link" data-scroll-target="#polygons_to_vertices">polygons_to_vertices</a></li>
+  <li><a href="#getting-pixels-within-each-polygon" id="toc-getting-pixels-within-each-polygon" class="nav-link" data-scroll-target="#getting-pixels-within-each-polygon">Getting pixels within each polygon</a></li>
+  <li><a href="#fast_polygon_fill" id="toc-fast_polygon_fill" class="nav-link" data-scroll-target="#fast_polygon_fill">fast_polygon_fill</a></li>
+  </ul></li>
+  <li><a href="#error-correction-using-off-boundary-pixels" id="toc-error-correction-using-off-boundary-pixels" class="nav-link" data-scroll-target="#error-correction-using-off-boundary-pixels">Error Correction using Off-Boundary Pixels</a>
+  <ul class="collapse">
+  <li><a href="#how-do-we-implement-error-correction" id="toc-how-do-we-implement-error-correction" class="nav-link" data-scroll-target="#how-do-we-implement-error-correction">How do we implement error correction?</a></li>
+  <li><a href="#off-diagonal-pixels" id="toc-off-diagonal-pixels" class="nav-link" data-scroll-target="#off-diagonal-pixels">Off-Diagonal Pixels</a></li>
+  <li><a href="#off-boundary-pixels" id="toc-off-boundary-pixels" class="nav-link" data-scroll-target="#off-boundary-pixels">Off-Boundary Pixels</a></li>
+  <li><a href="#putting-it-all-together-to-get-off-boundary-pixels-of-a-geodataframe" id="toc-putting-it-all-together-to-get-off-boundary-pixels-of-a-geodataframe" class="nav-link" data-scroll-target="#putting-it-all-together-to-get-off-boundary-pixels-of-a-geodataframe">Putting it all together to get off-boundary pixels of a GeoDataFrame</a></li>
+  </ul></li>
+  </ul>
+<div class="toc-actions"><ul><li><a href="https://github.com/thinkingmachines/geowrangler/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./grids.html">Module Reference</a></li><li class="breadcrumb-item"><a href="./polygon_fill.html">Polygon Fill</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Polygon Fill</h1>
+</div>
+
+<div>
+  <div class="description">
+    polygon fill algorithms for speeding up grid generation
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<!-- WARNING: THIS FILE WAS AUTOGENERATED! DO NOT EDIT! -->
+<p><a href="https://colab.research.google.com/github/thinkingmachines/geowrangler/blob/master/notebooks/15_polygon_fill.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg" title="Open in Colab button" class="img-fluid"></a></p>
+<section id="overview" class="level2">
+<h2 class="anchored" data-anchor-id="overview">Overview</h2>
+<p>We will go over utility functions that leverage these 2 algorithms for filling in pixels in polygons fast:</p>
+<ol type="1">
+<li><a href="https://github.com/cgyurgyik/fast-voxel-traversal-algorithm/blob/master/overview/FastVoxelTraversalOverview.md">Voxel Traversal Algorithm</a>: We use this for filling in pixels along the polygon boundary. 2D voxel traversal is used for every line segment of the polygon boundary.</li>
+<li><a href="https://www.educative.io/answers/what-is-scanline-fill-algorithm">Scanline Fill Algorithm</a>: We use this for filling in pixels in the polygon interior.</li>
+</ol>
+<p>The utility functions are currently used in <a href="https://geowrangler.thinkingmachin.es/grids.html#fastsquaregridgenerator">FastSquareGridGenerator</a> and <a href="https://geowrangler.thinkingmachin.es/grids.html#fastbingtilegridgenerator">FastBingTileGridGenerator</a></p>
+<p>At the end of this notebook, there’s a section for error correction using off-boundary pixels.</p>
+<section id="in-a-nutshell-how-do-we-speed-up-polygon-fill" class="level3">
+<h3 class="anchored" data-anchor-id="in-a-nutshell-how-do-we-speed-up-polygon-fill">In a nutshell, how do we speed up polygon fill?</h3>
+<ol type="1">
+<li>Translate polygons from geographic coordinates (epsg:4326, epsg:3857) to pixel coordinates (integers only)</li>
+<li><b>Use the fast polygon fill algorithms to get the polygon pixels and off-boundary pixels (focus of this notebook)</b></li>
+<li>Translate pixels back from pixel coordinates to geographic coordinates (square polygons)</li>
+<li>Perform off-boundary pixel error correction</li>
+</ol>
+<p>This notebook focuses on the fast polygon fill algorithms, while the translation functions and error correction proper are found in <a href="https://geowrangler.thinkingmachin.es/grids.html#fastsquaregridgenerator">FastSquareGridGenerator</a> and <a href="https://geowrangler.thinkingmachin.es/grids.html#fastbingtilegridgenerator">FastBingTileGridGenerator</a>.</p>
+<div id="798c7c6b-ec87-4dac-8275-1d19dc4df9ae" class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>polygon_test_cases <span class="op">=</span> {</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Square"</span>: [(<span class="dv">0</span>, <span class="dv">0</span>), (<span class="dv">10</span>, <span class="dv">0</span>), (<span class="dv">10</span>, <span class="dv">10</span>), (<span class="dv">0</span>, <span class="dv">10</span>)],</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Triangle"</span>: [(<span class="dv">0</span>, <span class="dv">0</span>), (<span class="dv">10</span>, <span class="dv">0</span>), (<span class="dv">5</span>, <span class="dv">10</span>)],</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Right Triangle"</span>: [(<span class="dv">0</span>, <span class="dv">0</span>), (<span class="dv">10</span>, <span class="dv">0</span>), (<span class="dv">0</span>, <span class="dv">10</span>)],</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Pentagon"</span>: [(<span class="dv">2</span>, <span class="dv">0</span>), (<span class="dv">8</span>, <span class="dv">0</span>), (<span class="dv">10</span>, <span class="dv">6</span>), (<span class="dv">5</span>, <span class="dv">10</span>), (<span class="dv">0</span>, <span class="dv">6</span>)],</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Star"</span>: [</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">6</span>, <span class="dv">2</span>),</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">8</span>, <span class="dv">8</span>),</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">12</span>, <span class="dv">8</span>),</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">9</span>, <span class="dv">12</span>),</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">11</span>, <span class="dv">18</span>),</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">6</span>, <span class="dv">14</span>),</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">1</span>, <span class="dv">18</span>),</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">3</span>, <span class="dv">12</span>),</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">0</span>, <span class="dv">8</span>),</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">4</span>, <span class="dv">8</span>),</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    ],</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Complex Shape 1"</span>: [(<span class="dv">0</span>, <span class="dv">0</span>), (<span class="dv">5</span>, <span class="dv">2</span>), (<span class="dv">3</span>, <span class="dv">5</span>), (<span class="dv">8</span>, <span class="dv">8</span>), (<span class="dv">5</span>, <span class="dv">10</span>), (<span class="dv">0</span>, <span class="dv">7</span>)],</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Complex Shape 2"</span>: [</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">0</span>, <span class="dv">0</span>),</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">2</span>, <span class="dv">6</span>),</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">4</span>, <span class="dv">10</span>),</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">6</span>, <span class="dv">8</span>),</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">8</span>, <span class="dv">12</span>),</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">10</span>, <span class="dv">4</span>),</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">12</span>, <span class="dv">2</span>),</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">8</span>, <span class="dv">0</span>),</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>    ],</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Complex Shape 3"</span>: [(<span class="dv">2</span>, <span class="dv">3</span>), (<span class="dv">5</span>, <span class="dv">3</span>), (<span class="dv">6</span>, <span class="dv">6</span>), (<span class="dv">3</span>, <span class="dv">7</span>), (<span class="dv">1</span>, <span class="dv">5</span>)],</span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Complex Shape 4"</span>: [(<span class="dv">1</span>, <span class="dv">1</span>), (<span class="dv">2</span>, <span class="dv">5</span>), (<span class="dv">4</span>, <span class="dv">3</span>), (<span class="dv">6</span>, <span class="dv">7</span>)],</span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Complex Shape 5"</span>: [(<span class="dv">1</span>, <span class="dv">2</span>), (<span class="dv">3</span>, <span class="dv">6</span>), (<span class="dv">5</span>, <span class="dv">5</span>), (<span class="dv">7</span>, <span class="dv">4</span>), (<span class="dv">9</span>, <span class="dv">5</span>), (<span class="dv">11</span>, <span class="dv">2</span>)],</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+</section>
+<section id="voxel-traversal" class="level2">
+<h2 class="anchored" data-anchor-id="voxel-traversal">Voxel Traversal</h2>
+<p>We use the 2D voxel traversal algorithm to fill in pixels between two points.</p>
+<hr>
+<p><a href="https://github.com/thinkingmachines/geowrangler/blob/master/geowrangler/gridding_utils/polygon_fill.py#L15" target="_blank" style="float:right; font-size:smaller">source</a></p>
+<section id="voxel_traversal_2d" class="level3">
+<h3 class="anchored" data-anchor-id="voxel_traversal_2d">voxel_traversal_2d</h3>
+<blockquote class="blockquote">
+<pre><code> voxel_traversal_2d (start_vertex:Tuple[int,int],
+                     end_vertex:Tuple[int,int], debug:bool=False)</code></pre>
+</blockquote>
+<p>*Returns all pixels between two points as inspired by Amanatides &amp; Woo’s “A Fast Voxel Traversal Algorithm For Ray Tracing”</p>
+<p>Implementation adapted from https://www.redblobgames.com/grids/line-drawing/ in the supercover lines section</p>
+<p>This also returns the off-diagonal pixels that can be useful for correcting errors at the corners of polygons during polygon fill*</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 6%">
+<col style="width: 25%">
+<col style="width: 34%">
+<col style="width: 34%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Default</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>start_vertex</td>
+<td>Tuple</td>
+<td></td>
+<td></td>
+</tr>
+<tr class="even">
+<td>end_vertex</td>
+<td>Tuple</td>
+<td></td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>debug</td>
+<td>bool</td>
+<td>False</td>
+<td>if true, prints diagnostic info for the algorithm</td>
+</tr>
+<tr class="even">
+<td><strong>Returns</strong></td>
+<td><strong>Dict</strong></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>Voxel traversal is used on every line segment to fill the polygon boundary.</p>
+<div id="dc732d7e-91a6-4f0a-811a-cc9cc92a1df8" class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>polygon_pixels <span class="op">=</span> {}</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> test_polygon_name, vertices <span class="kw">in</span> polygon_test_cases.items():</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    offset_vertices <span class="op">=</span> vertices[<span class="dv">1</span>:] <span class="op">+</span> vertices[:<span class="dv">1</span>]</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    pixels <span class="op">=</span> <span class="bu">set</span>()</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> start_vertex, end_vertex <span class="kw">in</span> <span class="bu">zip</span>(vertices, offset_vertices):</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>        pixels.update(voxel_traversal_2d(start_vertex, end_vertex)[<span class="st">"line_pixels"</span>])</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    polygon_pixels[test_polygon_name] <span class="op">=</span> pixels</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>plot_all_polygons(polygon_test_cases, polygon_pixels)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="15_polygon_fill_files/figure-html/cell-6-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="scanline-fill-algorithm" class="level2">
+<h2 class="anchored" data-anchor-id="scanline-fill-algorithm">Scanline Fill Algorithm</h2>
+<p>We use the scanline fill algorithm to fill in pixels within the polygon boundary.</p>
+<hr>
+<p><a href="https://github.com/thinkingmachines/geowrangler/blob/master/geowrangler/gridding_utils/polygon_fill.py#L142" target="_blank" style="float:right; font-size:smaller">source</a></p>
+<section id="scanline_fill" class="level3">
+<h3 class="anchored" data-anchor-id="scanline_fill">scanline_fill</h3>
+<blockquote class="blockquote">
+<pre><code> scanline_fill (vertices:List[Tuple[int,int]], debug:bool=False)</code></pre>
+</blockquote>
+<p><em>Returns all pixels within the interior of a polygon defined by vertices</em></p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 6%">
+<col style="width: 25%">
+<col style="width: 34%">
+<col style="width: 34%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Default</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>vertices</td>
+<td>List</td>
+<td></td>
+<td>list of polygon vertices in order (either clockwise or counterclockwise)</td>
+</tr>
+<tr class="even">
+<td>debug</td>
+<td>bool</td>
+<td>False</td>
+<td>if true, prints diagnostic info for the algorithm</td>
+</tr>
+<tr class="odd">
+<td><strong>Returns</strong></td>
+<td><strong>Set</strong></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>We use scanline fill on every set of vertices. Notice that the scanline can fill parts of the boundary as well, but it doesn’t capture the entire boundary.</p>
+<div id="d3eb282d-6262-4011-829e-cf533c04a3ee" class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>polygon_pixels <span class="op">=</span> {}</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> test_polygon_name, vertices <span class="kw">in</span> polygon_test_cases.items():</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    polygon_pixels[test_polygon_name] <span class="op">=</span> scanline_fill(vertices)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>plot_all_polygons(polygon_test_cases, polygon_pixels)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="15_polygon_fill_files/figure-html/cell-8-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="combining-voxel-traversal-and-scanline-fill-for-our-polygon-fill-algorithm" class="level2">
+<h2 class="anchored" data-anchor-id="combining-voxel-traversal-and-scanline-fill-for-our-polygon-fill-algorithm">Combining Voxel Traversal and Scanline Fill for our Polygon Fill Algorithm</h2>
+<hr>
+<p><a href="https://github.com/thinkingmachines/geowrangler/blob/master/geowrangler/gridding_utils/polygon_fill.py#L199" target="_blank" style="float:right; font-size:smaller">source</a></p>
+<section id="voxel_traversal_scanline_fill" class="level3">
+<h3 class="anchored" data-anchor-id="voxel_traversal_scanline_fill">voxel_traversal_scanline_fill</h3>
+<blockquote class="blockquote">
+<pre><code> voxel_traversal_scanline_fill (vertices_df:Union[pandas.core.frame.DataFr
+                                ame,polars.dataframe.frame.DataFrame],
+                                x_col:str='x', y_col:str='y',
+                                debug:bool=False)</code></pre>
+</blockquote>
+<p>*Returns pixels that intersect a polygon.</p>
+<p>This uses voxel traversal to fill the boundary, and scanline fill for the interior. All coordinates are assumed to be integers.</p>
+<p>This also returns the off-boundary pixels that can be useful for correcting errors at the corners of polygons during polygon fill*</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 6%">
+<col style="width: 25%">
+<col style="width: 34%">
+<col style="width: 34%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Default</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>vertices_df</td>
+<td>Union</td>
+<td></td>
+<td>dataframe with x_col and y_col for the polygon vertices</td>
+</tr>
+<tr class="even">
+<td>x_col</td>
+<td>str</td>
+<td>x</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>y_col</td>
+<td>str</td>
+<td>y</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>debug</td>
+<td>bool</td>
+<td>False</td>
+<td>if true, prints diagnostic info for both voxel traversal and scanline fill algorithms</td>
+</tr>
+<tr class="odd">
+<td><strong>Returns</strong></td>
+<td><strong>Dict</strong></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>By using both algorithms, we can fill all the pixels per polygon.</p>
+<div id="e4836507-2070-41f9-b1c4-6f2f1b2dd665" class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>polygon_pixels <span class="op">=</span> {}</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> test_polygon_name, vertices <span class="kw">in</span> polygon_test_cases.items():</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    vertices_df <span class="op">=</span> pd.DataFrame(vertices, columns<span class="op">=</span>[<span class="st">"x"</span>, <span class="st">"y"</span>])</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    polygon_pixels[test_polygon_name] <span class="op">=</span> voxel_traversal_scanline_fill(vertices_df)[<span class="st">"polygon_pixels"</span>]</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>plot_all_polygons(polygon_test_cases, polygon_pixels)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="15_polygon_fill_files/figure-html/cell-10-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="putting-it-all-together-to-fill-multiple-polygons-in-a-geodataframe" class="level2">
+<h2 class="anchored" data-anchor-id="putting-it-all-together-to-fill-multiple-polygons-in-a-geodataframe">Putting it all together to fill multiple polygons in a GeoDataFrame</h2>
+<p>Here we build up to the <a href="https://geowrangler.thinkingmachin.es/polygon_fill.html#fast_polygon_fill"><code>fast_polygon_fill</code></a> function that can fill in multiple polygons and MultiPolygon geometries in an AOI. This essentially means using <a href="https://geowrangler.thinkingmachin.es/polygon_fill.html#voxel_traversal_scanline_fill"><code>voxel_traversal_scanline_fill</code></a> on each individual polygon in the AOI.</p>
+<div id="1ee9346e-a06a-4339-8d4f-5094bd62af97" class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>multipolygon_dict <span class="op">=</span> {</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Square"</span>: Polygon([(<span class="dv">15</span>, <span class="dv">0</span>), (<span class="dv">25</span>, <span class="dv">0</span>), (<span class="dv">25</span>, <span class="dv">10</span>), (<span class="dv">15</span>, <span class="dv">10</span>)]),</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Triangle MultiPolygon"</span>: MultiPolygon(polygons <span class="op">=</span> [</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>        Polygon([(<span class="dv">0</span>, <span class="dv">0</span>), (<span class="dv">10</span>, <span class="dv">0</span>), (<span class="dv">5</span>, <span class="dv">10</span>)]), </span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>        Polygon([(<span class="dv">0</span>, <span class="dv">12</span>), (<span class="dv">10</span>, <span class="dv">12</span>), (<span class="dv">0</span>, <span class="dv">22</span>)])],</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Pentagon"</span>: Polygon([(<span class="dv">17</span>, <span class="dv">15</span>), (<span class="dv">23</span>, <span class="dv">15</span>), (<span class="dv">25</span>, <span class="dv">21</span>), (<span class="dv">20</span>, <span class="dv">25</span>), (<span class="dv">15</span>, <span class="dv">21</span>)]),</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>multipolygon_gdf <span class="op">=</span> gpd.GeoDataFrame(geometry<span class="op">=</span>gpd.GeoSeries(multipolygon_dict))</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>multipolygon_gdf.index.name <span class="op">=</span> <span class="st">"geom_name"</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>multipolygon_gdf <span class="op">=</span> multipolygon_gdf.reset_index()</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>multipolygon_gdf</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">geom_name</th>
+<th data-quarto-table-cell-role="th">geometry</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>Square</td>
+<td>POLYGON ((15 0, 25 0, 25 10, 15 10, 15 0))</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>Triangle MultiPolygon</td>
+<td>MULTIPOLYGON (((0 0, 10 0, 5 10, 0 0)), ((0 12...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>Pentagon</td>
+<td>POLYGON ((17 15, 23 15, 25 21, 20 25, 15 21, 1...</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<div id="41925902-46eb-4d3a-bb84-374ba021ef44" class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>multipolygon_gdf.boundary.plot()</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="15_polygon_fill_files/figure-html/cell-12-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<section id="converting-polygons-and-multipolygons-to-a-list-of-vertices" class="level3">
+<h3 class="anchored" data-anchor-id="converting-polygons-and-multipolygons-to-a-list-of-vertices">Converting <code>Polygons</code> and <code>MultiPolygons</code> to a list of vertices</h3>
+<p>The <a href="https://geowrangler.thinkingmachin.es/polygon_fill.html#polygons_to_vertices"><code>polygons_to_vertices</code></a> function can convert all polygons and multipolygons in a GeoDataFrame to a Polars DataFrame of vertices. This is a preparation step for <a href="https://geowrangler.thinkingmachin.es/polygon_fill.html#fast_polygon_fill"><code>fast_polygon_fill</code></a>.</p>
+<p>Note: It is also feasible to convert it to a Pandas DataFrame but using Polars is more efficient for vectorized translations between geographic coordinates and pixel coordinates.</p>
+<hr>
+<p><a href="https://github.com/thinkingmachines/geowrangler/blob/master/geowrangler/gridding_utils/polygon_fill.py#L242" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="polygons_to_vertices" class="level3">
+<h3 class="anchored" data-anchor-id="polygons_to_vertices">polygons_to_vertices</h3>
+<blockquote class="blockquote">
+<pre><code> polygons_to_vertices (polys_gdf:geopandas.geodataframe.GeoDataFrame,
+                       unique_id_col:Optional[str]=None)</code></pre>
+</blockquote>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 6%">
+<col style="width: 25%">
+<col style="width: 34%">
+<col style="width: 34%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Default</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>polys_gdf</td>
+<td>GeoDataFrame</td>
+<td></td>
+<td></td>
+</tr>
+<tr class="even">
+<td>unique_id_col</td>
+<td>Optional</td>
+<td>None</td>
+<td>the ids under this column will be preserved in the output tiles</td>
+</tr>
+<tr class="odd">
+<td><strong>Returns</strong></td>
+<td><strong>DataFrame</strong></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>The output is a dataframe of vertices across all polygons.</p>
+<p>If the original coordinates are based on a geographic coordinate system such as <code>epsg:4326</code> or <code>epsg:3857</code>, then there would normally need to be an additional step to translate it from geographic coordinates to pixel coordinates. But since our sample polygons are already based on pixel coordinates, then we only need to cast the vertex coordinates <code>x</code>, <code>y</code> to an integer dtype.</p>
+<div id="eba85b48-1be5-4709-844b-fc8a21de6586" class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>vertices_df <span class="op">=</span> polygons_to_vertices(multipolygon_gdf, <span class="st">"geom_name"</span>)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>vertices_df <span class="op">=</span> vertices_df.cast({<span class="st">"x"</span>:PIXEL_DTYPE, <span class="st">"y"</span>:PIXEL_DTYPE})</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>vertices_df.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (5, 4)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">geom_name</th>
+<th data-quarto-table-cell-role="th">__subpolygon_id__</th>
+<th data-quarto-table-cell-role="th">x</th>
+<th data-quarto-table-cell-role="th">y</th>
+</tr>
+<tr class="even">
+<th>str</th>
+<th>i64</th>
+<th>i32</th>
+<th>i32</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"Square"</td>
+<td>0</td>
+<td>15</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td>"Square"</td>
+<td>0</td>
+<td>25</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<td>"Square"</td>
+<td>0</td>
+<td>25</td>
+<td>10</td>
+</tr>
+<tr class="even">
+<td>"Square"</td>
+<td>0</td>
+<td>15</td>
+<td>10</td>
+</tr>
+<tr class="odd">
+<td>"Square"</td>
+<td>0</td>
+<td>15</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</section>
+<section id="getting-pixels-within-each-polygon" class="level3">
+<h3 class="anchored" data-anchor-id="getting-pixels-within-each-polygon">Getting pixels within each polygon</h3>
+<p>The <a href="https://geowrangler.thinkingmachin.es/polygon_fill.html#fast_polygon_fill"><code>fast_polygon_fill</code></a> function is generally a wrapper on <a href="https://geowrangler.thinkingmachin.es/polygon_fill.html#voxel_traversal_scanline_fill"><code>voxel_traversal_scanline_fill</code></a> to find all pixel coordinates within each polygon in the AOI.</p>
+<hr>
+<p><a href="https://github.com/thinkingmachines/geowrangler/blob/master/geowrangler/gridding_utils/polygon_fill.py#L280" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="fast_polygon_fill" class="level3">
+<h3 class="anchored" data-anchor-id="fast_polygon_fill">fast_polygon_fill</h3>
+<blockquote class="blockquote">
+<pre><code> fast_polygon_fill (vertices_df:polars.dataframe.frame.DataFrame,
+                    unique_id_col:Optional[str]=None)</code></pre>
+</blockquote>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 6%">
+<col style="width: 25%">
+<col style="width: 34%">
+<col style="width: 34%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Default</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>vertices_df</td>
+<td>DataFrame</td>
+<td></td>
+<td>integer vertices of all polygons in the AOI</td>
+</tr>
+<tr class="even">
+<td>unique_id_col</td>
+<td>Optional</td>
+<td>None</td>
+<td>the ids under this column will be preserved in the output tiles</td>
+</tr>
+<tr class="odd">
+<td><strong>Returns</strong></td>
+<td><strong>Dict</strong></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>The output is a polars datafarame containing all the pixels within all the AOI polygons. The <code>unique_id_col</code> parameter can be used to assign to each pixel its corresponding geometry name from the original AOI. This saves us effort from having to perform another spatial join to get the geometry names.</p>
+<p>If the original AOI is based on a geographic coordinate system such as <code>epsg:4326</code> or <code>epsg:3857</code>, then there would need to be an additional step to translate it from pixel coordinates back to geographic coordinates. To represent a pixel in geographic coordinates, you would need translate both the lower left corner and upper right corner to represent a rectangular polygon. But in this case it’s not necessary to do the translation since the original AOIs are already based on pixel coordinates. You can refer to the <code>_xy_to_bbox</code> method in <a href="https://geowrangler.thinkingmachin.es/grids.html#fastsquaregridgenerator">FastSquareGridGenerator</a> and <a href="https://geowrangler.thinkingmachin.es/grids.html#fastbingtilegridgenerator">FastBingTileGridGenerator</a> for reference.</p>
+<div id="9e77970d-03f9-4aef-a077-34f3cf49b4ad" class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>filled_polygons <span class="op">=</span> fast_polygon_fill(vertices_df, <span class="st">"geom_name"</span>)[<span class="st">"tiles_in_geom"</span>]</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>filled_polygons.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (5, 3)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">x</th>
+<th data-quarto-table-cell-role="th">y</th>
+<th data-quarto-table-cell-role="th">geom_name</th>
+</tr>
+<tr class="even">
+<th>i32</th>
+<th>i32</th>
+<th>str</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>18</td>
+<td>10</td>
+<td>"Square"</td>
+</tr>
+<tr class="even">
+<td>8</td>
+<td>1</td>
+<td>"Triangle MultiPolygon"</td>
+</tr>
+<tr class="odd">
+<td>8</td>
+<td>12</td>
+<td>"Triangle MultiPolygon"</td>
+</tr>
+<tr class="even">
+<td>20</td>
+<td>20</td>
+<td>"Pentagon"</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>0</td>
+<td>"Triangle MultiPolygon"</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div id="ffa3684e-111d-48d8-affb-79523f868f0f" class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># counting pixels per geometry</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>filled_polygons.group_by(<span class="st">"geom_name"</span>).<span class="bu">len</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (3, 2)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">geom_name</th>
+<th data-quarto-table-cell-role="th">len</th>
+</tr>
+<tr class="even">
+<th>str</th>
+<th>u32</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"Pentagon"</td>
+<td>87</td>
+</tr>
+<tr class="even">
+<td>"Triangle MultiPolygon"</td>
+<td>137</td>
+</tr>
+<tr class="odd">
+<td>"Square"</td>
+<td>121</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div id="08d41c40-fdb9-4db3-a6d5-1e0166ebeaf3" class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">5</span>,<span class="dv">5</span>))</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> multipolygon_gdf.boundary.plot(ax <span class="op">=</span> ax)</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> idx, row <span class="kw">in</span> filled_polygons.to_pandas().iterrows():</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> row[<span class="st">"x"</span>]</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> row[<span class="st">"y"</span>]</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>    rect <span class="op">=</span> patches.Rectangle(</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>                xy<span class="op">=</span>(x <span class="op">-</span> <span class="fl">0.5</span>, y <span class="op">-</span> <span class="fl">0.5</span>),</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>                width<span class="op">=</span><span class="dv">1</span>,</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>                height<span class="op">=</span><span class="dv">1</span>,</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>                linewidth<span class="op">=</span><span class="dv">1</span>,</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>                edgecolor<span class="op">=</span><span class="st">"black"</span>,</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>                facecolor<span class="op">=</span><span class="st">"r"</span>,</span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>                alpha<span class="op">=</span><span class="fl">0.6</span>,</span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>    ax.add_patch(rect)</span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="15_polygon_fill_files/figure-html/cell-18-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="error-correction-using-off-boundary-pixels" class="level2">
+<h2 class="anchored" data-anchor-id="error-correction-using-off-boundary-pixels">Error Correction using Off-Boundary Pixels</h2>
+<p>Off-boundary pixels are pixels that have at least one corner tangential to an AOI polygon’s edge. They are useful for gridding error correction in <a href="https://geowrangler.thinkingmachin.es/grids.html#fastsquaregridgenerator">FastSquareGridGenerator</a> and <a href="https://geowrangler.thinkingmachin.es/grids.html#fastbingtilegridgenerator">FastBingTileGridGenerator</a>.</p>
+<p>When we translate a polygon from geographic coordinates to pixel coordinates, we inevitably have to round the polygon vertex coordinates to the nearest higher or lower integer. For some pixels, this rounding results in one of the pixel corners to be just tangent to the translated polygon boundary. But if it were in the original geographic coordinates, the boundary would have had intersected a portion of the pixel’s interior, not just exactly at a corner.</p>
+<p>Thus, there will sometimes be pixels that when in geographic coordinates actually intersect the AOI, but when in pixel coordinates are only tangential to the AOI polygon. When we use the fast polygon fill algorithm, it doesn’t consider these tangential pixels, also called off-boundary pixels, as part of the filled-in pixel set. So to correct this error, we need to first identify the off-boundary pixels and then select which ones to add to the filled-in pixel set.</p>
+<section id="how-do-we-implement-error-correction" class="level3">
+<h3 class="anchored" data-anchor-id="how-do-we-implement-error-correction">How do we implement error correction?</h3>
+<p>We determine which pixels to add to the filled-in pixel set by intersecting the polygon boundary linestring with the off-boundary pixel polygon. Both the linestring and the off-boundary pixel polygon should be in geographic coordinates, not pixel coordinates. The pixels that intersect should be added to the filled-in pixel set. You can find this implementation in the <code>generate_grid</code> method under <a href="https://geowrangler.thinkingmachin.es/grids.html#fastsquaregridgenerator">FastSquareGridGenerator</a> and <a href="https://geowrangler.thinkingmachin.es/grids.html#fastbingtilegridgenerator">FastBingTileGridGenerator</a></p>
+<ul>
+<li><p><em>Why can’t we just add all of the off-boundary pixels?</em> We can’t because not all of the off-boundary pixels actually intersect the polygon when in geographic coordinates.</p></li>
+<li><p><em>Won’t there be an increased computational cost from using a geometry intersection operation?</em> Yes, this additional step will add compute time but the increase in computational cost should be minimal since we’re doing a linestring to polygon intersection (not a polygon to polygon intersection), and the off-boundary pixels should be a small fraction of the total pixels.</p></li>
+<li><p><em>Why is error correction not implemented in this notebook?</em> In this particular notebook we’re only working with pixel coordinates, so the translation problem isn’t a concern and we don’t need error correction. It’s a concern when you’re starting off with geographic coordinates, as shown in <a href="https://geowrangler.thinkingmachin.es/grids.html#fastsquaregridgenerator">FastSquareGridGenerator</a> and <a href="https://geowrangler.thinkingmachin.es/grids.html#fastbingtilegridgenerator">FastBingTileGridGenerator</a>.</p></li>
+</ul>
+<p>The section below demonstrates the utility functions for getting off-boundary pixels</p>
+<ol type="1">
+<li>Get off-diagonal pixels for a single polygon using <a href="https://geowrangler.thinkingmachin.es/polygon_fill.html#voxel_traversal_2d"><code>voxel_traversal_2d</code></a></li>
+<li>Get off-boundary pixels for a single polygon using <a href="https://geowrangler.thinkingmachin.es/polygon_fill.html#voxel_traversal_scanline_fill"><code>voxel_traversal_scanline_fill</code></a></li>
+<li>Get off-boundary pixels for a GeoDataFrame using <a href="https://geowrangler.thinkingmachin.es/polygon_fill.html#fast_polygon_fill"><code>fast_polygon_fill</code></a></li>
+</ol>
+</section>
+<section id="off-diagonal-pixels" class="level3">
+<h3 class="anchored" data-anchor-id="off-diagonal-pixels">Off-Diagonal Pixels</h3>
+<p>Off-boundary pixels originate from off-diagonal pixels. Off-diagonal pixels occur whenever there is a diagonal step in the voxel traversal algorithm (hence the name).</p>
+<p>Notice below that some of the off-diagonal pixels are in the interior. Later in the <code>voxel_travresal_scanline_fill</code> function we’ll be filtering these further to include only off-diagonal pixels on the polygon’s exterior. The filtered pixels are the off-boundary pixels.</p>
+<div id="442a6f4e-76c5-44dc-aa15-8c37605e97f4" class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>off_diagonal_pixels <span class="op">=</span> {}</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> test_polygon_name, vertices <span class="kw">in</span> polygon_test_cases.items():</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    offset_vertices <span class="op">=</span> vertices[<span class="dv">1</span>:] <span class="op">+</span> vertices[:<span class="dv">1</span>]</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>    pixels <span class="op">=</span> <span class="bu">set</span>()</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> start_vertex, end_vertex <span class="kw">in</span> <span class="bu">zip</span>(vertices, offset_vertices):</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>        pixels.update(voxel_traversal_2d(start_vertex, end_vertex)[<span class="st">"off_diagonal_pixels"</span>])</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>    off_diagonal_pixels[test_polygon_name] <span class="op">=</span> pixels</span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>plot_all_polygons(polygon_test_cases, off_diagonal_pixels)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="15_polygon_fill_files/figure-html/cell-19-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="off-boundary-pixels" class="level3">
+<h3 class="anchored" data-anchor-id="off-boundary-pixels">Off-Boundary Pixels</h3>
+<p>Off-boundary pixels are almost the same as the off-diagonal pixels, just filtered to only include pixels on the polygon exterior. These are what we use for gridding error correction.</p>
+<p>Inside <a href="https://geowrangler.thinkingmachin.es/polygon_fill.html#voxel_traversal_scanline_fill"><code>voxel_traversal_scanline_fill</code></a>, the filtering is done by getting the set difference between the the off-boundary pixels and the interior pixels from scanline fill.</p>
+<div id="effd1130-a43b-4c50-bd43-a1c9fb4aa6a7" class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>off_boundary_pixels <span class="op">=</span> {}</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> test_polygon_name, vertices <span class="kw">in</span> polygon_test_cases.items():</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    vertices_df <span class="op">=</span> pd.DataFrame(vertices, columns<span class="op">=</span>[<span class="st">"x"</span>, <span class="st">"y"</span>])</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>    off_boundary_pixels[test_polygon_name] <span class="op">=</span> voxel_traversal_scanline_fill(vertices_df)[<span class="st">"off_boundary_pixels"</span>]</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>plot_all_polygons(polygon_test_cases, off_boundary_pixels)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="15_polygon_fill_files/figure-html/cell-20-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="putting-it-all-together-to-get-off-boundary-pixels-of-a-geodataframe" class="level3">
+<h3 class="anchored" data-anchor-id="putting-it-all-together-to-get-off-boundary-pixels-of-a-geodataframe">Putting it all together to get off-boundary pixels of a GeoDataFrame</h3>
+<p>The <a href="https://geowrangler.thinkingmachin.es/polygon_fill.html#fast_polygon_fill"><code>fast_polygon_fill</code></a> function also returns the off-boundary pixels across all geometries in a GeoDataFrame</p>
+<div id="5d2098f1-e3c7-4156-b0eb-02d1c3c0656d" class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>multipolygon_gdf.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">geom_name</th>
+<th data-quarto-table-cell-role="th">geometry</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>Square</td>
+<td>POLYGON ((15 0, 25 0, 25 10, 15 10, 15 0))</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>Triangle MultiPolygon</td>
+<td>MULTIPOLYGON (((0 0, 10 0, 5 10, 0 0)), ((0 12...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>Pentagon</td>
+<td>POLYGON ((17 15, 23 15, 25 21, 20 25, 15 21, 1...</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<div id="c6d9f3a8-aad7-4e55-9dd6-dac5846d6068" class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>vertices_df <span class="op">=</span> polygons_to_vertices(multipolygon_gdf, <span class="st">"geom_name"</span>)</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>vertices_df <span class="op">=</span> vertices_df.cast({<span class="st">"x"</span>:PIXEL_DTYPE, <span class="st">"y"</span>:PIXEL_DTYPE})</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>tiles_off_boundary <span class="op">=</span> fast_polygon_fill(vertices_df, <span class="st">"geom_name"</span>)[<span class="st">"tiles_off_boundary"</span>]</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>tiles_off_boundary.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (5, 3)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">x</th>
+<th data-quarto-table-cell-role="th">y</th>
+<th data-quarto-table-cell-role="th">geom_name</th>
+</tr>
+<tr class="even">
+<th>i32</th>
+<th>i32</th>
+<th>str</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>9</td>
+<td>14</td>
+<td>"Triangle MultiPolygon"</td>
+</tr>
+<tr class="even">
+<td>24</td>
+<td>16</td>
+<td>"Pentagon"</td>
+</tr>
+<tr class="odd">
+<td>2</td>
+<td>21</td>
+<td>"Triangle MultiPolygon"</td>
+</tr>
+<tr class="even">
+<td>6</td>
+<td>17</td>
+<td>"Triangle MultiPolygon"</td>
+</tr>
+<tr class="odd">
+<td>10</td>
+<td>13</td>
+<td>"Triangle MultiPolygon"</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div id="dbc264d3-55fc-488f-8799-1b07f09929da" class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co"># counting pixels per geometry</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>tiles_off_boundary.group_by(<span class="st">"geom_name"</span>).<span class="bu">len</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div><style>
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (2, 2)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">geom_name</th>
+<th data-quarto-table-cell-role="th">len</th>
+</tr>
+<tr class="even">
+<th>str</th>
+<th>u32</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"Pentagon"</td>
+<td>4</td>
+</tr>
+<tr class="even">
+<td>"Triangle MultiPolygon"</td>
+<td>10</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div id="60db46b0-b955-4037-9d1b-0c32e81d0c5e" class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">5</span>,<span class="dv">5</span>))</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> multipolygon_gdf.boundary.plot(ax <span class="op">=</span> ax)</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> idx, row <span class="kw">in</span> tiles_off_boundary.to_pandas().iterrows():</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> row[<span class="st">"x"</span>]</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> row[<span class="st">"y"</span>]</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>    rect <span class="op">=</span> patches.Rectangle(</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>                xy<span class="op">=</span>(x <span class="op">-</span> <span class="fl">0.5</span>, y <span class="op">-</span> <span class="fl">0.5</span>),</span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>                width<span class="op">=</span><span class="dv">1</span>,</span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>                height<span class="op">=</span><span class="dv">1</span>,</span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>                linewidth<span class="op">=</span><span class="dv">1</span>,</span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>                edgecolor<span class="op">=</span><span class="st">"black"</span>,</span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>                facecolor<span class="op">=</span><span class="st">"r"</span>,</span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>                alpha<span class="op">=</span><span class="fl">0.6</span>,</span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a>    ax.add_patch(rect)</span>
+<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="15_polygon_fill_files/figure-html/cell-24-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp("https:\/\/geowrangler\.thinkingmachin\.es\/");
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/thinkingmachines/geowrangler/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>
