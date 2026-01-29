@@ -24,6 +24,13 @@ We [welcome your comments, suggestions, bug reports, and code
 contributions](https://github.com/thinkingmachines/geowrangler/discussions)
 to make **Geowrangler** better.
 
+### Maintenance status
+
+Geowrangler is **community-maintained** and supported by maintainers on a **volunteer, best-effort basis**.
+
+- There is **no guaranteed SLA** for issue responses, PR reviews, or releases.
+- Please open a GitHub issue for feature requests and reporting bugs. You may also use GitHub Discussions for general Q&A.
+
 ### Installation
 
     pip install geowrangler
@@ -41,3 +48,5 @@ Please checkout the
 and the
 [CONTRIBUTING](https://github.com/thinkingmachines/geowrangler/blob/master/CONTRIBUTING.md)
 sections to learn how to contribute, enhance, and fix Geowrangler.
+
+> Note: Reviews and releases are handled on a best-effort basis by volunteer maintainers.
