@@ -685,7 +685,52 @@ def generate_grid(
     ] = None,  # the ids under this column will be preserved in the output tiles
 ) -> Union[GeoDataFrame, pd.DataFrame]:
 
-    vertices = polygon_fill.polygons_to_vertices(aoi_gdf, unique_id_col)
+    # Fix: Convert to EPSG:4326 if not already (Bing tiles use lat/lng)
+    original_crs = aoi_gdf.crs
+    if aoi_gdf.crs is None:
+        warnings.warn(
+            "Input GeoDataFrame has no CRS. Assuming EPSG:4326 (WGS84)."
+        )
+        working_gdf = aoi_gdf.copy()
+        working_gdf = working_gdf.set_crs("EPSG:4326")
+    elif not aoi_gdf.crs.equals("EPSG:4326"):
+        working_gdf = aoi_gdf.to_crs("EPSG:4326")
+    else:
+        working_gdf = aoi_gdf
+
+    # Fix: Handle polygons with holes by using only exterior
+    # The scanline fill algorithm doesn't handle holes correctly
+    has_holes = False
+    def extract_exterior(geom):
+        nonlocal has_holes
+        if geom.geom_type == "Polygon":
+            if len(list(geom.interiors)) > 0:
+                has_holes = True
+                return Polygon(geom.exterior)
+            return geom
+        elif geom.geom_type == "MultiPolygon":
+            exteriors = []
+            for poly in geom.geoms:
+                if len(list(poly.interiors)) > 0:
+                    has_holes = True
+                    exteriors.append(Polygon(poly.exterior))
+                else:
+                    exteriors.append(poly)
+            from shapely.geometry import MultiPolygon as ShapelyMultiPolygon
+            return ShapelyMultiPolygon(exteriors)
+        return geom
+
+    working_gdf = working_gdf.copy()
+    working_gdf.geometry = working_gdf.geometry.apply(extract_exterior)
+    
+    if has_holes:
+        warnings.warn(
+            "Input geometries contain holes (interior rings). "
+            "Holes are ignored during grid generation - grids will fill the entire exterior. "
+            "If you need to exclude holes, clip the result with the original geometry."
+        )
+
+    vertices = polygon_fill.polygons_to_vertices(working_gdf, unique_id_col)
     vertices = self._latlng_to_xy(vertices, lat_col="y", lng_col="x")
 
     polygon_fill_result = polygon_fill.fast_polygon_fill(vertices, unique_id_col)
@@ -695,7 +740,7 @@ def generate_grid(
     tiles_off_boundary = polygon_fill_result["tiles_off_boundary"]
     if not tiles_off_boundary.is_empty():
         off_boundary_bboxes = self._xy_to_bbox(tiles_off_boundary, "x", "y")
-        all_polygon_boundary = aoi_gdf.boundary.union_all(method="unary")
+        all_polygon_boundary = working_gdf.boundary.union_all(method="unary")
         intersects_boundary_bool = off_boundary_bboxes.intersects(all_polygon_boundary)
         addtl_tiles_in_geom = tiles_off_boundary.filter(
             pl.Series(intersects_boundary_bool)
@@ -728,6 +773,9 @@ def generate_grid(
 
     if self.return_geometry:
         tiles_in_geom = GeoDataFrame(tiles_in_geom.to_pandas(), geometry=bboxes)
+        # Convert back to original CRS if different
+        if original_crs is not None and not original_crs.equals("EPSG:4326"):
+            tiles_in_geom = tiles_in_geom.to_crs(original_crs)
     else:
         tiles_in_geom = tiles_in_geom.to_pandas()
 

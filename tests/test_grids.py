@@ -322,3 +322,96 @@ def test_fast_bing_tile_grid_generator_add_xyz_true(
     assert "z" in grids_gdf
     assert isinstance(grids_gdf, pd.DataFrame)
     assert len(grids_gdf) == FAST_BING_TILE_N_TILES
+
+
+def test_fast_bing_tile_grid_generator_non_4326_crs():
+    """Test that FastBingTileGridGenerator correctly handles non-EPSG:4326 CRS.
+    
+    This tests the fix for issue #263 bug 2: Input in a projected CRS (like EPSG:32651)
+    should be converted to EPSG:4326 internally and results converted back.
+    """
+    # Create polygon in EPSG:4326 first
+    gdf_4326 = gpd.GeoDataFrame(
+        geometry=[
+            Polygon(
+                [
+                    (0, 0),
+                    (2, 0),
+                    (2, 1),
+                    (1, 1),
+                    (1, 3),
+                    (0, 3),
+                ]
+            )
+        ],
+        crs="EPSG:4326",
+    )
+    
+    # Convert to a projected CRS (Web Mercator)
+    gdf_3857 = gdf_4326.to_crs("EPSG:3857")
+    
+    grid_generator = grids.FastBingTileGridGenerator(10)
+    
+    # Generate grids from the projected CRS input
+    grids_gdf = grid_generator.generate_grid(gdf_3857)
+    
+    # Result should be in the original input CRS
+    assert grids_gdf.crs.to_epsg() == 3857
+    assert "geometry" in grids_gdf
+    assert isinstance(grids_gdf, gpd.GeoDataFrame)
+    # Should get approximately same number of tiles
+    assert len(grids_gdf) == FAST_BING_TILE_N_TILES
+
+
+def test_fast_bing_tile_grid_generator_polygon_with_holes():
+    """Test that FastBingTileGridGenerator handles polygons with holes with a warning.
+    
+    This tests the fix for issue #263 bug 1: Polygons with interior holes
+    should emit a warning and fill the entire exterior.
+    """
+    # Create polygon with a hole
+    exterior = [(0, 0), (4, 0), (4, 4), (0, 4), (0, 0)]
+    hole = [(1, 1), (2, 1), (2, 2), (1, 2), (1, 1)]
+    polygon_with_hole = Polygon(exterior, [hole])
+    
+    gdf = gpd.GeoDataFrame(
+        geometry=[polygon_with_hole],
+        crs="EPSG:4326",
+    )
+    
+    grid_generator = grids.FastBingTileGridGenerator(10)
+    
+    # Should emit a warning about holes
+    with pytest.warns(UserWarning, match="holes"):
+        grids_gdf = grid_generator.generate_grid(gdf)
+    
+    assert "geometry" in grids_gdf
+    assert isinstance(grids_gdf, gpd.GeoDataFrame)
+    assert len(grids_gdf) > 0
+
+
+def test_fast_bing_tile_grid_generator_no_crs_warning():
+    """Test that FastBingTileGridGenerator warns when input has no CRS."""
+    gdf_no_crs = gpd.GeoDataFrame(
+        geometry=[
+            Polygon(
+                [
+                    (0, 0),
+                    (2, 0),
+                    (2, 1),
+                    (1, 1),
+                    (1, 3),
+                    (0, 3),
+                ]
+            )
+        ],
+        crs=None,
+    )
+    
+    grid_generator = grids.FastBingTileGridGenerator(10)
+    
+    # Should emit a warning about missing CRS
+    with pytest.warns(UserWarning, match="no CRS"):
+        grids_gdf = grid_generator.generate_grid(gdf_no_crs)
+    
+    assert len(grids_gdf) > 0
