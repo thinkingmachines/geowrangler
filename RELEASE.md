@@ -5,7 +5,7 @@
 Run the following. Use `<part>` = 0, 1, 2 for major, minor or patch depending on the release. For example if the version is 1.5.2 then the major version is 1, the minor version is 5, and the patch version is 2. See https://nbdev.fast.ai/api/release.html#bump-version for more details
 
 ```
-nbdev_bump_version --part <part>
+nbdev-bump-version --part <part>
 ```
 
 ## Publishing
@@ -36,7 +36,7 @@ The `<REPOSITORY>` value is either `pypi` or `testpypi`.
 ## Updating release notes and tagging a release
 
 1. Document the release notes in `CHANGELOG.md`
-2. Run `nbdev_release_git` to create entries for the [release page](https://github.com/thinkingmachines/geowrangler/tags). 
+2. Run `nbdev-release-git` to create entries for the [release page](https://github.com/thinkingmachines/geowrangler/tags). 
     - You'll need to create a GitHub personal access token for this if you haven't already. See the [nbdev.release docs](https://nbdev.fast.ai/api/release.html#overview), under the `Setup` section, for more details.
 
 ## Submitting

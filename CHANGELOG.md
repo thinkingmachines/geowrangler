@@ -1,5 +1,7 @@
 # Release Notes
-
+## 0.5.2 (pending)
+ - upgrade Python version to `3.14` 
+ - upgrade `nbdev` to `nbdev3` `(3.x)`
 ## 0.5.1
 
 ### Improvements
