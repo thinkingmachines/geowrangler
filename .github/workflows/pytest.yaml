@@ -13,8 +13,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
         with:
-          python-version: 3.9
+          python-version: 3.14
       - run: pip install -e ".[dev]"
       # Code cove with a min percentage
-      # - run: poetry run pytest --cov . --cov-fail-under=80 -n auto
       - run: pytest --cov --cov-config=.coveragerc --cov-fail-under=80 -n auto
