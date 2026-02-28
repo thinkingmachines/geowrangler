@@ -3,7 +3,7 @@
 # %% auto #0
 __all__ = ['create_raster_zonal_stats', 'create_exactextract_zonal_stats']
 
-# %% ../notebooks/03_raster_zonal_stats.ipynb #2aaa858a
+# %% ../notebooks/03_raster_zonal_stats.ipynb #e5bf3814
 from pathlib import Path
 from typing import Any, Dict, Union, List
 import warnings
@@ -19,7 +19,7 @@ from exactextract.raster import RasterioRasterSource
 
 from .vector_zonal_stats import _expand_aggs, _fillnas, _fix_agg
 
-# %% ../notebooks/03_raster_zonal_stats.ipynb #9ecaa86b
+# %% ../notebooks/03_raster_zonal_stats.ipynb #41f6fd0b
 def check_crs_alignment(
     aoi: Union[  # The area of interest geodataframe, or path to the vector file
         str, Path, gpd.GeoDataFrame
@@ -41,7 +41,7 @@ def check_crs_alignment(
     if raster_crs != aoi_crs:
         raise ValueError(f"The CRS of the AOI ({aoi_crs}) and the raster data ({raster_crs}) do not match!")
 
-# %% ../notebooks/03_raster_zonal_stats.ipynb #deb8479e
+# %% ../notebooks/03_raster_zonal_stats.ipynb #c939d1a9
 def create_raster_zonal_stats(
     aoi: Union[  # The area of interest geodataframe, or path to the vector file
         str, Path, gpd.GeoDataFrame
@@ -129,7 +129,7 @@ def create_raster_zonal_stats(
 
     return aoi
 
-# %% ../notebooks/03_raster_zonal_stats.ipynb #f94c0836
+# %% ../notebooks/03_raster_zonal_stats.ipynb #5ad8f5ea
 def _validate_aggs(aggregation, band_count):
     "Validate aggregations based on band count, dropping invalid entries"
     aggregation_validated = []
@@ -144,7 +144,7 @@ def _validate_aggs(aggregation, band_count):
 
     return aggregation_validated
 
-# %% ../notebooks/03_raster_zonal_stats.ipynb #af330922
+# %% ../notebooks/03_raster_zonal_stats.ipynb #28457142
 def create_exactextract_zonal_stats(
     aoi: Union[  
             str, Path, gpd.GeoDataFrame

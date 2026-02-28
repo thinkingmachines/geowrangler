@@ -3,7 +3,7 @@
 # %% auto #0
 __all__ = ['query_window_by_polygon', 'query_window_by_gdf']
 
-# %% ../notebooks/09_raster_process.ipynb #2d267c1c
+# %% ../notebooks/09_raster_process.ipynb #0c1b7e9c
 #| include: false
 from pathlib import PosixPath
 from typing import Union
@@ -13,7 +13,7 @@ import rasterio.mask
 from rasterio.io import DatasetReader
 from shapely.geometry import Polygon
 
-# %% ../notebooks/09_raster_process.ipynb #b8648556
+# %% ../notebooks/09_raster_process.ipynb #1a6e3051
 def query_window_by_polygon(
     input_raster: Union[str, DatasetReader, PosixPath],
     output_path: str,
@@ -103,7 +103,7 @@ def query_window_by_polygon(
 
     return
 
-# %% ../notebooks/09_raster_process.ipynb #f2650241
+# %% ../notebooks/09_raster_process.ipynb #7ceb5996
 def query_window_by_gdf(
     input_raster: Union[str, DatasetReader, PosixPath],
     output_folder: str,
