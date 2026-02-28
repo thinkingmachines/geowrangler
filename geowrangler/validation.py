@@ -4,7 +4,7 @@
 __all__ = ['ValidationError', 'BaseValidator', 'OrientationValidator', 'CrsBoundsValidator', 'SelfIntersectingValidator',
            'NullValidator', 'AreaValidator', 'GeometryValidation']
 
-# %% ../notebooks/01_validation.ipynb #c4ae19bb
+# %% ../notebooks/01_validation.ipynb #96a74e4b
 import logging
 import warnings
 from abc import ABC, abstractmethod
@@ -21,11 +21,11 @@ from shapely.geometry.polygon import orient
 
 logger = logging.getLogger(__name__)
 
-# %% ../notebooks/01_validation.ipynb #2ea928f4
+# %% ../notebooks/01_validation.ipynb #65574101
 class ValidationError(Exception):
     pass
 
-# %% ../notebooks/01_validation.ipynb #f0dbc723
+# %% ../notebooks/01_validation.ipynb #0fb2e50f
 class BaseValidator(ABC):
     """Abstract Base Class for single validator"""
 
@@ -74,7 +74,7 @@ class BaseValidator(ABC):
         else:
             return True
 
-# %% ../notebooks/01_validation.ipynb #9a0334ef
+# %% ../notebooks/01_validation.ipynb #40f37cd2
 @patch
 def validate(
     self: BaseValidator,
@@ -99,14 +99,14 @@ def validate(
         gdf.loc[~is_valid, "geometry"] = gdf[~is_valid].geometry.apply(self.fix)
     return gdf
 
-# %% ../notebooks/01_validation.ipynb #a61a6e56
+# %% ../notebooks/01_validation.ipynb #db70a71f
 class OrientationValidator(BaseValidator):
     """Checks and fixes Orientation of the geometry to ensure it follows a counter-clockwise orientation"""
 
     validator_column_name = "is_oriented_properly"
     geometry_types = ["MultiPolygon", "Polygon"]
 
-# %% ../notebooks/01_validation.ipynb #f64261b4
+# %% ../notebooks/01_validation.ipynb #104bef65
 @patch
 def check(
     self: OrientationValidator, geometry: BaseGeometry  # Geometry to validate
@@ -117,7 +117,7 @@ def check(
     elif geometry.geom_type == "MultiPolygon":
         return all([signed_area(g.exterior) >= 0 for g in geometry.geoms])
 
-# %% ../notebooks/01_validation.ipynb #bff863df
+# %% ../notebooks/01_validation.ipynb #1b6abcbd
 @patch
 def fix(
     self: OrientationValidator, geometry: BaseGeometry  # Geometry to fix
@@ -128,7 +128,7 @@ def fix(
     elif geometry.geom_type == "MultiPolygon":
         return MultiPolygon([orient(g) for g in geometry.geoms])
 
-# %% ../notebooks/01_validation.ipynb #4254c466
+# %% ../notebooks/01_validation.ipynb #8ac67c6e
 class CrsBoundsValidator(BaseValidator):
     """Checks bounds of the geometry to ensure it is within bounds of the crs"""
 
@@ -136,7 +136,7 @@ class CrsBoundsValidator(BaseValidator):
     fix_available = False
     warning_message = "Found geometries out of bounds from crs"
 
-# %% ../notebooks/01_validation.ipynb #fbba5553
+# %% ../notebooks/01_validation.ipynb #52e59208
 @patch
 def get_check_arguments(
     self: CrsBoundsValidator, gdf: gpd.GeoDataFrame  # GeoDataFrame to check
@@ -144,7 +144,7 @@ def get_check_arguments(
     """Return check arguments"""
     return {"gdf": gdf}
 
-# %% ../notebooks/01_validation.ipynb #3261b62d
+# %% ../notebooks/01_validation.ipynb #4512af47
 @patch
 def check(
     self: CrsBoundsValidator,
@@ -161,7 +161,7 @@ def check(
         (b_xmin >= xmin) and (b_ymin >= ymin) and (b_xmax <= xmax) and (b_ymax <= ymax)
     )
 
-# %% ../notebooks/01_validation.ipynb #9819a0a5
+# %% ../notebooks/01_validation.ipynb #64036e4c
 @patch
 def fix(
     self: CrsBoundsValidator, geometry: BaseGeometry  # Geometry to fix
@@ -169,13 +169,13 @@ def fix(
     """No fix available"""
     return geometry
 
-# %% ../notebooks/01_validation.ipynb #4376ea9e
+# %% ../notebooks/01_validation.ipynb #afd092da
 class SelfIntersectingValidator(BaseValidator):
     """Checks bounds of the geometry to ensure it is within bounds or crs"""
 
     validator_column_name = "is_not_self_intersecting"
 
-# %% ../notebooks/01_validation.ipynb #d2a67734
+# %% ../notebooks/01_validation.ipynb #c28d1881
 @patch
 def check(
     self: SelfIntersectingValidator, geometry: BaseGeometry  # Geometry to check
@@ -183,13 +183,13 @@ def check(
     explanation = shapely_validation.explain_validity(geometry)
     return "Self-intersection" not in explanation
 
-# %% ../notebooks/01_validation.ipynb #6c27cecb
+# %% ../notebooks/01_validation.ipynb #cda51ef7
 @patch
 def fix(self: SelfIntersectingValidator, geometry: BaseGeometry) -> BaseGeometry:
     """Fix intersection geometry by applying shapely.validation.make_valid"""
     return shapely_validation.make_valid(geometry)
 
-# %% ../notebooks/01_validation.ipynb #17aa8aee
+# %% ../notebooks/01_validation.ipynb #cd6fe120
 class NullValidator(BaseValidator):
     """Checks bounds of the geometry to ensure it is within bounds or crs"""
 
@@ -202,13 +202,13 @@ class NullValidator(BaseValidator):
     def skip(self, geometry: BaseGeometry):
         return False
 
-# %% ../notebooks/01_validation.ipynb #fb1cabc9
+# %% ../notebooks/01_validation.ipynb #c83839a6
 @patch
 def check(self: NullValidator, geometry: BaseGeometry) -> bool:  # Geometry to check
     """Checks if polygon is null"""
     return not pd.isnull(geometry)
 
-# %% ../notebooks/01_validation.ipynb #b818a70e
+# %% ../notebooks/01_validation.ipynb #eb8801e3
 @patch
 def fix(
     self: NullValidator, geometry: BaseGeometry  # Geometry to fix
@@ -216,7 +216,7 @@ def fix(
     """No fix available"""
     return geometry
 
-# %% ../notebooks/01_validation.ipynb #40836c2c
+# %% ../notebooks/01_validation.ipynb #ff8e9713
 class AreaValidator(BaseValidator):
     """Checks area of the geometry to ensure it greater than 0"""
 
@@ -225,13 +225,13 @@ class AreaValidator(BaseValidator):
     warning_message = "Found geometries with area equals or less than zero"
     geometry_types = ["MultiPolygon", "Polygon"]
 
-# %% ../notebooks/01_validation.ipynb #f38b5891
+# %% ../notebooks/01_validation.ipynb #ce219b92
 @patch
 def check(self: AreaValidator, geometry: BaseGeometry) -> bool:
     """Checks if area is greater than 0"""
     return geometry.area > 0
 
-# %% ../notebooks/01_validation.ipynb #72a574d3
+# %% ../notebooks/01_validation.ipynb #05df8a75
 @patch
 def fix(
     self: AreaValidator, geometry: BaseGeometry  # Geometry to fix
@@ -239,7 +239,7 @@ def fix(
     """No fix available"""
     return geometry
 
-# %% ../notebooks/01_validation.ipynb #a97f3196
+# %% ../notebooks/01_validation.ipynb #efa6db89
 class GeometryValidation:
     """Applies a list of validation checks and tries to fix them"""
 
@@ -283,7 +283,7 @@ class GeometryValidation:
                 raise ValidationError("Invalid validator.")
         return validators_classes
 
-# %% ../notebooks/01_validation.ipynb #69926c8c
+# %% ../notebooks/01_validation.ipynb #e507a335
 @patch
 def validate_all(self: GeometryValidation) -> gpd.GeoDataFrame:
     """Sequentially run validators"""
