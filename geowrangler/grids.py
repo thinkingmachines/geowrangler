@@ -4,7 +4,7 @@
 __all__ = ['SquareGridGenerator', 'FastSquareGridGenerator', 'H3GridGenerator', 'BingTileGridGenerator',
            'FastBingTileGridGenerator']
 
-# %% ../notebooks/00_grids.ipynb #d4a31e39
+# %% ../notebooks/00_grids.ipynb #8fbd030b
 import logging
 from functools import reduce
 from typing import List, Tuple, Union, Optional, Iterable
@@ -28,7 +28,7 @@ from geowrangler.gridding_utils import polygon_fill
 
 logger = logging.getLogger(__name__)
 
-# %% ../notebooks/00_grids.ipynb #a0c03527
+# %% ../notebooks/00_grids.ipynb #0897d668
 class SquareGridBoundary:
     """Reusing Boundary. x_min, y_min, x_max, and y_max are in the the target crs"""
 
@@ -78,7 +78,7 @@ class SquareGridBoundary:
             yrange[y_mask],
         )
 
-# %% ../notebooks/00_grids.ipynb #b0532ae6
+# %% ../notebooks/00_grids.ipynb #1dfaf033
 class SquareGridGenerator:
     def __init__(
         self,
@@ -90,7 +90,7 @@ class SquareGridGenerator:
         self.grid_projection = grid_projection
         self.boundary = boundary
 
-# %% ../notebooks/00_grids.ipynb #de2fe62b
+# %% ../notebooks/00_grids.ipynb #2ce208e5
 @patch
 def create_cell(
     self: SquareGridGenerator,
@@ -107,7 +107,7 @@ def create_cell(
         ]
     )
 
-# %% ../notebooks/00_grids.ipynb #89304816
+# %% ../notebooks/00_grids.ipynb #6a777961
 @patch
 def create_grid_for_polygon(self: SquareGridGenerator, boundary, geometry):
     x_idx_offset, xrange, y_idx_offset, yrange = boundary.get_range_subset(
@@ -126,7 +126,7 @@ def create_grid_for_polygon(self: SquareGridGenerator, boundary, geometry):
                 )
     return cells
 
-# %% ../notebooks/00_grids.ipynb #154c2d2d
+# %% ../notebooks/00_grids.ipynb #e50cc3b4
 @patch
 def generate_grid(self: SquareGridGenerator, aoi_gdf: GeoDataFrame) -> GeoDataFrame:
     reprojected_gdf = aoi_gdf.to_crs(self.grid_projection)
@@ -150,7 +150,7 @@ def generate_grid(self: SquareGridGenerator, aoi_gdf: GeoDataFrame) -> GeoDataFr
             {"x": [], "y": [], "geometry": []}, geometry="geometry", crs=aoi_gdf.crs
         )
 
-# %% ../notebooks/00_grids.ipynb #ddd05713
+# %% ../notebooks/00_grids.ipynb #f8f9ad24
 def setup_boundary(
     boundary: Optional[Union[SquareGridGenerator,Iterable[float]]],
     aoi_gdf: GeoDataFrame,
@@ -184,7 +184,7 @@ def is_aoi_within_boundary(
     is_within_bounds = is_x_within_bounds & is_y_within_bounds
     return is_within_bounds
 
-# %% ../notebooks/00_grids.ipynb #9c0a6ac0
+# %% ../notebooks/00_grids.ipynb #d3f8bf8e
 class FastSquareGridGenerator:
     PIXEL_DTYPE = polygon_fill.PIXEL_DTYPE
     SUBPOLYGON_ID_COL = polygon_fill.SUBPOLYGON_ID_COL
@@ -202,7 +202,7 @@ class FastSquareGridGenerator:
         if self.cell_size <= 0:
             raise ValueError(f"cell_size should be positive but instead is {cell_size}")
 
-# %% ../notebooks/00_grids.ipynb #122942ff
+# %% ../notebooks/00_grids.ipynb #4d45ac6e
 @patch
 def generate_grid(
     self: FastSquareGridGenerator,
@@ -247,7 +247,7 @@ def generate_grid(
   
     return tiles_in_geom
 
-# %% ../notebooks/00_grids.ipynb #70b8f756
+# %% ../notebooks/00_grids.ipynb #800d564a
 @patch
 def _remove_out_of_bounds_polygons(
     self: FastSquareGridGenerator,
@@ -408,7 +408,7 @@ def _xy_to_bbox(
 
     return bboxes
 
-# %% ../notebooks/00_grids.ipynb #06586f95
+# %% ../notebooks/00_grids.ipynb #c62ec264
 class H3GridGenerator:
     def __init__(
         self,
@@ -418,7 +418,7 @@ class H3GridGenerator:
         self.resolution = resolution
         self.return_geometry = return_geometry
 
-# %% ../notebooks/00_grids.ipynb #fcb09edd
+# %% ../notebooks/00_grids.ipynb #e584c212
 @patch
 def get_hexes_for_polygon(self: H3GridGenerator, poly: Polygon):
     if h3.__version__ [0] == "3":
@@ -433,7 +433,7 @@ def get_hexes_for_polygon(self: H3GridGenerator, poly: Polygon):
             self.resolution,
         )
 
-# %% ../notebooks/00_grids.ipynb #55061143
+# %% ../notebooks/00_grids.ipynb #b01cbf90
 @patch
 def generate_grid(self: H3GridGenerator, aoi_gdf: GeoDataFrame) -> DataFrame:
     reprojected_gdf = aoi_gdf.to_crs("epsg:4326")  # h3 hexes are in epsg:4326 CRS
@@ -463,7 +463,7 @@ def generate_grid(self: H3GridGenerator, aoi_gdf: GeoDataFrame) -> DataFrame:
     )
     return h3_gdf.to_crs(aoi_gdf.crs)
 
-# %% ../notebooks/00_grids.ipynb #0569bd6b
+# %% ../notebooks/00_grids.ipynb #aca7caed
 class BingTileGridGenerator:
     def __init__(
         self,
@@ -500,7 +500,7 @@ class BingTileGridGenerator:
             tiles = {qk: (geom, tile) for qk, geom, tile in tiles}
         return tiles
 
-# %% ../notebooks/00_grids.ipynb #e338132f
+# %% ../notebooks/00_grids.ipynb #3520969d
 @patch
 def get_all_tiles_for_polygon(self: BingTileGridGenerator, polygon: Polygon):
     """Get the interseting tiles with polygon for a zoom level. Polygon should be in EPSG:4326"""
@@ -511,7 +511,7 @@ def get_all_tiles_for_polygon(self: BingTileGridGenerator, polygon: Polygon):
     )
     return tiles
 
-# %% ../notebooks/00_grids.ipynb #cb4b4907
+# %% ../notebooks/00_grids.ipynb #816d4f61
 @patch
 def generate_grid(self: BingTileGridGenerator, aoi_gdf: GeoDataFrame) -> DataFrame:
     reprojected_gdf = aoi_gdf.to_crs("epsg:4326")  # quadkeys hexes are in epsg:4326 CRS
@@ -546,7 +546,7 @@ def generate_grid(self: BingTileGridGenerator, aoi_gdf: GeoDataFrame) -> DataFra
 
     return tiles_gdf
 
-# %% ../notebooks/00_grids.ipynb #143e3e8c
+# %% ../notebooks/00_grids.ipynb #b803b05a
 def get_intersect_partition(item):
     tiles_gdf, reprojected_gdf = item
     tiles_gdf.sindex
@@ -556,7 +556,7 @@ def get_intersect_partition(item):
     )
     return intersect_tiles_gdf
 
-# %% ../notebooks/00_grids.ipynb #8a34e523
+# %% ../notebooks/00_grids.ipynb #e4022881
 def get_parallel_intersects(
     tiles_gdf, reprojected_gdf, n_workers=defaults.cpus, progress=True
 ):
@@ -577,7 +577,7 @@ def get_parallel_intersects(
     results = results.drop_duplicates(subset=["quadkey"])
     return results
 
-# %% ../notebooks/00_grids.ipynb #6dd17187
+# %% ../notebooks/00_grids.ipynb #05f8673c
 @patch
 def generate_grid_join(
     self: BingTileGridGenerator,
@@ -636,7 +636,7 @@ def generate_grid_join(
 
     return tiles_gdf.to_crs(aoi_gdf.crs)
 
-# %% ../notebooks/00_grids.ipynb #b43084e8
+# %% ../notebooks/00_grids.ipynb #ab7dea07
 class FastBingTileGridGenerator:
     EPSILON = 1e-14
     PIXEL_DTYPE = polygon_fill.PIXEL_DTYPE
@@ -656,15 +656,59 @@ class FastBingTileGridGenerator:
         if self.zoom_level > self.MAX_ZOOM:
             raise NotImplementedError(f"Maximum allowed zoom level is {self.MAX_ZOOM}. Input was {self.zoom_level}")
 
-# %% ../notebooks/00_grids.ipynb #52c6c2e1
+# %% ../notebooks/00_grids.ipynb #20ac9f2c
 @patch
 def generate_grid(
     self: FastBingTileGridGenerator,
     aoi_gdf: GeoDataFrame,
     unique_id_col: Optional[str] = None, # the ids under this column will be preserved in the output tiles
-) -> Union[GeoDataFrame, pd.DataFrame]:
+) -> Union[GeoDataFrame, pd.DataFrame]:  
+    # Fix: Convert to EPSG:4326 if not already (Bing tiles use lat/lng)
+    original_crs = aoi_gdf.crs
+    if aoi_gdf.crs is None:
+        warnings.warn(
+            "Input GeoDataFrame has no CRS. Assuming EPSG:4326 (WGS84)."
+        )
+        working_gdf = aoi_gdf.copy()
+        working_gdf = working_gdf.set_crs("EPSG:4326")
+    elif not aoi_gdf.crs.equals("EPSG:4326"):
+        working_gdf = aoi_gdf.to_crs("EPSG:4326")
+    else:
+        working_gdf = aoi_gdf
+
+    # Fix: Handle polygons with holes by using only exterior
+    # The scanline fill algorithm doesn't handle holes correctly
+    has_holes = False
+    def extract_exterior(geom):
+        nonlocal has_holes
+        if geom.geom_type == "Polygon":
+            if len(list(geom.interiors)) > 0:
+                has_holes = True
+                return Polygon(geom.exterior)
+            return geom
+        elif geom.geom_type == "MultiPolygon":
+            exteriors = []
+            for poly in geom.geoms:
+                if len(list(poly.interiors)) > 0:
+                    has_holes = True
+                    exteriors.append(Polygon(poly.exterior))
+                else:
+                    exteriors.append(poly)
+            from shapely.geometry import MultiPolygon as ShapelyMultiPolygon
+            return ShapelyMultiPolygon(exteriors)
+        return geom
+
+    working_gdf = working_gdf.copy()
+    working_gdf.geometry = working_gdf.geometry.apply(extract_exterior)
     
-    vertices = polygon_fill.polygons_to_vertices(aoi_gdf, unique_id_col)
+    if has_holes:
+        warnings.warn(
+            "Input geometries contain holes (interior rings). "
+            "Holes are ignored during grid generation - grids will fill the entire exterior. "
+            "If you need to exclude holes, clip the result with the original geometry."
+        )
+
+    vertices = polygon_fill.polygons_to_vertices(working_gdf, unique_id_col)
     vertices = self._latlng_to_xy(vertices, lat_col="y", lng_col="x")
 
     polygon_fill_result = polygon_fill.fast_polygon_fill(vertices, unique_id_col)
@@ -674,7 +718,7 @@ def generate_grid(
     tiles_off_boundary = polygon_fill_result["tiles_off_boundary"]
     if not tiles_off_boundary.is_empty():
         off_boundary_bboxes = self._xy_to_bbox(tiles_off_boundary, "x", "y")
-        all_polygon_boundary = aoi_gdf.boundary.union_all(method="unary")
+        all_polygon_boundary = working_gdf.boundary.union_all(method="unary")
         intersects_boundary_bool = off_boundary_bboxes.intersects(all_polygon_boundary)
         addtl_tiles_in_geom = tiles_off_boundary.filter(pl.Series(intersects_boundary_bool))
     
@@ -705,12 +749,15 @@ def generate_grid(
 
     if self.return_geometry:
         tiles_in_geom = GeoDataFrame(tiles_in_geom.to_pandas(), geometry=bboxes)
+        # Convert back to original CRS if different
+        if original_crs is not None and not original_crs.equals("EPSG:4326"):
+            tiles_in_geom = tiles_in_geom.to_crs(original_crs)
     else:
         tiles_in_geom = tiles_in_geom.to_pandas()
 
     return tiles_in_geom
 
-# %% ../notebooks/00_grids.ipynb #e33aa0ba
+# %% ../notebooks/00_grids.ipynb #a85ad615
 @patch
 def _lat_to_ytile(self:FastBingTileGridGenerator, lat: pl.Expr) -> pl.Expr:
     logtan = pl.Expr.log(pl.Expr.tan((np.pi / 4) + (pl.Expr.radians(lat) / 2)))
