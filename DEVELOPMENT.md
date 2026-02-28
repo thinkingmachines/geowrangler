@@ -71,6 +71,7 @@ conda activate geowrangler-env
 Then run the following to install the python libs.
 ```
 cd geowrangler # cd into your geowrangler local directory
+conda install -c conda-forge gdal libgdal -y
 pip install -e ".[dev]"
 nbdev-install-hooks
 ```
