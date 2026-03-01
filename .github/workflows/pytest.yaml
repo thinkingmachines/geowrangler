@@ -14,11 +14,11 @@ jobs:
       - uses: actions/setup-python@v4
         with:
           python-version: 3.14
-      - uses: awalsh128/cache-apt-pkgs-action@latest
-        with:
-          packages: |
-            gdal
-          version: 1.0
-      - run: pip install -e ".[dev]"
-      # Code cove with a min percentage
-      - run: pytest --cov --cov-config=.coveragerc --cov-fail-under=80 -n auto
+      - name: Install GDAL
+        run: sudo apt-get update && sudo apt-get install -y gdal-bin libgdal-dev
+      - name: Set GDAL environment variables
+        run: echo "GDAL_VERSION=$(gdal-config --version)" >> $GITHUB_ENV
+      - name: Install dependencies
+        run: pip install -e ".[dev]"
+      - name: Run pytest with coverage with min percentage
+        run: pytest --cov --cov-config=.coveragerc --cov-fail-under=80 -n auto
