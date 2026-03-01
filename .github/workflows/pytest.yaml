@@ -9,16 +9,15 @@ on:
 jobs:
   pytest:
     runs-on: ubuntu-latest
-    env:
-      GDAL_VERSION: 3.10.2
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v4
         with:
           python-version: 3.14
-      - uses: trundev/setup-gdal@main
+      - uses: awalsh128/cache-apt-pkgs-action@latest
         with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+           packages: gdal 
+           version: 1.0    
       - run: pip install -e ".[dev]"
       # Code cove with a min percentage
       - run: pytest --cov --cov-config=.coveragerc --cov-fail-under=80 -n auto
