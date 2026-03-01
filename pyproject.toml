@@ -28,7 +28,7 @@ dev = ['nbdev', 'jupyterlab', 'matplotlib', 'nbdime', 'ipytest', 'branca', 'foli
 version = {attr = "geowrangler.__version__"}
 
 [tool.setuptools.packages.find]
-include = ["geowrangler"]
+include = ["geowrangler*"]
 
 [tool.nbdev]
 nbs_path = 'notebooks'
