@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "geowrangler"
+dynamic = ["version"]
+description = "🌏 A python package for wrangling geospatial datasets"
+readme = "README.md"
+requires-python = ">=3.8"
+license = {text = "MIT"}
+authors = [{name = "Thinking Machines Data Sciences Inc.", email = "geowrangler@thinkingmachin.es"}]
+keywords = ['nbdev', 'jupyter', 'notebook', 'python']
+classifiers = ["Natural Language :: English", "Intended Audience :: Developers", "Development Status :: 3 - Alpha", "Programming Language :: Python :: 3", "Programming Language :: Python :: 3 :: Only"]
+dependencies = ['fastcore', 'pandas', 'numpy', 'geopandas>=1.0', 'fastprogress', 'h3', 'morecantile', 'loguru', 'rasterstats', 'scikit-learn', 'requests', 'pyarrow', 'exactextract', 'polars']
+
+[project.urls]
+Repository = "https://github.com/thinkingmachines/geowrangler"
+Documentation = "https://geowrangler.thinkingmachin.es/"
+
+[project.entry-points.nbdev]
+geowrangler = "geowrangler._modidx:d"
+
+[project.optional-dependencies]
+dev = ['nbdev', 'jupyterlab', 'matplotlib', 'nbdime', 'ipytest', 'branca', 'folium', 'mapclassify', 'pytest', 'pytest-mock', 'pytest-cov', 'pytest-xdist', 'black[jupyter]', 'twine']
+
+[tool.setuptools.dynamic]
+version = {attr = "geowrangler.__version__"}
+
+[tool.setuptools.packages.find]
+include = ["geowrangler"]
+
+[tool.nbdev]
+nbs_path = 'notebooks'
+branch = 'master'
+readme_nb = 'readme.ipynb'
+tst_flags = 'slow | no_test'
+jupyter_hooks = true
+custom_sidebar = true

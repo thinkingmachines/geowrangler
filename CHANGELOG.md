@@ -1,5 +1,17 @@
 # Release Notes
+## 0.5.2
+### Improvements
+ - Upgrade Python development version to `3.14` 
+ - Upgrade `nbdev` to `nbdev3` `(3.x)` 
+ - Improve markdown describing off-boundary pixels 
 
+### Fixes
+ - Fix h3 version4 module incompatibility
+ - Fix FastBingTileGridGenerator 
+
+### Others
+ - Add maintenance note
+  
 ## 0.5.1
 
 ### Improvements

@@ -51,12 +51,12 @@ pytest --cov --cov-config=.coveragerc --cov-fail-under=80 -n auto
 Once the necessary changes are made, run the following to generate the python code.
 
 ```
-nbdev_export
+nbdev-export
 ```
 
 ## View contributions on documentation site and edit as needed
 
-1. Run nbdev_docs to create the HTML files via Quarto (can verify locally with some port: nbdev_preview --port 4327)
+1. Run nbdev-docs to create the HTML files via Quarto (can verify locally with some port: nbdev-preview --port 4327)
     - Doc site automatically updates once a PR is merged (in Settings > Pages need to make sure [geowrangler.thinkingmachin.es](http://geowrangler.thinkingmachin.es/) is the domain as it defaults to [thinkingmachines.github.io](http://thinkingmachines.github.io/) after merges)
 2. Edit [notebooks/index.ipynb](https://github.com/thinkingmachines/geowrangler/blob/master/notebooks/index.ipynb) to edit the [doc homepage](https://geowrangler.thinkingmachin.es/)
 3. Edit [notebooks/sidebar.yml](https://github.com/thinkingmachines/geowrangler/blob/master/notebooks/sidebar.yml) to edit the left sidebar

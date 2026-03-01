@@ -14,8 +14,8 @@ You can run geowrangler's jupyter notebooks to see how the different modules are
 * OS: Linux, MacOS, Windows Subsystem for Linux (WSL) on Windows
 
 * Requirements:
-   - python 3.9 or higher
-   - virtualenv, venv or conda for python environment virtualization
+   - python 3.14 or higher
+   - uv, virtualenv, venv or conda for python environment virtualization
    - [quarto](https://quarto.org) to preview the documentation site locally
   
 #### Github Repo Fork
@@ -29,25 +29,29 @@ repo for approval by geowrangler's maintainers.
 
 #### Development Installation
 
-We recommend creating a virtual python environment via [virtualenv](https://pypi.org/project/virtualenv/) or [conda](https://docs.conda.io/projects/conda/en/latest/user-guide/index.html) for your development environment. Please see the relevant documentation for more details on installing these python environment managers. Afterward, continue with the geowrangler setup instructions below.
+We recommend creating a virtual python environment via [uv](https://docs.astral.sh/uv/) or [conda](https://docs.conda.io/projects/conda/en/latest/user-guide/index.html) for your development environment. Please see the relevant documentation for more details on installing these python environment managers. Afterward, continue with the geowrangler setup instructions below.
 
 To generate and preview the documentation site on your local machine, you will need to install [quarto](https://quarto.org). The following assumes that you have setup quarto on your system.
 
 
-**Set-up with virtualenv**
+**Set-up with uv**
 
-Set up your Python env with `virtualenv` and install the necessary python libs by running the following commands.
+Set up your Python env with `uv` and install the necessary python libs by running the following commands.
+
+**Prerequisite**: [Install `gdal` in your system](https://gdal.org/en/stable/download.html) first before installing `geowrangler`, otherwise you might encounter build failures while installing with `pip` below.
 
 Remember to replace `<your-github-id>` in the github url below with your GitHub ID to clone from your fork.
+
 
 ```
 git clone https://github.com/<your-github-id>/geowrangler.git
 cd geowrangler
-virtualenv -p /usr/bin/python3.9 .venv
+uv venv -p 3.14 --seed
 source .venv/bin/activate
 pip install -e ".[dev]"
-nbdev_install_hooks
+nbdev-install-hooks
 ```
+
 
 You're all set! [Run the tests](#running-tests) to make sure everything was installed properly.
 
@@ -59,7 +63,7 @@ and  run `source .venv/bin/activate` to activate the geowrangler environment.
 Run the following commands to set-up a conda env and install geos.
 
 ```
-conda create -y -n geowrangler-env python=3.9 # replace geowrangler-env if you prefer a different env name
+conda create -y -n geowrangler-env python=3.14 # replace geowrangler-env if you prefer a different env name
 conda deactivate # important to ensure libs from other envs aren't used
 conda activate geowrangler-env
 ```
@@ -67,9 +71,9 @@ conda activate geowrangler-env
 Then run the following to install the python libs.
 ```
 cd geowrangler # cd into your geowrangler local directory
+conda install -c conda-forge gdal libgdal -y
 pip install -e ".[dev]"
-nbdev_install_hooks
-
+nbdev-install-hooks
 ```
 
 You're all set! [Run the tests](#running-tests) to make sure everything was installed properly.
@@ -95,7 +99,7 @@ jupyter lab
 
 To sync the notebook source code with the python modules, run the following.
 ```
-nbdev_export
+nbdev-export
 ```
 After syncing, you can run the tests to make sure everything is working as expected. See [Running tests](#running-tests) for more details.
 
@@ -104,7 +108,7 @@ After syncing, you can run the tests to make sure everything is working as expec
 
 To generate and view the documentation site on your local machine, the quickest way is to setup [Quarto](https://quarto.org). The following assumes that you have setup quarto on your system.
 ```
-nbdev_preview --port 4371
+nbdev-preview --port 4371
 ```
 
 You can now view your documentation site at `http://localhost:4371/`.
