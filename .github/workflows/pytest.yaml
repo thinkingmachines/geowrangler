@@ -16,8 +16,9 @@ jobs:
           python-version: 3.14
       - uses: awalsh128/cache-apt-pkgs-action@latest
         with:
-           packages: gdal 
-           version: 1.0    
+          packages: |
+            gdal
+          version: 1.0
       - run: pip install -e ".[dev]"
       # Code cove with a min percentage
       - run: pytest --cov --cov-config=.coveragerc --cov-fail-under=80 -n auto
