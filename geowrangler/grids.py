@@ -115,12 +115,15 @@ def create_grid_for_polygon(self: SquareGridGenerator, boundary, geometry):
     )
     cells = {}
     prepared_geometry = prep(geometry)
+    # cells are shrunk before checking if they intersect, to exclude cells that only touch the geometry
+    shrink = polygon_fill.TOLERANCE * self.cell_size
     for x_idx, x in enumerate(xrange):
         for y_idx, y in enumerate(yrange):
             x_col = x_idx + x_idx_offset
             y_col = y_idx + y_idx_offset
             cell = self.create_cell(x, y)
-            if prepared_geometry.intersects(cell):
+            shrunk_cell = box(x + shrink, y + shrink, x + self.cell_size - shrink, y + self.cell_size - shrink)
+            if prepared_geometry.intersects(shrunk_cell):
                 cells.update(
                     {(x_col, y_col): {"x": x_col, "y": y_col, "geometry": cell}}
                 )

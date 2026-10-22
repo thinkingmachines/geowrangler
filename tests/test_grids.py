@@ -7,6 +7,7 @@ import shapely
 from shapely.geometry import Polygon
 
 from geowrangler import grids
+from geowrangler.gridding_utils.polygon_fill import TOLERANCE
 
 
 @pytest.fixture
@@ -272,11 +273,10 @@ def test_bing_tile_grid_generator_join_return_geometry_false(
     assert isinstance(grids_gdf, pd.DataFrame)
     assert len(grids_gdf) == BING_TILE_N_TILES
 
-# FastBingTileGridGenerator returns 16 more tiles than BingTileGridGenerator because the sample polygons lie
-# exactly on the tile borders at longitude 0 and latitude 0. Like shapely's `intersects`, FastBingTileGridGenerator
-# includes the tiles that only touch the polygon at an edge or a corner.
-FAST_BING_TILE_N_TILES = BING_TILE_N_TILES + 16
-FAST_BING_TILE_MULTIPOLY_N_TILES = BING_TILE_MULTIPOLY_N_TILES + 16
+# The sample polygons lie exactly on the tile borders at longitude 0 and latitude 0. Like BingTileGridGenerator,
+# FastBingTileGridGenerator excludes the tiles that only touch the polygons there.
+FAST_BING_TILE_N_TILES = BING_TILE_N_TILES
+FAST_BING_TILE_MULTIPOLY_N_TILES = BING_TILE_MULTIPOLY_N_TILES
 
 def test_fast_bing_tile_grid_generator(sample_gdf):
     grid_generator = grids.FastBingTileGridGenerator(10)
@@ -416,24 +416,25 @@ def test_fast_bing_tile_grid_generator_no_crs_warning():
     assert len(grids_gdf) > 0
 
 def brute_force_square_cells(polygon, cell_size, boundary):
-    """Cells (x, y) of the boundary's lattice where the closed cell intersects the polygon"""
+    """Cells (x, y) of the boundary's lattice that share area with the polygon, ignoring slivers thinner than the tolerance"""
     x_min, y_min, x_max, y_max = boundary
     n_x = int(np.ceil((x_max - x_min) / cell_size))
     n_y = int(np.ceil((y_max - y_min) / cell_size))
     xs, ys = np.meshgrid(np.arange(n_x), np.arange(n_y), indexing="ij")
     xs, ys = xs.ravel(), ys.ravel()
+    shrink = TOLERANCE * cell_size
     cells = shapely.box(
-        x_min + xs * cell_size,
-        y_min + ys * cell_size,
-        x_min + (xs + 1) * cell_size,
-        y_min + (ys + 1) * cell_size,
+        x_min + xs * cell_size + shrink,
+        y_min + ys * cell_size + shrink,
+        x_min + (xs + 1) * cell_size - shrink,
+        y_min + (ys + 1) * cell_size - shrink,
     )
     intersects = shapely.intersects(cells, polygon)
     return set(zip(xs[intersects].tolist(), ys[intersects].tolist()))
 
 
 def brute_force_bing_tiles(grid_generator, polygon):
-    """Tiles (x, y) where the closed tile intersects the polygon in EPSG:4326"""
+    """Tiles (x, y) that share area with the polygon in EPSG:4326, ignoring slivers thinner than the tolerance"""
     minx, miny, maxx, maxy = polygon.bounds
     xs = np.arange(
         int(grid_generator._lng_to_xtile(minx)) - 2,
@@ -445,8 +446,13 @@ def brute_force_bing_tiles(grid_generator, polygon):
     )
     xs, ys = np.meshgrid(xs, ys, indexing="ij")
     xs, ys = xs.ravel(), ys.ravel()
-    tiles = grid_generator._xy_to_bbox(pl.DataFrame({"x": xs, "y": ys}), "x", "y")
-    intersects = tiles.intersects(polygon).values
+    tiles = shapely.box(
+        grid_generator._xtile_to_lng(xs + TOLERANCE),
+        grid_generator._ytile_to_lat(ys + 1 - TOLERANCE),
+        grid_generator._xtile_to_lng(xs + 1 - TOLERANCE),
+        grid_generator._ytile_to_lat(ys + TOLERANCE),
+    )
+    intersects = shapely.intersects(tiles, polygon)
     return set(zip(xs[intersects].tolist(), ys[intersects].tolist()))
 
 
@@ -572,3 +578,55 @@ def test_fast_square_grid_generator_empty_aoi(geometry):
         grids_gdf = grid_generator.generate_grid(gdf, unique_id_col="polygon_id")
     assert len(grids_gdf) == 0
     assert list(grids_gdf.columns) == ["x", "y", "polygon_id", "geometry"]
+
+
+def bing_tile_bounds(x, y, z):
+    grid_generator = grids.FastBingTileGridGenerator(z)
+    return (
+        grid_generator._xtile_to_lng(x),
+        grid_generator._ytile_to_lat(y + 1),
+        grid_generator._xtile_to_lng(x + 1),
+        grid_generator._ytile_to_lat(y),
+    )
+
+
+def test_fast_bing_tile_grid_generator_tile_aligned_aois():
+    """AOIs that are zoom 10 tiles contain exactly 16 zoom 12 tiles each, and neighbouring AOIs share no tiles"""
+    gdf = gpd.GeoDataFrame(
+        {"name": ["West", "East"]},
+        geometry=[
+            shapely.box(*bing_tile_bounds(858, 471, 10)),
+            shapely.box(*bing_tile_bounds(859, 471, 10)),
+        ],
+        crs="EPSG:4326",
+    )
+    grid_generator = grids.FastBingTileGridGenerator(12, add_xyz_cols=True)
+    grids_gdf = grid_generator.generate_grid(gdf, unique_id_col="name")
+
+    west = grids_gdf[grids_gdf["name"] == "West"]
+    east = grids_gdf[grids_gdf["name"] == "East"]
+    assert set(zip(west.x, west.y)) == {(x, y) for x in range(3432, 3436) for y in range(1884, 1888)}
+    assert set(zip(east.x, east.y)) == {(x, y) for x in range(3436, 3440) for y in range(1884, 1888)}
+
+    # same as BingTileGridGenerator
+    slow_grids_gdf = grids.BingTileGridGenerator(12).generate_grid(gdf.iloc[:1])
+    assert set(slow_grids_gdf.quadkey) == set(west.quadkey)
+
+
+@pytest.mark.parametrize("reproject", [False, True])
+def test_square_grid_generators_regrid_cell(reproject):
+    """Regridding a 15 km cell at 1 km on the same boundary gives the 15 x 15 cells inside it"""
+    boundary = grids.SquareGridBoundary(0, 0, 300_000, 300_000)
+    cell = gpd.GeoDataFrame(
+        geometry=[shapely.box(150_000, 60_000, 165_000, 75_000)], crs="EPSG:3857"
+    )
+    if reproject:
+        # the round trip moves the edges off the grid lines by floating point noise
+        cell = cell.to_crs("EPSG:4326").to_crs("EPSG:3857")
+    expected_cells = {(x, y) for x in range(150, 165) for y in range(60, 75)}
+
+    fast_grids_gdf = grids.FastSquareGridGenerator(1000, boundary=boundary).generate_grid(cell)
+    assert set(zip(fast_grids_gdf.x, fast_grids_gdf.y)) == expected_cells
+
+    grids_gdf = grids.SquareGridGenerator(1000, boundary=boundary).generate_grid(cell)
+    assert set(zip(grids_gdf.x, grids_gdf.y)) == expected_cells

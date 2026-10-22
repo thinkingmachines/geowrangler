@@ -20,6 +20,10 @@ PIXEL_DTYPE = pl.Int32
 # (min_x, min_y, max_x, max_y) of the pixels to return, inclusive
 PixelBounds = Tuple[int, int, int, int]
 
+# pixels are shrunk by this fraction of a pixel on each side before checking if they intersect a polygon.
+# This excludes pixels that only touch a polygon, and slivers from floating point noise e.g. after reprojection
+TOLERANCE = 1e-6
+
 # %% ../../notebooks/15_polygon_fill.ipynb #3f1c2a9e
 def _expand_ranges(
     lo: np.ndarray, # inclusive start of each range
@@ -59,25 +63,27 @@ def _segment_pixels(
     x1: np.ndarray, y1: np.ndarray, x2: np.ndarray, y2: np.ndarray, # segment endpoints
     pixel_bounds: PixelBounds,
     y_to_row: Callable[[np.ndarray], np.ndarray] = _identity,
+    tolerance: float = TOLERANCE, # fraction of a pixel to shrink each side of the pixels by
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
-    Returns (segment index, x, y) for every pixel touched by each closed line segment.
+    Returns (segment index, x, y) for every pixel crossed by each line segment.
 
     x is in fractional pixel units. y is in any unit where the segment is straight, and `y_to_row` monotonically maps it to fractional pixel units.
-    Pixel (x, y) is the closed square [x, x+1] x [y, y+1], so pixels that only touch a segment at an edge or a corner are included.
+    Pixel (x, y) is the square [x, x+1] x [y, y+1] shrunk by `tolerance` on each side, so pixels that only touch a segment at an edge or a corner are excluded.
+    With tolerance = 0, the pixels are closed squares and pixels that only touch a segment are included.
     """
     min_x, min_y, max_x, max_y = pixel_bounds
 
-    # columns whose closed strip [col, col+1] overlaps the segment's x-range
+    # columns whose strip [col + tolerance, col + 1 - tolerance] overlaps the segment's x-range
     seg_min_x, seg_max_x = np.minimum(x1, x2), np.maximum(x1, x2)
-    col_lo = np.maximum(np.ceil(_clip(seg_min_x, min_x, max_x)) - 1, min_x).astype(np.int64)
-    col_hi = np.minimum(np.floor(_clip(seg_max_x, min_x, max_x)), max_x).astype(np.int64)
+    col_lo = np.maximum(np.ceil(_clip(seg_min_x, min_x, max_x) - 1 + tolerance), min_x).astype(np.int64)
+    col_hi = np.minimum(np.floor(_clip(seg_max_x, min_x, max_x) - tolerance), max_x).astype(np.int64)
     seg, col = _expand_ranges(col_lo, col_hi)
 
     # clip each segment to its column strip, then find the y-range of the clipped part
     x1, y1, x2, y2 = x1[seg], y1[seg], x2[seg], y2[seg]
-    clip_x1 = np.maximum(col, np.minimum(x1, x2))
-    clip_x2 = np.minimum(col + 1, np.maximum(x1, x2))
+    clip_x1 = np.maximum(col + tolerance, np.minimum(x1, x2))
+    clip_x2 = np.minimum(col + 1 - tolerance, np.maximum(x1, x2))
     with np.errstate(divide="ignore", invalid="ignore"):
         slope = (y2 - y1) / (x2 - x1)
         clip_y1 = np.where(clip_x1 == x1, y1, np.where(clip_x1 == x2, y2, y1 + (clip_x1 - x1) * slope))
@@ -86,10 +92,10 @@ def _segment_pixels(
     clip_y1 = np.where(is_vertical, y1, clip_y1)
     clip_y2 = np.where(is_vertical, y2, clip_y2)
 
-    # rows whose closed strip [row, row+1] overlaps the clipped part's y-range
+    # rows whose strip [row + tolerance, row + 1 - tolerance] overlaps the clipped part's y-range
     row1, row2 = y_to_row(clip_y1), y_to_row(clip_y2)
-    row_lo = np.maximum(np.ceil(_clip(np.minimum(row1, row2), min_y, max_y)) - 1, min_y).astype(np.int64)
-    row_hi = np.minimum(np.floor(_clip(np.maximum(row1, row2), min_y, max_y)), max_y).astype(np.int64)
+    row_lo = np.maximum(np.ceil(_clip(np.minimum(row1, row2), min_y, max_y) - 1 + tolerance), min_y).astype(np.int64)
+    row_hi = np.minimum(np.floor(_clip(np.maximum(row1, row2), min_y, max_y) - tolerance), max_y).astype(np.int64)
     sub, row = _expand_ranges(row_lo, row_hi)
 
     return seg[sub], col[sub], row
@@ -98,17 +104,20 @@ def _segment_pixels(
 def voxel_traversal_2d(
     start_vertex: Tuple[float, float],
     end_vertex: Tuple[float, float],
+    tolerance: float = TOLERANCE, # fraction of a pixel to shrink each side of the pixels by. Use 0 to include pixels that only touch the segment
 ) -> Set[Tuple[int, int]]:
     """
-    Returns all pixels touched by the line segment between two points in fractional pixel coordinates.
+    Returns all pixels crossed by the line segment between two points in fractional pixel coordinates.
 
-    Pixel (x, y) is the closed square [x, x+1] x [y, y+1], so this is a supercover line: pixels that only touch the segment at an edge or a corner are included.
+    Pixel (x, y) is the square [x, x+1] x [y, y+1] shrunk by `tolerance` on each side, so pixels that only touch the segment at an edge or a corner are excluded.
+    With tolerance = 0, this is a supercover line that includes every pixel touched by the segment.
     """
     (x1, y1), (x2, y2) = start_vertex, end_vertex
     _, xs, ys = _segment_pixels(
         np.array([x1], dtype=float), np.array([y1], dtype=float),
         np.array([x2], dtype=float), np.array([y2], dtype=float),
         pixel_bounds=_default_pixel_bounds(np.array([x1, x2], dtype=float), np.array([y1, y2], dtype=float)),
+        tolerance=tolerance,
     )
     return set(zip(xs.tolist(), ys.tolist()))
 
@@ -191,8 +200,9 @@ def _polygon_pixels(
     pixel_bounds: Optional[PixelBounds] = None,
     y_to_row: Callable[[np.ndarray], np.ndarray] = _identity,
     row_to_y: Callable[[np.ndarray], np.ndarray] = _identity,
+    tolerance: float = TOLERANCE,
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """Returns (polygon index, x, y) for every pixel that intersects each polygon. Pixels can be repeated"""
+    """Returns (polygon index, x, y) for every pixel that shares area with each polygon. Pixels can be repeated"""
     is_valid = ~np.isnan(x) & ~np.isnan(y)
     x, y, ring_idx, polygon_idx = x[is_valid], y[is_valid], ring_idx[is_valid], polygon_idx[is_valid]
     next_idx = _next_vertex_idx(ring_idx)
@@ -201,7 +211,7 @@ def _polygon_pixels(
     if pixel_bounds is None:
         pixel_bounds = _default_pixel_bounds(x, y, y_to_row)
 
-    boundary_edge, boundary_x, boundary_y = _segment_pixels(x, y, next_x, next_y, pixel_bounds, y_to_row)
+    boundary_edge, boundary_x, boundary_y = _segment_pixels(x, y, next_x, next_y, pixel_bounds, y_to_row, tolerance)
     interior_polygon, interior_x, interior_y = _scanline_pixels(
         x, y, next_x, next_y, polygon_idx, pixel_bounds, y_to_row, row_to_y
     )
@@ -218,9 +228,12 @@ def voxel_traversal_scanline_fill(
     x_col: str = "x",
     y_col: str = "y",
     ring_col: Optional[str] = None, # column that identifies the ring (exterior or hole) of each vertex. If None, all vertices are in one ring
+    tolerance: float = TOLERANCE, # fraction of a pixel to shrink each side of the pixels by. Use 0 to include pixels that only touch the polygon
 ) -> Set[Tuple[int,int]]:
     """
-    Returns pixels that intersect a polygon. Coordinates are in fractional pixel units, and pixel (x, y) is the closed square [x, x+1] x [y, y+1]
+    Returns pixels that share area with a polygon. Coordinates are in fractional pixel units, and pixel (x, y) is the square [x, x+1] x [y, y+1].
+
+    Pixels that only touch the polygon at an edge or a corner, or that overlap it by a sliver thinner than `tolerance`, are excluded.
 
     This uses voxel traversal to fill the boundary, and scanline fill for the interior.
     """
@@ -235,7 +248,7 @@ def voxel_traversal_scanline_fill(
     else:
         ring_idx = np.zeros(len(x), dtype=np.int64)
 
-    _, xs, ys = _polygon_pixels(x, y, ring_idx, polygon_idx=np.zeros(len(x), dtype=np.int64))
+    _, xs, ys = _polygon_pixels(x, y, ring_idx, polygon_idx=np.zeros(len(x), dtype=np.int64), tolerance=tolerance)
     return set(zip(xs.tolist(), ys.tolist()))
 
 # %% ../../notebooks/15_polygon_fill.ipynb #a7e3cc8e-c70b-4b87-9821-f92f8fe8e504
@@ -292,10 +305,13 @@ def fast_polygon_fill(
     pixel_bounds: Optional[PixelBounds] = None, # (min_x, min_y, max_x, max_y) of the pixels to return, inclusive. If None, all pixels touched by the polygons are returned
     y_to_row: Optional[Callable[[np.ndarray], np.ndarray]] = None, # monotonic function mapping vertex y to fractional pixel y. Use this when the polygon edges are straight in a different space than the pixels. If None, y is already in pixel units
     row_to_y: Optional[Callable[[np.ndarray], np.ndarray]] = None, # inverse of y_to_row
+    tolerance: float = TOLERANCE, # fraction of a pixel to shrink each side of the pixels by. Use 0 to include pixels that only touch the polygons
 ) -> pl.DataFrame:
     """
-    Returns all pixels that intersect each polygon. Pixel (x, y) is the closed square [x, x+1] x [y, y+1],
-    so pixels that only touch a polygon at an edge or a corner are included, the same as shapely's `intersects`.
+    Returns all pixels that share area with each polygon. Pixel (x, y) is the square [x, x+1] x [y, y+1].
+
+    Pixels that only touch a polygon at an edge or a corner, or that overlap it by a sliver thinner than `tolerance`, are excluded.
+    This is the same as shapely's `intersects` on each pixel shrunk by `tolerance` on each side.
 
     This uses voxel traversal to fill the boundary of every ring, and even-odd scanline fill for the interior, so holes are excluded.
     """
@@ -330,7 +346,7 @@ def fast_polygon_fill(
     x = vertices_df["x"].cast(pl.Float64).to_numpy()
     y = vertices_df["y"].cast(pl.Float64).to_numpy()
     pixel_polygon_idx, pixel_x, pixel_y = _polygon_pixels(
-        x, y, ring_idx, polygon_idx, pixel_bounds, y_to_row, row_to_y
+        x, y, ring_idx, polygon_idx, pixel_bounds, y_to_row, row_to_y, tolerance
     )
 
     if unique_id_col is None:

@@ -8,8 +8,8 @@ from shapely.geometry import LineString, Point, Polygon, MultiPolygon
 from geowrangler.gridding_utils import polygon_fill
 
 
-def brute_force_pixels(geom, pixel_bounds=None):
-    """Pixels (x, y) where the closed square [x, x+1] x [y, y+1] intersects geom"""
+def brute_force_pixels(geom, pixel_bounds=None, tolerance=polygon_fill.TOLERANCE):
+    """Pixels (x, y) where the square [x, x+1] x [y, y+1] shrunk by tolerance on each side intersects geom"""
     if pixel_bounds is None:
         minx, miny, maxx, maxy = geom.bounds
         pixel_bounds = (
@@ -23,7 +23,8 @@ def brute_force_pixels(geom, pixel_bounds=None):
         np.arange(min_x, max_x + 1), np.arange(min_y, max_y + 1), indexing="ij"
     )
     xs, ys = xs.ravel(), ys.ravel()
-    intersects = shapely.intersects(shapely.box(xs, ys, xs + 1, ys + 1), geom)
+    pixels = shapely.box(xs + tolerance, ys + tolerance, xs + 1 - tolerance, ys + 1 - tolerance)
+    intersects = shapely.intersects(pixels, geom)
     return set(zip(xs[intersects].tolist(), ys[intersects].tolist()))
 
 
@@ -107,18 +108,20 @@ def sample_gdf():
     yield multipolygon_gdf
 
 
-def test_fill_individual_polygons(sample_polygons):
+@pytest.mark.parametrize("tolerance", [polygon_fill.TOLERANCE, 0])
+def test_fill_individual_polygons(sample_polygons, tolerance):
     for polygon_name, vertices in sample_polygons.items():
         vertices_df = pd.DataFrame(vertices, columns=["x", "y"])
-        filled_pixels = polygon_fill.voxel_traversal_scanline_fill(vertices_df)
-        expected_pixels = brute_force_pixels(Polygon(vertices))
+        filled_pixels = polygon_fill.voxel_traversal_scanline_fill(vertices_df, tolerance=tolerance)
+        expected_pixels = brute_force_pixels(Polygon(vertices), tolerance=tolerance)
         assert (
             filled_pixels == expected_pixels
         ), f"{polygon_name} has {len(filled_pixels - expected_pixels)} extra and {len(expected_pixels - filled_pixels)} missing pixels"
 
 
+@pytest.mark.parametrize("tolerance", [polygon_fill.TOLERANCE, 0])
 @pytest.mark.parametrize("round_vertices", [False, True])
-def test_fill_random_concave_polygons(round_vertices):
+def test_fill_random_concave_polygons(round_vertices, tolerance):
     rng = np.random.default_rng(0)
     n_tested = 0
     while n_tested < 200:
@@ -128,9 +131,9 @@ def test_fill_random_concave_polygons(round_vertices):
         n_tested += 1
         x, y = np.array(polygon.exterior.coords).T
         filled_pixels = polygon_fill.voxel_traversal_scanline_fill(
-            pl.DataFrame({"x": x, "y": y})
+            pl.DataFrame({"x": x, "y": y}), tolerance=tolerance
         )
-        assert filled_pixels == brute_force_pixels(polygon), polygon.wkt
+        assert filled_pixels == brute_force_pixels(polygon, tolerance=tolerance), polygon.wkt
 
 
 def test_fill_polygon_with_hole():
@@ -151,7 +154,8 @@ def test_fill_polygon_with_hole():
     assert not {(x, y) for x in range(7, 14) for y in range(7, 14)} & filled_pixels
 
 
-def test_voxel_traversal_2d():
+@pytest.mark.parametrize("tolerance", [polygon_fill.TOLERANCE, 0])
+def test_voxel_traversal_2d(tolerance):
     rng = np.random.default_rng(0)
     segments = [((0, 0), (5, 5)), ((0, 0), (5, 0)), ((2, 1), (2, 7)), ((1, 1), (1, 1))]
     segments += [tuple(map(tuple, rng.uniform(-10, 10, (2, 2)))) for _ in range(100)]
@@ -160,8 +164,8 @@ def test_voxel_traversal_2d():
         line = LineString([start_vertex, end_vertex])
         if line.length == 0:
             line = Point(start_vertex)
-        pixels = polygon_fill.voxel_traversal_2d(start_vertex, end_vertex)
-        assert pixels == brute_force_pixels(line), (start_vertex, end_vertex)
+        pixels = polygon_fill.voxel_traversal_2d(start_vertex, end_vertex, tolerance=tolerance)
+        assert pixels == brute_force_pixels(line, tolerance=tolerance), (start_vertex, end_vertex)
 
 
 def test_scanline_fill():
@@ -233,6 +237,21 @@ def test_fill_overlapping_polygons_without_unique_id_col():
     vertices_df = polygon_fill.polygons_to_vertices(gdf)
     pixels = set(polygon_fill.fast_polygon_fill(vertices_df).iter_rows())
     assert pixels == brute_force_pixels(gdf.geometry[0])
+
+
+def test_fill_excludes_pixels_that_only_touch():
+    # a square whose edges lie on the pixel lines, and a copy that is off by floating point noise
+    for offset in [0, 1e-12, -1e-12]:
+        vertices_df = pd.DataFrame(
+            [(2 + offset, 3 - offset), (7 - offset, 3 + offset), (7, 8), (2, 8)], columns=["x", "y"]
+        )
+        filled_pixels = polygon_fill.voxel_traversal_scanline_fill(vertices_df)
+        assert filled_pixels == {(x, y) for x in range(2, 7) for y in range(3, 8)}
+
+    # with tolerance=0, pixels that touch the square are included
+    vertices_df = pd.DataFrame([(2, 3), (7, 3), (7, 8), (2, 8)], columns=["x", "y"])
+    filled_pixels = polygon_fill.voxel_traversal_scanline_fill(vertices_df, tolerance=0)
+    assert filled_pixels == {(x, y) for x in range(1, 8) for y in range(2, 9)}
 
 
 def test_fill_gdf_pixel_bounds(sample_gdf):
