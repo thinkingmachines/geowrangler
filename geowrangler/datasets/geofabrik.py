@@ -14,13 +14,22 @@ from urllib.request import HTTPError
 
 import geopandas as gpd
 import requests
-from fastcore.all import patch, urlcheck
+from fastcore.all import patch
 from loguru import logger
 
 from geowrangler.datasets.utils import make_report_hook, urlretrieve
 
 # %% ../../notebooks/05_datasets_geofabrik.ipynb #6e33cd05-ad3e-4f20-8902-b961c8e58ba3
 DEFAULT_CACHE_DIR = "~/.cache/geowrangler"
+
+# %% ../../notebooks/05_datasets_geofabrik.ipynb #c1d5e7a2
+def urlcheck(url: str, timeout: float = 10) -> bool:
+    """Returns True if the url can be reached"""
+    try:
+        response = requests.head(url, allow_redirects=True, timeout=timeout)
+    except requests.RequestException:
+        return False
+    return response.ok
 
 # %% ../../notebooks/05_datasets_geofabrik.ipynb #57334510-4bc1-4a2b-a085-e839f456a8a9
 @lru_cache(maxsize=None)

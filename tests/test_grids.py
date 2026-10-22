@@ -1,10 +1,13 @@
 import geopandas as gpd
 import numpy as np
 import pandas as pd
+import polars as pl
 import pytest
+import shapely
 from shapely.geometry import Polygon
 
 from geowrangler import grids
+from geowrangler.gridding_utils.polygon_fill import TOLERANCE
 
 
 @pytest.fixture
@@ -270,9 +273,10 @@ def test_bing_tile_grid_generator_join_return_geometry_false(
     assert isinstance(grids_gdf, pd.DataFrame)
     assert len(grids_gdf) == BING_TILE_N_TILES
 
-# FastBingTileGridGenerator returns 6 more tiles than BingTileGridGenerator because it considered tiles exactly on the border
-FAST_BING_TILE_N_TILES = BING_TILE_N_TILES + 6
-FAST_BING_TILE_MULTIPOLY_N_TILES = BING_TILE_MULTIPOLY_N_TILES + 6
+# The sample polygons lie exactly on the tile borders at longitude 0 and latitude 0. Like BingTileGridGenerator,
+# FastBingTileGridGenerator excludes the tiles that only touch the polygons there.
+FAST_BING_TILE_N_TILES = BING_TILE_N_TILES
+FAST_BING_TILE_MULTIPOLY_N_TILES = BING_TILE_MULTIPOLY_N_TILES
 
 def test_fast_bing_tile_grid_generator(sample_gdf):
     grid_generator = grids.FastBingTileGridGenerator(10)
@@ -364,30 +368,25 @@ def test_fast_bing_tile_grid_generator_non_4326_crs():
 
 
 def test_fast_bing_tile_grid_generator_polygon_with_holes():
-    """Test that FastBingTileGridGenerator handles polygons with holes with a warning.
-    
-    This tests the fix for issue #263 bug 1: Polygons with interior holes
-    should emit a warning and fill the entire exterior.
-    """
-    # Create polygon with a hole
+    """Test that FastBingTileGridGenerator excludes tiles that are fully inside a hole"""
     exterior = [(0, 0), (4, 0), (4, 4), (0, 4), (0, 0)]
-    hole = [(1, 1), (2, 1), (2, 2), (1, 2), (1, 1)]
+    hole = [(1, 1), (3, 1), (3, 3), (1, 3), (1, 1)]
     polygon_with_hole = Polygon(exterior, [hole])
-    
+
     gdf = gpd.GeoDataFrame(
         geometry=[polygon_with_hole],
         crs="EPSG:4326",
     )
-    
-    grid_generator = grids.FastBingTileGridGenerator(10)
-    
-    # Should emit a warning about holes
-    with pytest.warns(UserWarning, match="holes"):
-        grids_gdf = grid_generator.generate_grid(gdf)
-    
+
+    grid_generator = grids.FastBingTileGridGenerator(10, add_xyz_cols=True)
+    grids_gdf = grid_generator.generate_grid(gdf)
+
     assert "geometry" in grids_gdf
     assert isinstance(grids_gdf, gpd.GeoDataFrame)
-    assert len(grids_gdf) > 0
+    assert set(zip(grids_gdf.x, grids_gdf.y)) == brute_force_bing_tiles(
+        grid_generator, polygon_with_hole
+    )
+    assert not shapely.contains_properly(Polygon(hole), grids_gdf.geometry.values).any()
 
 
 def test_fast_bing_tile_grid_generator_no_crs_warning():
@@ -415,3 +414,219 @@ def test_fast_bing_tile_grid_generator_no_crs_warning():
         grids_gdf = grid_generator.generate_grid(gdf_no_crs)
     
     assert len(grids_gdf) > 0
+
+def brute_force_square_cells(polygon, cell_size, boundary):
+    """Cells (x, y) of the boundary's lattice that share area with the polygon, ignoring slivers thinner than the tolerance"""
+    x_min, y_min, x_max, y_max = boundary
+    n_x = int(np.ceil((x_max - x_min) / cell_size))
+    n_y = int(np.ceil((y_max - y_min) / cell_size))
+    xs, ys = np.meshgrid(np.arange(n_x), np.arange(n_y), indexing="ij")
+    xs, ys = xs.ravel(), ys.ravel()
+    shrink = TOLERANCE * cell_size
+    cells = shapely.box(
+        x_min + xs * cell_size + shrink,
+        y_min + ys * cell_size + shrink,
+        x_min + (xs + 1) * cell_size - shrink,
+        y_min + (ys + 1) * cell_size - shrink,
+    )
+    intersects = shapely.intersects(cells, polygon)
+    return set(zip(xs[intersects].tolist(), ys[intersects].tolist()))
+
+
+def brute_force_bing_tiles(grid_generator, polygon):
+    """Tiles (x, y) that share area with the polygon in EPSG:4326, ignoring slivers thinner than the tolerance"""
+    minx, miny, maxx, maxy = polygon.bounds
+    xs = np.arange(
+        int(grid_generator._lng_to_xtile(minx)) - 2,
+        int(grid_generator._lng_to_xtile(maxx)) + 3,
+    )
+    ys = np.arange(
+        int(grid_generator._lat_to_ytile(maxy)) - 2,
+        int(grid_generator._lat_to_ytile(miny)) + 3,
+    )
+    xs, ys = np.meshgrid(xs, ys, indexing="ij")
+    xs, ys = xs.ravel(), ys.ravel()
+    tiles = shapely.box(
+        grid_generator._xtile_to_lng(xs + TOLERANCE),
+        grid_generator._ytile_to_lat(ys + 1 - TOLERANCE),
+        grid_generator._xtile_to_lng(xs + 1 - TOLERANCE),
+        grid_generator._ytile_to_lat(ys + TOLERANCE),
+    )
+    intersects = shapely.intersects(tiles, polygon)
+    return set(zip(xs[intersects].tolist(), ys[intersects].tolist()))
+
+
+def random_star_polygons(rng, n_polygons, center_min, center_max, max_radius):
+    """Random star-shaped (generally concave) polygons"""
+    polygons = []
+    while len(polygons) < n_polygons:
+        n_vertices = rng.integers(5, 20)
+        center = rng.uniform(center_min, center_max, 2)
+        angles = np.sort(rng.uniform(0, 2 * np.pi, n_vertices))
+        radii = rng.uniform(max_radius / 8, max_radius, n_vertices)
+        polygon = Polygon(
+            np.c_[center[0] + radii * np.cos(angles), center[1] + radii * np.sin(angles)]
+        )
+        if polygon.is_valid:
+            polygons.append(polygon)
+    return polygons
+
+
+def test_fast_square_grid_generator_random_concave_polygons():
+    rng = np.random.default_rng(0)
+    polygons = random_star_polygons(rng, 100, 150, 850, 150)
+    gdf = gpd.GeoDataFrame(
+        {"polygon_id": range(len(polygons))}, geometry=polygons, crs="EPSG:3857"
+    )
+    boundary = (0, 0, 1000, 1000)
+    cell_size = 37
+
+    grid_generator = grids.FastSquareGridGenerator(
+        cell_size, boundary=grids.SquareGridBoundary(*boundary)
+    )
+    grids_gdf = grid_generator.generate_grid(gdf, unique_id_col="polygon_id")
+
+    for polygon_id, polygon in enumerate(polygons):
+        polygon_grids = grids_gdf[grids_gdf["polygon_id"] == polygon_id]
+        assert set(zip(polygon_grids.x, polygon_grids.y)) == brute_force_square_cells(
+            polygon, cell_size, boundary
+        ), polygon_id
+
+    # the geometries match the grid cells
+    assert grids_gdf.area.apply(np.isclose, b=cell_size**2).all()
+    matching_polygons = gdf.set_index("polygon_id").geometry.loc[grids_gdf["polygon_id"]]
+    assert shapely.intersects(grids_gdf.geometry.values, matching_polygons.values).all()
+
+
+def test_fast_square_grid_generator_matches_square_grid_generator():
+    rng = np.random.default_rng(1)
+    polygons = random_star_polygons(rng, 20, 0, 5, 2)
+    gdf = gpd.GeoDataFrame(geometry=polygons, crs="EPSG:4326")
+
+    fast_grids_gdf = grids.FastSquareGridGenerator(20000).generate_grid(gdf)
+    grids_gdf = grids.SquareGridGenerator(20000).generate_grid(gdf)
+
+    assert set(zip(fast_grids_gdf.x, fast_grids_gdf.y)) == set(
+        zip(grids_gdf.x, grids_gdf.y)
+    )
+
+
+def test_fast_square_grid_generator_polygon_with_holes():
+    exterior = [(0, 0), (1000, 0), (1000, 1000), (0, 1000)]
+    holes = [
+        [(300, 300), (700, 300), (700, 700), (300, 700)],
+        [(810, 820), (930, 845), (880, 960)],
+    ]
+    polygon_with_holes = Polygon(exterior, holes)
+    gdf = gpd.GeoDataFrame(geometry=[polygon_with_holes], crs="EPSG:3857")
+    boundary = (0, 0, 1000, 1000)
+    cell_size = 50
+
+    grid_generator = grids.FastSquareGridGenerator(
+        cell_size, boundary=grids.SquareGridBoundary(*boundary)
+    )
+    grids_gdf = grid_generator.generate_grid(gdf)
+
+    assert set(zip(grids_gdf.x, grids_gdf.y)) == brute_force_square_cells(
+        polygon_with_holes, cell_size, boundary
+    )
+    # cells fully inside the hole are excluded
+    assert not shapely.contains_properly(Polygon(holes[0]), grids_gdf.geometry.values).any()
+
+
+def test_fast_square_grid_generator_polygon_partially_outside_boundary():
+    polygon = Polygon([(-120, 130), (420, -80), (510, 260), (180, 140), (90, 470)])
+    gdf = gpd.GeoDataFrame(geometry=[polygon], crs="EPSG:3857")
+    boundary = (0, 0, 300, 300)
+    cell_size = 23
+
+    grid_generator = grids.FastSquareGridGenerator(
+        cell_size, boundary=grids.SquareGridBoundary(*boundary)
+    )
+    with pytest.warns(UserWarning):
+        grids_gdf = grid_generator.generate_grid(gdf)
+
+    assert set(zip(grids_gdf.x, grids_gdf.y)) == brute_force_square_cells(
+        polygon, cell_size, boundary
+    )
+
+
+def test_fast_bing_tile_grid_generator_random_concave_polygons():
+    rng = np.random.default_rng(0)
+    polygons = random_star_polygons(rng, 50, -60, 60, 2)
+    gdf = gpd.GeoDataFrame(
+        {"polygon_id": range(len(polygons))}, geometry=polygons, crs="EPSG:4326"
+    )
+
+    grid_generator = grids.FastBingTileGridGenerator(9, add_xyz_cols=True)
+    grids_gdf = grid_generator.generate_grid(gdf, unique_id_col="polygon_id")
+
+    for polygon_id, polygon in enumerate(polygons):
+        polygon_grids = grids_gdf[grids_gdf["polygon_id"] == polygon_id]
+        assert set(zip(polygon_grids.x, polygon_grids.y)) == brute_force_bing_tiles(
+            grid_generator, polygon
+        ), polygon_id
+
+
+@pytest.mark.parametrize(
+    "geometry", [[], [Polygon()]], ids=["no_rows", "empty_polygon"]
+)
+def test_fast_square_grid_generator_empty_aoi(geometry):
+    gdf = gpd.GeoDataFrame({"polygon_id": range(len(geometry))}, geometry=geometry, crs="EPSG:4326")
+    grid_generator = grids.FastSquareGridGenerator(15000)
+    with pytest.warns(UserWarning):
+        grids_gdf = grid_generator.generate_grid(gdf, unique_id_col="polygon_id")
+    assert len(grids_gdf) == 0
+    assert list(grids_gdf.columns) == ["x", "y", "polygon_id", "geometry"]
+
+
+def bing_tile_bounds(x, y, z):
+    grid_generator = grids.FastBingTileGridGenerator(z)
+    return (
+        grid_generator._xtile_to_lng(x),
+        grid_generator._ytile_to_lat(y + 1),
+        grid_generator._xtile_to_lng(x + 1),
+        grid_generator._ytile_to_lat(y),
+    )
+
+
+def test_fast_bing_tile_grid_generator_tile_aligned_aois():
+    """AOIs that are zoom 10 tiles contain exactly 16 zoom 12 tiles each, and neighbouring AOIs share no tiles"""
+    gdf = gpd.GeoDataFrame(
+        {"name": ["West", "East"]},
+        geometry=[
+            shapely.box(*bing_tile_bounds(858, 471, 10)),
+            shapely.box(*bing_tile_bounds(859, 471, 10)),
+        ],
+        crs="EPSG:4326",
+    )
+    grid_generator = grids.FastBingTileGridGenerator(12, add_xyz_cols=True)
+    grids_gdf = grid_generator.generate_grid(gdf, unique_id_col="name")
+
+    west = grids_gdf[grids_gdf["name"] == "West"]
+    east = grids_gdf[grids_gdf["name"] == "East"]
+    assert set(zip(west.x, west.y)) == {(x, y) for x in range(3432, 3436) for y in range(1884, 1888)}
+    assert set(zip(east.x, east.y)) == {(x, y) for x in range(3436, 3440) for y in range(1884, 1888)}
+
+    # same as BingTileGridGenerator
+    slow_grids_gdf = grids.BingTileGridGenerator(12).generate_grid(gdf.iloc[:1])
+    assert set(slow_grids_gdf.quadkey) == set(west.quadkey)
+
+
+@pytest.mark.parametrize("reproject", [False, True])
+def test_square_grid_generators_regrid_cell(reproject):
+    """Regridding a 15 km cell at 1 km on the same boundary gives the 15 x 15 cells inside it"""
+    boundary = grids.SquareGridBoundary(0, 0, 300_000, 300_000)
+    cell = gpd.GeoDataFrame(
+        geometry=[shapely.box(150_000, 60_000, 165_000, 75_000)], crs="EPSG:3857"
+    )
+    if reproject:
+        # the round trip moves the edges off the grid lines by floating point noise
+        cell = cell.to_crs("EPSG:4326").to_crs("EPSG:3857")
+    expected_cells = {(x, y) for x in range(150, 165) for y in range(60, 75)}
+
+    fast_grids_gdf = grids.FastSquareGridGenerator(1000, boundary=boundary).generate_grid(cell)
+    assert set(zip(fast_grids_gdf.x, fast_grids_gdf.y)) == expected_cells
+
+    grids_gdf = grids.SquareGridGenerator(1000, boundary=boundary).generate_grid(cell)
+    assert set(zip(grids_gdf.x, grids_gdf.y)) == expected_cells
