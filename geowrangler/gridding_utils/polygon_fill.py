@@ -4,242 +4,240 @@
 __all__ = ['voxel_traversal_2d', 'scanline_fill', 'voxel_traversal_scanline_fill', 'polygons_to_vertices', 'fast_polygon_fill']
 
 # %% ../../notebooks/15_polygon_fill.ipynb #52b870c5-564a-40c0-8286-fdfe52f4fdc2
-from typing import List, Tuple, Set, Optional, Dict, Union
+from typing import Callable, List, Tuple, Set, Optional, Union
 
 import numpy as np
 import pandas as pd
 import geopandas as gpd
 import polars as pl
+import shapely
+
+# %% ../../notebooks/15_polygon_fill.ipynb #7cafc141-7211-420b-b92e-2e90122daeb4
+SUBPOLYGON_ID_COL =  "__subpolygon_id__"
+RING_ID_COL = "__ring_id__"
+PIXEL_DTYPE = pl.Int32
+
+# (min_x, min_y, max_x, max_y) of the pixels to return, inclusive
+PixelBounds = Tuple[int, int, int, int]
+
+# %% ../../notebooks/15_polygon_fill.ipynb #3f1c2a9e
+def _expand_ranges(
+    lo: np.ndarray, # inclusive start of each range
+    hi: np.ndarray, # inclusive end of each range. Ranges where hi < lo are empty
+) -> Tuple[np.ndarray, np.ndarray]:
+    """Returns the index of the parent range and the value for every integer in every range"""
+    counts = np.maximum(hi - lo + 1, 0)
+    parent = np.repeat(np.arange(len(lo)), counts)
+    offsets = np.arange(counts.sum()) - np.repeat(np.cumsum(counts) - counts, counts)
+    return parent, lo[parent] + offsets
+
+def _clip(values: np.ndarray, min_value: int, max_value: int) -> np.ndarray:
+    """Clips fractional pixel coordinates to just outside the pixel bounds so they can be safely cast to integers"""
+    return np.clip(values, min_value - 1, max_value + 2)
+
+def _identity(values: np.ndarray) -> np.ndarray:
+    return values
+
+def _default_pixel_bounds(
+    x: np.ndarray,
+    y: np.ndarray,
+    y_to_row: Callable[[np.ndarray], np.ndarray] = _identity,
+) -> PixelBounds:
+    """Pixel bounds that cover every pixel touched by the vertices"""
+    rows = y_to_row(y)
+    if len(x) == 0:
+        return (0, 0, -1, -1)
+    return (
+        int(np.floor(np.nanmin(x))) - 1,
+        int(np.floor(np.nanmin(rows))) - 1,
+        int(np.floor(np.nanmax(x))),
+        int(np.floor(np.nanmax(rows))),
+    )
 
 # %% ../../notebooks/15_polygon_fill.ipynb #7a2af02e-68d5-4346-a13e-0000a4e78a7d
+def _segment_pixels(
+    x1: np.ndarray, y1: np.ndarray, x2: np.ndarray, y2: np.ndarray, # segment endpoints
+    pixel_bounds: PixelBounds,
+    y_to_row: Callable[[np.ndarray], np.ndarray] = _identity,
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """
+    Returns (segment index, x, y) for every pixel touched by each closed line segment.
+
+    x is in fractional pixel units. y is in any unit where the segment is straight, and `y_to_row` monotonically maps it to fractional pixel units.
+    Pixel (x, y) is the closed square [x, x+1] x [y, y+1], so pixels that only touch a segment at an edge or a corner are included.
+    """
+    min_x, min_y, max_x, max_y = pixel_bounds
+
+    # columns whose closed strip [col, col+1] overlaps the segment's x-range
+    seg_min_x, seg_max_x = np.minimum(x1, x2), np.maximum(x1, x2)
+    col_lo = np.maximum(np.ceil(_clip(seg_min_x, min_x, max_x)) - 1, min_x).astype(np.int64)
+    col_hi = np.minimum(np.floor(_clip(seg_max_x, min_x, max_x)), max_x).astype(np.int64)
+    seg, col = _expand_ranges(col_lo, col_hi)
+
+    # clip each segment to its column strip, then find the y-range of the clipped part
+    x1, y1, x2, y2 = x1[seg], y1[seg], x2[seg], y2[seg]
+    clip_x1 = np.maximum(col, np.minimum(x1, x2))
+    clip_x2 = np.minimum(col + 1, np.maximum(x1, x2))
+    with np.errstate(divide="ignore", invalid="ignore"):
+        slope = (y2 - y1) / (x2 - x1)
+        clip_y1 = np.where(clip_x1 == x1, y1, np.where(clip_x1 == x2, y2, y1 + (clip_x1 - x1) * slope))
+        clip_y2 = np.where(clip_x2 == x2, y2, np.where(clip_x2 == x1, y1, y1 + (clip_x2 - x1) * slope))
+    is_vertical = x1 == x2
+    clip_y1 = np.where(is_vertical, y1, clip_y1)
+    clip_y2 = np.where(is_vertical, y2, clip_y2)
+
+    # rows whose closed strip [row, row+1] overlaps the clipped part's y-range
+    row1, row2 = y_to_row(clip_y1), y_to_row(clip_y2)
+    row_lo = np.maximum(np.ceil(_clip(np.minimum(row1, row2), min_y, max_y)) - 1, min_y).astype(np.int64)
+    row_hi = np.minimum(np.floor(_clip(np.maximum(row1, row2), min_y, max_y)), max_y).astype(np.int64)
+    sub, row = _expand_ranges(row_lo, row_hi)
+
+    return seg[sub], col[sub], row
+
+# %% ../../notebooks/15_polygon_fill.ipynb #a1d0f6b2
 def voxel_traversal_2d(
-    start_vertex: Tuple[int, int], 
-    end_vertex: Tuple[int, int],
-    debug: bool = False, # if true, prints diagnostic info for the algorithm  
-) -> Dict[str,List[Tuple[int, int]]]:
+    start_vertex: Tuple[float, float],
+    end_vertex: Tuple[float, float],
+) -> Set[Tuple[int, int]]:
     """
-    Returns all pixels between two points as inspired by Amanatides & Woo's “A Fast Voxel Traversal Algorithm For Ray Tracing” 
-    
-    Implementation adapted from https://www.redblobgames.com/grids/line-drawing/ in the supercover lines section
+    Returns all pixels touched by the line segment between two points in fractional pixel coordinates.
 
-    This also returns the off-diagonal pixels that can be useful for correcting errors at the corners of polygons during polygon fill
+    Pixel (x, y) is the closed square [x, x+1] x [y, y+1], so this is a supercover line: pixels that only touch the segment at an edge or a corner are included.
     """
-
-    # Setup initial conditions
-    x1, y1 = start_vertex
-    x2, y2 = end_vertex
-
-    direction_x = 1 if x2 > x1 else -1
-    direction_y = 1 if y2 > y1 else -1
-
-    result = {"line_pixels":[], "off_diagonal_pixels":[]}
-    
-    # Single point
-    if (x1 == x2) and (y1 == y2):
-        pixels = [(x1,y1)]
-        result["line_pixels"].extend(pixels)
-        return result
-
-    # Vertical line
-    elif x1 == x2:
-        pixels = [(x1, y) for y in range(y1, y2 + direction_y, direction_y)]
-        result["line_pixels"].extend(pixels)
-        return result
-
-    # Horizontal line
-    elif y1 == y2:
-        pixels = [(x, y1) for x in range(x1, x2 + direction_x, direction_x)]
-        result["line_pixels"].extend(pixels)
-        return result
-
-    dy = y2 - y1
-    dx = x2 - x1
-
-    pixel_x, pixel_y = x1, y1
-    pixels = [(pixel_x, pixel_y)]
-    off_diagonal_pixels = []
-
-    is_finished = False
-
-    if debug:
-        print(f"\nTraversing from ({x1},{y1}) to ({x2},{y2})")
-
-    ix = 0
-    iy = 0
-
-    nx = abs(dx)
-    ny = abs(dy)
-    max_steps = (nx+ny)
-    n_steps = 0
-    while not is_finished:
-        # this prevents infinite loops
-        n_steps += 1
-        if n_steps > max_steps:
-            raise Exception(
-                f"Traversal has exceeded steps limit {max_steps:,}. Please recheck inputs"
-            )
-
-        decision = (1+2*ix)*ny - (1+2*iy)*nx
-        if decision == 0:
-
-            off_diagonal_pixels.append((pixel_x + direction_x, pixel_y))
-            off_diagonal_pixels.append((pixel_x, pixel_y + direction_y))
-            
-            # diagonal step
-            pixel_x += direction_x
-            pixel_y += direction_y
-            ix += 1
-            iy += 1
-        elif decision < 0:
-            # horizontal step
-            pixel_x += direction_x
-            ix += 1
-        else:
-            # vetical step
-            pixel_y += direction_y
-            iy += 1
-
-        pixels.append((pixel_x, pixel_y))
-
-        if debug:
-            print(
-                f"Next tile coords are ({pixel_x}, {pixel_y})"
-            )
-
-        # checks to see if the loop is finished
-        if direction_x == 1:
-            is_x_finished = pixel_x >= x2
-        elif direction_x == -1:
-            is_x_finished = pixel_x <= x2
-
-        if direction_y == 1:
-            is_y_finished = pixel_y >= y2
-        elif direction_y == -1:
-            is_y_finished = pixel_y <= y2
-
-        if is_x_finished and is_y_finished:
-            break
-
-    result = {"line_pixels":pixels, "off_diagonal_pixels":off_diagonal_pixels}
-    return result
+    (x1, y1), (x2, y2) = start_vertex, end_vertex
+    _, xs, ys = _segment_pixels(
+        np.array([x1], dtype=float), np.array([y1], dtype=float),
+        np.array([x2], dtype=float), np.array([y2], dtype=float),
+        pixel_bounds=_default_pixel_bounds(np.array([x1, x2], dtype=float), np.array([y1, y2], dtype=float)),
+    )
+    return set(zip(xs.tolist(), ys.tolist()))
 
 # %% ../../notebooks/15_polygon_fill.ipynb #6140fc04
-def interpolate_x(
-    start_vertex: Tuple[int, int],
-    end_vertex: Tuple[int, int],
-    y: int,
-) -> float:
-    """Interpolate x value for a given y along the line segment defined by start_vertex and end_vertex."""
-    x1, y1 = start_vertex
-    x2, y2 = end_vertex
-    if y1 == y2:
-        # case when there is a horizontal line segment
-        raise ValueError(f"The y value of the 2 vertices should not be the same")
+def _scanline_pixels(
+    x1: np.ndarray, y1: np.ndarray, x2: np.ndarray, y2: np.ndarray, # edge endpoints
+    group: np.ndarray, # polygon each edge belongs to. Even-odd fill is done per group
+    pixel_bounds: PixelBounds,
+    y_to_row: Callable[[np.ndarray], np.ndarray] = _identity,
+    row_to_y: Callable[[np.ndarray], np.ndarray] = _identity,
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """
+    Returns (group, x, y) for every pixel whose center is inside its group's polygon using the even-odd rule.
 
-    inverse_slope = (x2 - x1) / (y2 - y1)
-    interpolated_x = x1 + (y - y1) * inverse_slope
-    return interpolated_x
+    Each group can have any number of closed rings (e.g. an exterior and its holes), so holes are left unfilled.
+    """
+    min_x, min_y, max_x, max_y = pixel_bounds
+
+    # rows whose center lies in [lo, hi) of the edge's y-range. The half-open range counts shared vertices exactly once
+    row1, row2 = y_to_row(y1), y_to_row(y2)
+    row_lo = np.maximum(np.ceil(_clip(np.minimum(row1, row2), min_y, max_y) - 0.5), min_y).astype(np.int64)
+    row_hi = np.minimum(np.ceil(_clip(np.maximum(row1, row2), min_y, max_y) - 0.5) - 1, max_y).astype(np.int64)
+    edge, row = _expand_ranges(row_lo, row_hi)
+
+    # x where each edge crosses the row center
+    x1, y1, x2, y2 = x1[edge], y1[edge], x2[edge], y2[edge]
+    row_center_y = row_to_y(row + 0.5)
+    crossing_x = x1 + (row_center_y - y1) * (x2 - x1) / (y2 - y1)
+    crossing_x = np.clip(crossing_x, np.minimum(x1, x2), np.maximum(x1, x2))
+
+    # pair up sorted crossings within each (group, row). A closed ring always crosses a row an even number of times
+    order = np.lexsort((crossing_x, row, group[edge]))
+    crossing_x, row, crossing_group = crossing_x[order], row[order], group[edge][order]
+    assert len(crossing_x) % 2 == 0, "Polygon rings should be closed"
+    span_x1, span_x2 = crossing_x[0::2], crossing_x[1::2]
+    span_row, span_group = row[0::2], crossing_group[0::2]
+
+    # pixels whose center lies within each span
+    col_lo = np.maximum(np.ceil(_clip(span_x1, min_x, max_x) - 0.5), min_x).astype(np.int64)
+    col_hi = np.minimum(np.floor(_clip(span_x2, min_x, max_x) - 0.5), max_x).astype(np.int64)
+    span, col = _expand_ranges(col_lo, col_hi)
+
+    return span_group[span], col, span_row[span]
 
 # %% ../../notebooks/15_polygon_fill.ipynb #29616c05-3a87-4952-a4f6-eb97c958599b
 def scanline_fill(
-    vertices: List[Tuple[int,int]], # list of polygon vertices in order (either clockwise or counterclockwise)
-    debug: bool = False, # if true, prints diagnostic info for the algorithm  
+    vertices: List[Tuple[float,float]], # list of polygon vertices in order (either clockwise or counterclockwise)
 ) -> Set[Tuple[int,int]]:
-    """Returns all pixels within the interior of a polygon defined by vertices"""
-    
-    offset_vertices = vertices[1:] + vertices[:1]
-
-    if not vertices:
+    """Returns all pixels whose center is within the interior of a polygon defined by vertices in fractional pixel coordinates"""
+    if len(vertices) < 3:
         return set()
-    
-    if len(vertices) == 1:
-        return set(vertices)
 
-    # Calculate the bounding box for the polygon
-    min_y, max_y = min(y for x, y in vertices), max(y for x, y in vertices)
+    x, y = np.array(vertices, dtype=float).T
+    next_x, next_y = np.roll(x, -1), np.roll(y, -1)
+    group, xs, ys = _scanline_pixels(
+        x, y, next_x, next_y,
+        group=np.zeros(len(x), dtype=np.int64),
+        pixel_bounds=_default_pixel_bounds(x, y),
+    )
+    return set(zip(xs.tolist(), ys.tolist()))
 
-    filled_pixels = set()
-    # Process each horizontal scanline within the bounding box
-    for scanline_y in range(min_y, max_y + 1):
-        intersection_points = []
+# %% ../../notebooks/15_polygon_fill.ipynb #5b7e0c3d
+def _next_vertex_idx(ring_idx: np.ndarray) -> np.ndarray:
+    """Returns the index of the next vertex in each vertex's ring. The last vertex of a ring wraps around to the first"""
+    if len(ring_idx) == 0:
+        return np.array([], dtype=np.int64)
+    ring_first_idx = np.searchsorted(ring_idx, ring_idx)
+    is_ring_last = np.append(ring_idx[1:] != ring_idx[:-1], True)
+    return np.where(is_ring_last, ring_first_idx, np.arange(len(ring_idx)) + 1)
 
-        # Find intersections of the polygon with the current scanline
-        for start_vertex, end_vertex in zip(vertices, offset_vertices):
-            start_x, start_y = start_vertex
-            end_x, end_y = end_vertex
+def _polygon_pixels(
+    x: np.ndarray, y: np.ndarray, # vertices in ring order
+    ring_idx: np.ndarray, # non-decreasing index of the ring of each vertex
+    polygon_idx: np.ndarray, # non-decreasing index of the polygon of each vertex. Even-odd fill is done per polygon
+    pixel_bounds: Optional[PixelBounds] = None,
+    y_to_row: Callable[[np.ndarray], np.ndarray] = _identity,
+    row_to_y: Callable[[np.ndarray], np.ndarray] = _identity,
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Returns (polygon index, x, y) for every pixel that intersects each polygon. Pixels can be repeated"""
+    next_idx = _next_vertex_idx(ring_idx)
+    next_x, next_y = x[next_idx], y[next_idx]
 
-            if (end_y < scanline_y <= start_y) or (start_y < scanline_y <= end_y):
-                # Calculate x-coordinate of intersection
-                intersection_x = interpolate_x(start_vertex, end_vertex, scanline_y)
-                intersection_points.append(intersection_x)
+    if pixel_bounds is None:
+        pixel_bounds = _default_pixel_bounds(x, y, y_to_row)
 
-        # Fill pixels between pairs of intersections
-        if intersection_points:
-            intersection_points.sort()
+    boundary_edge, boundary_x, boundary_y = _segment_pixels(x, y, next_x, next_y, pixel_bounds, y_to_row)
+    interior_polygon, interior_x, interior_y = _scanline_pixels(
+        x, y, next_x, next_y, polygon_idx, pixel_bounds, y_to_row, row_to_y
+    )
 
-            filled_pixels_in_row = set()
-            for start_x, end_x in zip(
-                intersection_points[::2], intersection_points[1::2]
-            ):
-                start_x, end_x = int(round(start_x)), int(round(end_x))
-
-                _filled_pixels_in_row = [
-                    (x, scanline_y) for x in range(start_x, end_x + 1)
-                ]
-                filled_pixels_in_row.update(_filled_pixels_in_row)
-
-            filled_pixels.update(filled_pixels_in_row)
-
-        if debug:
-            print(f"Scanline y = {scanline_y}, Intersections: {intersection_points}")
-    
-    return filled_pixels
-
+    return (
+        np.concatenate([polygon_idx[boundary_edge], interior_polygon]),
+        np.concatenate([boundary_x, interior_x]),
+        np.concatenate([boundary_y, interior_y]),
+    )
 
 # %% ../../notebooks/15_polygon_fill.ipynb #bc62c0f2-cd69-49c8-93f0-902d42f54eaa
 def voxel_traversal_scanline_fill(
     vertices_df: Union[pd.DataFrame,pl.DataFrame], # dataframe with x_col and y_col for the polygon vertices
-    x_col: str = "x", 
+    x_col: str = "x",
     y_col: str = "y",
-    debug: bool = False, # if true, prints diagnostic info for both voxel traversal and scanline fill algorithms
-) -> Dict[str, Set[Tuple[int,int]]]:
+    ring_col: Optional[str] = None, # column that identifies the ring (exterior or hole) of each vertex. If None, all vertices are in one ring
+) -> Set[Tuple[int,int]]:
     """
-    Returns pixels that intersect a polygon. 
-    
-    This uses voxel traversal to fill the boundary, and scanline fill for the interior. All coordinates are assumed to be integers.        
-    
-    This also returns the off-boundary pixels that can be useful for correcting errors at the corners of polygons during polygon fill
+    Returns pixels that intersect a polygon. Coordinates are in fractional pixel units, and pixel (x, y) is the closed square [x, x+1] x [y, y+1]
+
+    This uses voxel traversal to fill the boundary, and scanline fill for the interior.
     """
+    if isinstance(vertices_df, pd.DataFrame):
+        vertices_df = pl.from_pandas(vertices_df)
 
-    vertices = list(zip(vertices_df[x_col].to_list(), vertices_df[y_col].to_list()))
-    offset_vertices = vertices[1:] + vertices[:1]
+    x = vertices_df[x_col].cast(pl.Float64).to_numpy()
+    y = vertices_df[y_col].cast(pl.Float64).to_numpy()
+    if ring_col is not None:
+        ring = vertices_df[ring_col].to_numpy()
+        ring_idx = np.cumsum(np.append(True, ring[1:] != ring[:-1])) - 1
+    else:
+        ring_idx = np.zeros(len(x), dtype=np.int64)
 
-    polygon_pixels = set()
-    off_boundary_pixels = set()
-
-    for start_vertex, end_vertex in zip(vertices, offset_vertices):
-        voxel_traversal_results = voxel_traversal_2d(start_vertex, end_vertex, debug)
-        polygon_pixels.update(voxel_traversal_results["line_pixels"])
-        off_boundary_pixels.update(voxel_traversal_results["off_diagonal_pixels"])
-
-    polygon_pixels.update(scanline_fill(vertices, debug))
-
-     # removing off boundary tiles that are actually in the interior 
-    off_boundary_pixels = off_boundary_pixels - polygon_pixels
-
-    result = {"polygon_pixels":polygon_pixels, "off_boundary_pixels":off_boundary_pixels}
-    return result
-
-# %% ../../notebooks/15_polygon_fill.ipynb #7cafc141-7211-420b-b92e-2e90122daeb4
-SUBPOLYGON_ID_COL =  "__subpolygon_id__"
-PIXEL_DTYPE = pl.Int32
+    _, xs, ys = _polygon_pixels(x, y, ring_idx, polygon_idx=np.zeros(len(x), dtype=np.int64))
+    return set(zip(xs.tolist(), ys.tolist()))
 
 # %% ../../notebooks/15_polygon_fill.ipynb #a7e3cc8e-c70b-4b87-9821-f92f8fe8e504
 def polygons_to_vertices(
-    polys_gdf: gpd.GeoDataFrame, 
+    polys_gdf: gpd.GeoDataFrame,
     unique_id_col: Optional[str] = None # the ids under this column will be preserved in the output tiles
 ) -> pl.DataFrame:
-    
+    """Returns the vertices of every ring (exterior and holes) of every polygon, with the ids of the polygon, subpolygon and ring of each vertex"""
+
     if unique_id_col is not None:
         duplicates_bool = polys_gdf[unique_id_col].duplicated()
         if duplicates_bool.any():
@@ -265,73 +263,74 @@ def polygons_to_vertices(
         )
 
     polys_gdf.index.names = [unique_id_col, SUBPOLYGON_ID_COL]
-    vertices_df = polys_gdf.get_coordinates().reset_index()
+    ids_df = pd.DataFrame(index=polys_gdf.index).reset_index()
+
+    # each ring is kept separate so that holes aren't joined to the exterior
+    rings, poly_idx = shapely.get_rings(polys_gdf.geometry.values, return_index=True)
+    ring_ids = np.arange(len(rings)) - np.searchsorted(poly_idx, poly_idx)
+    coords, ring_idx = shapely.get_coordinates(rings, return_index=True)
+
+    vertices_df = ids_df.iloc[poly_idx[ring_idx]].reset_index(drop=True)
+    vertices_df[RING_ID_COL] = ring_ids[ring_idx]
+    vertices_df["x"] = coords[:, 0]
+    vertices_df["y"] = coords[:, 1]
     vertices_df = pl.from_pandas(vertices_df)
 
     return vertices_df
 
 # %% ../../notebooks/15_polygon_fill.ipynb #ee85336e-01b7-4cd1-bb1a-daafa50afbbf
 def fast_polygon_fill(
-    vertices_df: pl.DataFrame, # integer vertices of all polygons in the AOI
+    vertices_df: pl.DataFrame, # vertices of all polygons in the AOI in fractional pixel coordinates, in ring order (see `polygons_to_vertices`)
     unique_id_col: Optional[str] = None, # the ids under this column will be preserved in the output tiles
-) -> Dict[str,pl.DataFrame]:
-    
-    if unique_id_col is not None:
-        id_cols = [SUBPOLYGON_ID_COL, unique_id_col]
-        has_unique_id_col = True
-    else:
-        complement_cols = ["x","y",SUBPOLYGON_ID_COL]
-        unique_id_col = list(set(vertices_df.columns) - set(complement_cols))
-        assert len(unique_id_col) == 1
-        unique_id_col = unique_id_col[0]
-        id_cols = [SUBPOLYGON_ID_COL, unique_id_col]
-        has_unique_id_col = False
+    pixel_bounds: Optional[PixelBounds] = None, # (min_x, min_y, max_x, max_y) of the pixels to return, inclusive. If None, all pixels touched by the polygons are returned
+    y_to_row: Optional[Callable[[np.ndarray], np.ndarray]] = None, # monotonic function mapping vertex y to fractional pixel y. Use this when the polygon edges are straight in a different space than the pixels. If None, y is already in pixel units
+    row_to_y: Optional[Callable[[np.ndarray], np.ndarray]] = None, # inverse of y_to_row
+) -> pl.DataFrame:
+    """
+    Returns all pixels that intersect each polygon. Pixel (x, y) is the closed square [x, x+1] x [y, y+1],
+    so pixels that only touch a polygon at an edge or a corner are included, the same as shapely's `intersects`.
 
-    for col in id_cols:
+    This uses voxel traversal to fill the boundary of every ring, and even-odd scanline fill for the interior, so holes are excluded.
+    """
+    if (y_to_row is None) != (row_to_y is None):
+        raise ValueError("y_to_row and row_to_y should be given together")
+    y_to_row = y_to_row or _identity
+    row_to_y = row_to_y or _identity
+
+    # vertices are grouped by polygon for the even-odd fill, and by ring for connecting the edges
+    polygon_cols = [col for col in vertices_df.columns if col not in ("x", "y", RING_ID_COL)]
+    ring_cols = polygon_cols + ([RING_ID_COL] if RING_ID_COL in vertices_df.columns else [])
+    for col in [SUBPOLYGON_ID_COL] + ([unique_id_col] if unique_id_col is not None else []):
         assert col in vertices_df, f"{col} should be column in vertices_df"
 
-    polygon_ids = vertices_df.select(id_cols).unique(maintain_order=True).rows()
+    vertices_df = vertices_df.filter(pl.col("x").is_not_nan() & pl.col("y").is_not_nan())
+    is_new_polygon = pl.any_horizontal([pl.col(col).ne_missing(pl.col(col).shift(1)) for col in polygon_cols])
+    is_new_ring = pl.any_horizontal([pl.col(col).ne_missing(pl.col(col).shift(1)) for col in ring_cols])
+    group_df = vertices_df.select(
+        polygon_idx=is_new_polygon.fill_null(True).cum_sum() - 1,
+        ring_idx=is_new_ring.fill_null(True).cum_sum() - 1,
+    )
+    polygon_idx = group_df["polygon_idx"].to_numpy()
+    ring_idx = group_df["ring_idx"].to_numpy()
 
-    tiles_in_geom = set()
-    tiles_off_boundary = set()
-    for polygon_id in polygon_ids:
-        subpolygon_id, unique_id = polygon_id
-        filter_expr = (pl.col(SUBPOLYGON_ID_COL) == subpolygon_id) & (
-            pl.col(unique_id_col) == unique_id
-        )
-        poly_vertices = vertices_df.filter(filter_expr)
-        
-        poly_vertices = poly_vertices.unique(maintain_order=True)
-        voxel_traversal_results = voxel_traversal_scanline_fill(poly_vertices, x_col="x", y_col="y")
-        _tiles_in_geom = voxel_traversal_results["polygon_pixels"]
-        _tiles_off_boundary = voxel_traversal_results["off_boundary_pixels"]
-
-        if has_unique_id_col:
-            _tiles_in_geom = [(x, y, unique_id) for (x, y) in _tiles_in_geom]
-            _tiles_off_boundary = [(x, y, unique_id) for (x, y) in _tiles_off_boundary]
-
-        tiles_in_geom.update(_tiles_in_geom)
-        tiles_off_boundary.update(_tiles_off_boundary)
-
-    # removing off boundary tiles that are actually in the interior 
-    tiles_off_boundary = tiles_off_boundary - tiles_in_geom
-
-    schema = {"x": PIXEL_DTYPE, "y": PIXEL_DTYPE}
-    if has_unique_id_col:
-        schema[unique_id_col] = vertices_df[unique_id_col].dtype
-
-    tiles_in_geom = pl.from_records(
-        data=list(tiles_in_geom),
-        orient="row",
-        schema=schema,
+    x = vertices_df["x"].cast(pl.Float64).to_numpy()
+    y = vertices_df["y"].cast(pl.Float64).to_numpy()
+    pixel_polygon_idx, pixel_x, pixel_y = _polygon_pixels(
+        x, y, ring_idx, polygon_idx, pixel_bounds, y_to_row, row_to_y
     )
 
-    tiles_off_boundary = pl.from_records(
-        data=list(tiles_off_boundary),
-        orient="row",
-        schema=schema,
+    pixels_df = pl.DataFrame(
+        {"x": pixel_x, "y": pixel_y, "polygon_idx": pixel_polygon_idx},
+        schema={"x": PIXEL_DTYPE, "y": PIXEL_DTYPE, "polygon_idx": pl.Int64},
     )
 
-    result = {"tiles_in_geom": tiles_in_geom, "tiles_off_boundary": tiles_off_boundary}
+    if unique_id_col is None:
+        return pixels_df.select("x", "y").unique().sort("x", "y")
 
-    return result
+    polygon_first_idx = np.flatnonzero(np.diff(polygon_idx, prepend=-1))
+    unique_ids = vertices_df[unique_id_col].gather(polygon_first_idx)
+    pixels_df = pixels_df.with_columns(
+        unique_ids.gather(pixels_df["polygon_idx"]).alias(unique_id_col)
+    )
+
+    return pixels_df.select("x", "y", unique_id_col).unique().sort(unique_id_col, "x", "y")

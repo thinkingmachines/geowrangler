@@ -1,4 +1,21 @@
 # Release Notes
+## Unreleased
+### Fixes
+ - Fix `FastSquareGridGenerator` and `FastBingTileGridGenerator` returning cells that don't intersect the AOI and missing cells that do. Polygon edges are now traced in fractional cell coordinates instead of between vertices snapped to integer cells, so both return exactly the cells whose closed square intersects the AOI (the same as shapely's `intersects`)
+ - Fix polygons with holes in `FastSquareGridGenerator`: cells fully inside a hole are no longer returned. `FastBingTileGridGenerator` now also excludes holes instead of filling the whole exterior with a warning
+ - Fix `fast_polygon_fill` changing the shape of polygons that revisit a cell, by no longer de-duplicating vertices
+
+### Improvements
+ - `fast_polygon_fill` is vectorized with numpy, making `FastSquareGridGenerator` and `FastBingTileGridGenerator` faster
+
+### Breaking Changes
+ - `FastBingTileGridGenerator` now includes tiles that only touch the AOI at an edge or a corner, e.g. along the tile borders at longitude 0 and latitude 0
+ - In `gridding_utils.polygon_fill`, vertices are in fractional pixel coordinates and pixel `(x, y)` is the closed square `[x, x+1] x [y, y+1]`. Off-boundary pixels are removed since the error correction is no longer needed
+   - `fast_polygon_fill` returns a polars DataFrame of pixels instead of a dict, and accepts `pixel_bounds`, `y_to_row` and `row_to_y`
+   - `voxel_traversal_scanline_fill` returns a set of pixels instead of a dict, and accepts a `ring_col` for polygons with holes
+   - `voxel_traversal_2d` returns a set of pixels instead of a dict
+   - `polygons_to_vertices` adds a `__ring_id__` column
+
 ## 0.5.2
 ### Improvements
  - Upgrade Python development version to `3.14` 

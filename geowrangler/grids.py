@@ -214,26 +214,14 @@ def generate_grid(
     boundary = setup_boundary(self.boundary, aoi_gdf, reprojected_gdf)
     
     vertices = polygon_fill.polygons_to_vertices(reprojected_gdf, unique_id_col)
-    if boundary.boundary_type != "aoi_boundary":
-        vertices = self._remove_out_of_bounds_polygons(vertices, boundary)
     vertices = self._northingeasting_to_xy(vertices, boundary, northing_col="y", easting_col="x")
     
-    polygon_fill_result = polygon_fill.fast_polygon_fill(vertices, unique_id_col)
-    tiles_in_geom = polygon_fill_result["tiles_in_geom"]
+    tiles_in_geom = polygon_fill.fast_polygon_fill(
+        vertices, 
+        unique_id_col, 
+        pixel_bounds=self._get_pixel_bounds(boundary),
+    )
     bboxes = self._xy_to_bbox(tiles_in_geom, boundary, "x", "y")
-
-    # this is error correction on the polygon boundary (not the square boundary) 
-    tiles_off_boundary = polygon_fill_result["tiles_off_boundary"]
-    if not tiles_off_boundary.is_empty():
-        off_boundary_bboxes = self._xy_to_bbox(tiles_off_boundary, boundary, "x", "y") 
-        all_polygon_boundary = reprojected_gdf.boundary.union_all(method="unary")
-        intersects_boundary_bool = off_boundary_bboxes.intersects(all_polygon_boundary)
-    
-        addtl_tiles_in_geom = tiles_off_boundary.filter(pl.Series(intersects_boundary_bool))
-        addtl_boundary_bboxes = off_boundary_bboxes[intersects_boundary_bool].copy()
-    
-        tiles_in_geom = pl.concat([tiles_in_geom, addtl_tiles_in_geom])
-        bboxes = pd.concat([bboxes, addtl_boundary_bboxes], ignore_index=True)
 
     column_order = ["x","y"]
     if unique_id_col is not None:
@@ -249,58 +237,23 @@ def generate_grid(
 
 # %% ../notebooks/00_grids.ipynb #800d564a
 @patch
-def _remove_out_of_bounds_polygons(
+def _get_pixel_bounds(
     self: FastSquareGridGenerator,
-    vertices: pl.DataFrame,
     boundary: SquareGridBoundary,
-) -> pl.DataFrame:
-    id_cols = [col for col in vertices.columns if col != "x" and col != "y"]
-    
-    x_out_of_bounds_expr = (
-        (pl.col("maxx") < pl.lit(boundary.x_min)) | (pl.lit(boundary.x_max) < pl.col("minx"))
-    )
-    y_out_of_bounds_expr = (
-        (pl.col("maxy") < pl.lit(boundary.y_min)) | (pl.lit(boundary.y_max) < pl.col("miny"))
-    )
-    
-    out_of_bounds_expr = x_out_of_bounds_expr | y_out_of_bounds_expr
-    
-    out_of_bounds_polygons = (
-     vertices
-     .group_by(id_cols)
-     .agg(
-        minx=pl.col("x").min(),
-        miny=pl.col("y").min(),
-        maxx=pl.col("x").max(),
-        maxy=pl.col("y").max(),
-      )
-     .filter(out_of_bounds_expr)
-     .select(id_cols)
-    )
-
-    # keep only vertices from polygons that are not out of bounds
-    vertices = vertices.join(out_of_bounds_polygons, on = id_cols, how = "anti")
-    return vertices
+) -> Tuple[int, int, int, int]:
+    """Returns the (min_x, min_y, max_x, max_y) tile coordinates of the grid cells within the boundary, inclusive"""
+    n_x = max(int(np.ceil((boundary.x_max - boundary.x_min) / self.cell_size)), 1)
+    n_y = max(int(np.ceil((boundary.y_max - boundary.y_min) / self.cell_size)), 1)
+    return (0, 0, n_x - 1, n_y - 1)
 
 @patch
 def _northing_to_ytile(
     self:FastSquareGridGenerator, 
     northing: pl.Expr,
     y_min: float,
-    y_max: float,
 ) -> pl.Expr:
-
-    # clamping to bounds
-    northing = (
-        pl.when(northing < y_min)
-         .then(pl.lit(y_min))
-         .when(northing > y_max)
-         .then(pl.lit(y_max))
-         .otherwise(northing)
-    )
-    ytile = ((northing - y_min)/self.cell_size).floor()
-    ytile = ytile.cast(self.PIXEL_DTYPE)
-
+    """This gets the fractional ytile, where ytile n spans [n, n+1]"""
+    ytile = (northing - y_min) / self.cell_size
     return ytile
 
 @patch
@@ -308,21 +261,9 @@ def _easting_to_xtile(
     self:FastSquareGridGenerator, 
     easting: pl.Expr,
     x_min: float,
-    x_max: float,
 ) -> pl.Expr:
-
-    # clamping to bounds
-    easting = (
-        pl.when(easting < x_min)
-        .then(pl.lit(x_min))
-        .when(easting > x_max)
-        .then(pl.lit(x_max))
-        .otherwise(easting)
-    )
-        
-    xtile = ((easting - x_min)/self.cell_size).floor()
-    xtile = xtile.cast(self.PIXEL_DTYPE)
-    
+    """This gets the fractional xtile, where xtile n spans [n, n+1]"""
+    xtile = (easting - x_min) / self.cell_size
     return xtile
 
 @patch
@@ -334,16 +275,11 @@ def _northingeasting_to_xy(
     easting_col: str,
 ) -> pl.DataFrame:
 
-    x_min = boundary.x_min
-    y_min = boundary.y_min
-    x_max = boundary.x_max
-    y_max = boundary.y_max
-
     xy_df = (
         df
         .with_columns(
-            x=self._easting_to_xtile(pl.col(easting_col), x_min, x_max),
-            y=self._northing_to_ytile(pl.col(northing_col), y_min, y_max),
+            x=self._easting_to_xtile(pl.col(easting_col), boundary.x_min),
+            y=self._northing_to_ytile(pl.col(northing_col), boundary.y_min),
         )
     )
 
@@ -638,7 +574,6 @@ def generate_grid_join(
 
 # %% ../notebooks/00_grids.ipynb #ab7dea07
 class FastBingTileGridGenerator:
-    EPSILON = 1e-14
     PIXEL_DTYPE = polygon_fill.PIXEL_DTYPE
     SUBPOLYGON_ID_COL = polygon_fill.SUBPOLYGON_ID_COL
     MAX_ZOOM = 30
@@ -676,53 +611,18 @@ def generate_grid(
     else:
         working_gdf = aoi_gdf
 
-    # Fix: Handle polygons with holes by using only exterior
-    # The scanline fill algorithm doesn't handle holes correctly
-    has_holes = False
-    def extract_exterior(geom):
-        nonlocal has_holes
-        if geom.geom_type == "Polygon":
-            if len(list(geom.interiors)) > 0:
-                has_holes = True
-                return Polygon(geom.exterior)
-            return geom
-        elif geom.geom_type == "MultiPolygon":
-            exteriors = []
-            for poly in geom.geoms:
-                if len(list(poly.interiors)) > 0:
-                    has_holes = True
-                    exteriors.append(Polygon(poly.exterior))
-                else:
-                    exteriors.append(poly)
-            from shapely.geometry import MultiPolygon as ShapelyMultiPolygon
-            return ShapelyMultiPolygon(exteriors)
-        return geom
-
-    working_gdf = working_gdf.copy()
-    working_gdf.geometry = working_gdf.geometry.apply(extract_exterior)
-    
-    if has_holes:
-        warnings.warn(
-            "Input geometries contain holes (interior rings). "
-            "Holes are ignored during grid generation - grids will fill the entire exterior. "
-            "If you need to exclude holes, clip the result with the original geometry."
-        )
-
     vertices = polygon_fill.polygons_to_vertices(working_gdf, unique_id_col)
-    vertices = self._latlng_to_xy(vertices, lat_col="y", lng_col="x")
+    vertices = vertices.with_columns(x=self._lng_to_xtile(pl.col("x")))
 
-    polygon_fill_result = polygon_fill.fast_polygon_fill(vertices, unique_id_col)
-    tiles_in_geom = polygon_fill_result["tiles_in_geom"]
-
-    # this is error correction on the polygon boundary (not the square boundary)
-    tiles_off_boundary = polygon_fill_result["tiles_off_boundary"]
-    if not tiles_off_boundary.is_empty():
-        off_boundary_bboxes = self._xy_to_bbox(tiles_off_boundary, "x", "y")
-        all_polygon_boundary = working_gdf.boundary.union_all(method="unary")
-        intersects_boundary_bool = off_boundary_bboxes.intersects(all_polygon_boundary)
-        addtl_tiles_in_geom = tiles_off_boundary.filter(pl.Series(intersects_boundary_bool))
-    
-        tiles_in_geom = pl.concat([tiles_in_geom, addtl_tiles_in_geom])
+    # the polygon edges are straight in lat/lng, so the vertex y is kept as latitude
+    max_tile = 2**self.zoom_level - 1
+    tiles_in_geom = polygon_fill.fast_polygon_fill(
+        vertices, 
+        unique_id_col,
+        pixel_bounds=(0, 0, max_tile, max_tile),
+        y_to_row=self._lat_to_ytile,
+        row_to_y=self._ytile_to_lat,
+    )
 
     quadkey_expr = self._xyz_to_quadkey(
         pl.col("x"),
@@ -732,10 +632,6 @@ def generate_grid(
 
     if self.return_geometry:
         bboxes = self._xy_to_bbox(tiles_in_geom, "x", "y")
-
-        if not tiles_off_boundary.is_empty():
-            addtl_boundary_bboxes = off_boundary_bboxes[intersects_boundary_bool].copy()
-            bboxes = pd.concat([bboxes, addtl_boundary_bboxes], ignore_index=True)
     
     if not self.add_xyz_cols:
         tiles_in_geom = tiles_in_geom.drop(["x","y"])
@@ -759,76 +655,31 @@ def generate_grid(
 
 # %% ../notebooks/00_grids.ipynb #a85ad615
 @patch
-def _lat_to_ytile(self:FastBingTileGridGenerator, lat: pl.Expr) -> pl.Expr:
-    logtan = pl.Expr.log(pl.Expr.tan((np.pi / 4) + (pl.Expr.radians(lat) / 2)))
-
+def _lat_to_ytile(self:FastBingTileGridGenerator, lat: np.ndarray) -> np.ndarray:
+    """This gets the fractional ytile, where ytile n spans [n, n+1] from north to south"""
+    lat = np.clip(lat, -90, 90)
+    with np.errstate(divide="ignore"):
+        logtan = np.log(np.tan((np.pi / 4) + (np.radians(lat) / 2)))
     y = 0.5 - (logtan / (2 * np.pi))
-
-    power_of_2 = int(np.power(2, self.zoom_level))
-
-    # To address loss of precision in round-tripping between tile
-    # and lng/lat, points within EPSILON of the right side of a tile
-    # are counted in the next tile over.
-    y_pixel_coord = pl.Expr.floor((y + self.EPSILON) * power_of_2)
-
-    ytile = (
-        pl.when(y <= 0)
-        .then(pl.lit(0))
-        .when(y >= 1)
-        .then(pl.lit(power_of_2 - 1))
-        .otherwise(y_pixel_coord)
-        .cast(self.PIXEL_DTYPE)
-    )
-
-    return ytile
+    return y * 2**self.zoom_level
 
 @patch
-def _lng_to_xtile(self:FastBingTileGridGenerator, lng: pl.Expr) -> pl.Expr:
+def _lng_to_xtile(self:FastBingTileGridGenerator, lng: Union[pl.Expr, np.ndarray]) -> Union[pl.Expr, np.ndarray]:
+    """This gets the fractional xtile, where xtile n spans [n, n+1] from west to east"""
     x = 0.5 + (lng / 360.0)
-    power_of_2 = int(np.power(2, self.zoom_level))
-
-    x_pixel_coord = pl.Expr.floor((x + self.EPSILON) * power_of_2)
-
-    xtile = (
-        pl.when(x <= 0)
-        .then(pl.lit(0))
-        .when(x >= 1)
-        .then(pl.lit(power_of_2 - 1))
-        .otherwise(x_pixel_coord)
-        .cast(self.PIXEL_DTYPE)
-    )
-
-    return xtile
+    return x * 2**self.zoom_level
 
 @patch
-def _latlng_to_xy(
-    self:FastBingTileGridGenerator,
-    df: pl.DataFrame,
-    lat_col: str,
-    lng_col: str,
-) -> pl.DataFrame:
-    xy_df = df.with_columns(
-        x=self._lng_to_xtile(pl.col(lng_col)),
-        y=self._lat_to_ytile(pl.col(lat_col)),
-    )
-
-    return xy_df
+def _xtile_to_lng(self:FastBingTileGridGenerator, xtile: np.ndarray) -> np.ndarray:
+    """This gets the longitude of the left edge of the tile"""
+    return (xtile / 2**self.zoom_level) * 360.0 - 180.0
 
 @patch
-def _xtile_to_lng(self:FastBingTileGridGenerator, xtile: pl.Expr) -> pl.Expr:
-    """This gets the longitude of the upper left corner of the tile"""
-    power_of_2 = int(np.power(2, self.zoom_level))
-    lng_deg = (xtile / power_of_2) * 360.0 - 180.0
-    return lng_deg
-
-@patch
-def _ytile_to_lat(self:FastBingTileGridGenerator, ytile: pl.Expr) -> pl.Expr:
-    """This gets the latitude of the upper left corner of the tile"""
-    power_of_2 = int(np.power(2, self.zoom_level))
-    y = ytile / power_of_2
-    lat_rad = pl.Expr.arctan(pl.Expr.sinh(np.pi * (1 - 2 * y)))
-    lat_deg = pl.Expr.degrees(lat_rad)
-    return lat_deg
+def _ytile_to_lat(self:FastBingTileGridGenerator, ytile: np.ndarray) -> np.ndarray:
+    """This gets the latitude of the top edge of the tile"""
+    y = ytile / 2**self.zoom_level
+    lat_rad = np.arctan(np.sinh(np.pi * (1 - 2 * y)))
+    return np.degrees(lat_rad)
 
 @patch
 def _xy_to_bbox(
@@ -838,24 +689,15 @@ def _xy_to_bbox(
     ytile_col: str,
 ) -> GeoSeries:
 
-    upper_left_lng = self._xtile_to_lng(pl.col(xtile_col))
-    upper_left_lat = self._ytile_to_lat(pl.col(ytile_col))
-    lower_right_lng = self._xtile_to_lng(pl.col(xtile_col) + 1)
-    lower_right_lat = self._ytile_to_lat(pl.col(ytile_col) + 1)
-
-    bbox_df = df.select(
-        minx=upper_left_lng,
-        miny=lower_right_lat,
-        maxx=lower_right_lng,
-        maxy=upper_left_lat,
-    )
+    xtile = df[xtile_col].to_numpy().astype(np.float64)
+    ytile = df[ytile_col].to_numpy().astype(np.float64)
 
     # use vectorized version in shapely 2.0
     bboxes = box(
-        bbox_df["minx"].to_list(),
-        bbox_df["miny"].to_list(),
-        bbox_df["maxx"].to_list(),
-        bbox_df["maxy"].to_list(),
+        self._xtile_to_lng(xtile),
+        self._ytile_to_lat(ytile + 1),
+        self._xtile_to_lng(xtile + 1),
+        self._ytile_to_lat(ytile),
     )
     bboxes = GeoSeries(bboxes, crs="epsg:4326")
 
