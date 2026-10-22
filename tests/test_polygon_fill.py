@@ -248,3 +248,68 @@ def test_fill_gdf_pixel_bounds(sample_gdf):
             .iter_rows()
         )
         assert pixels == brute_force_pixels(geom, pixel_bounds), geom_name
+
+
+def test_fill_gdf_extra_vertex_column(sample_gdf):
+    vertices_df = polygon_fill.polygons_to_vertices(sample_gdf, "geom_name").with_row_index("vertex_order")
+    filled_polygons = polygon_fill.fast_polygon_fill(vertices_df, "geom_name")
+    square_pixels = set(
+        filled_polygons.filter(pl.col("geom_name") == "Square").select("x", "y").iter_rows()
+    )
+    assert square_pixels == brute_force_pixels(sample_gdf.geometry[0])
+
+    # without unique_id_col, the id column is ambiguous
+    with pytest.raises(ValueError, match="at most 1 id column"):
+        polygon_fill.fast_polygon_fill(vertices_df)
+
+
+def test_fill_nan_vertices():
+    vertices_df = pd.DataFrame({"x": [0, np.nan, 10, 10, 0], "y": [0, 5, 0, 10, 10]})
+    expected_pixels = brute_force_pixels(Polygon([(0, 0), (10, 0), (10, 10), (0, 10)]))
+    assert polygon_fill.voxel_traversal_scanline_fill(vertices_df) == expected_pixels
+
+    all_nan_df = pd.DataFrame({"x": [np.nan] * 3, "y": [np.nan] * 3})
+    assert polygon_fill.voxel_traversal_scanline_fill(all_nan_df) == set()
+
+
+def test_fill_empty_vertices():
+    gdf = gpd.GeoDataFrame({"geom_name": []}, geometry=[])
+    vertices_df = polygon_fill.polygons_to_vertices(gdf, "geom_name")
+    assert len(polygon_fill.fast_polygon_fill(vertices_df, "geom_name")) == 0
+
+
+def test_fill_shared_and_null_ids():
+    gdf = gpd.GeoDataFrame(
+        {"geom_name": [None, "b"]},
+        geometry=[
+            Polygon([(0, 0), (2, 0), (2, 2), (0, 2)]),
+            MultiPolygon(
+                [
+                    Polygon([(5, 5), (7, 5), (7, 7), (5, 7)]),
+                    Polygon([(6, 6), (9, 6), (9, 9), (6, 9)]),
+                ]
+            ),
+        ],
+    )
+    vertices_df = polygon_fill.polygons_to_vertices(gdf, "geom_name")
+    filled_polygons = polygon_fill.fast_polygon_fill(vertices_df, "geom_name")
+    # pixels shared by the subpolygons of the same geometry aren't duplicated
+    assert not filled_polygons.is_duplicated().any()
+    for geom_name, geom in zip(gdf["geom_name"], gdf.geometry):
+        pixels = set(
+            filled_polygons.filter(
+                pl.col("geom_name").is_null() if pd.isna(geom_name) else pl.col("geom_name") == geom_name
+            )
+            .select("x", "y")
+            .iter_rows()
+        )
+        assert pixels == brute_force_pixels(geom), geom_name
+
+
+def test_scanline_unclosed_ring_raises():
+    # a single edge that isn't part of a closed ring crosses the pixel rows an odd number of times
+    with pytest.raises(ValueError, match="odd number of edge crossings"):
+        polygon_fill._scanline_pixels(
+            np.array([0.0]), np.array([0.0]), np.array([5.0]), np.array([5.0]),
+            group=np.zeros(1, dtype=np.int64), pixel_bounds=(0, 0, 10, 10),
+        )

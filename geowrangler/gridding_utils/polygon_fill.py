@@ -142,7 +142,10 @@ def _scanline_pixels(
     # pair up sorted crossings within each (group, row). A closed ring always crosses a row an even number of times
     order = np.lexsort((crossing_x, row, group[edge]))
     crossing_x, row, crossing_group = crossing_x[order], row[order], group[edge][order]
-    assert len(crossing_x) % 2 == 0, "Polygon rings should be closed"
+    is_new_row = np.ones(len(row), dtype=bool)
+    is_new_row[1:] = (row[1:] != row[:-1]) | (crossing_group[1:] != crossing_group[:-1])
+    if np.any(np.bincount(np.cumsum(is_new_row) - 1) % 2):
+        raise ValueError("Found a pixel row with an odd number of edge crossings. Polygon rings should be closed and y_to_row should be monotonic")
     span_x1, span_x2 = crossing_x[0::2], crossing_x[1::2]
     span_row, span_group = row[0::2], crossing_group[0::2]
 
@@ -162,6 +165,8 @@ def scanline_fill(
         return set()
 
     x, y = np.array(vertices, dtype=float).T
+    is_valid = ~np.isnan(x) & ~np.isnan(y)
+    x, y = x[is_valid], y[is_valid]
     next_x, next_y = np.roll(x, -1), np.roll(y, -1)
     group, xs, ys = _scanline_pixels(
         x, y, next_x, next_y,
@@ -188,6 +193,8 @@ def _polygon_pixels(
     row_to_y: Callable[[np.ndarray], np.ndarray] = _identity,
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Returns (polygon index, x, y) for every pixel that intersects each polygon. Pixels can be repeated"""
+    is_valid = ~np.isnan(x) & ~np.isnan(y)
+    x, y, ring_idx, polygon_idx = x[is_valid], y[is_valid], ring_idx[is_valid], polygon_idx[is_valid]
     next_idx = _next_vertex_idx(ring_idx)
     next_x, next_y = x[next_idx], y[next_idx]
 
@@ -297,13 +304,20 @@ def fast_polygon_fill(
     y_to_row = y_to_row or _identity
     row_to_y = row_to_y or _identity
 
-    # vertices are grouped by polygon for the even-odd fill, and by ring for connecting the edges
-    polygon_cols = [col for col in vertices_df.columns if col not in ("x", "y", RING_ID_COL)]
-    ring_cols = polygon_cols + ([RING_ID_COL] if RING_ID_COL in vertices_df.columns else [])
-    for col in [SUBPOLYGON_ID_COL] + ([unique_id_col] if unique_id_col is not None else []):
+    if unique_id_col is not None:
+        id_cols = [unique_id_col]
+    else:
+        id_cols = [col for col in vertices_df.columns if col not in ("x", "y", SUBPOLYGON_ID_COL, RING_ID_COL)]
+        if len(id_cols) > 1:
+            raise ValueError(
+                f"vertices_df should have at most 1 id column besides x, y, {SUBPOLYGON_ID_COL} and {RING_ID_COL} when unique_id_col is None, but found {id_cols}"
+            )
+    for col in ["x", "y", SUBPOLYGON_ID_COL] + id_cols:
         assert col in vertices_df, f"{col} should be column in vertices_df"
 
-    vertices_df = vertices_df.filter(pl.col("x").is_not_nan() & pl.col("y").is_not_nan())
+    # vertices are grouped by polygon for the even-odd fill, and by ring for connecting the edges
+    polygon_cols = id_cols + [SUBPOLYGON_ID_COL]
+    ring_cols = polygon_cols + ([RING_ID_COL] if RING_ID_COL in vertices_df.columns else [])
     is_new_polygon = pl.any_horizontal([pl.col(col).ne_missing(pl.col(col).shift(1)) for col in polygon_cols])
     is_new_ring = pl.any_horizontal([pl.col(col).ne_missing(pl.col(col).shift(1)) for col in ring_cols])
     group_df = vertices_df.select(
@@ -319,18 +333,22 @@ def fast_polygon_fill(
         x, y, ring_idx, polygon_idx, pixel_bounds, y_to_row, row_to_y
     )
 
-    pixels_df = pl.DataFrame(
-        {"x": pixel_x, "y": pixel_y, "polygon_idx": pixel_polygon_idx},
-        schema={"x": PIXEL_DTYPE, "y": PIXEL_DTYPE, "polygon_idx": pl.Int64},
-    )
-
     if unique_id_col is None:
-        return pixels_df.select("x", "y").unique().sort("x", "y")
+        pixels_df = pl.DataFrame({"x": pixel_x, "y": pixel_y}, schema={"x": PIXEL_DTYPE, "y": PIXEL_DTYPE})
+        return pixels_df.unique()
 
+    # subpolygons with the same id share pixels, so pixels are deduplicated per id using the index of the id's first polygon
     polygon_first_idx = np.flatnonzero(np.diff(polygon_idx, prepend=-1))
-    unique_ids = vertices_df[unique_id_col].gather(polygon_first_idx)
-    pixels_df = pixels_df.with_columns(
-        unique_ids.gather(pixels_df["polygon_idx"]).alias(unique_id_col)
+    polygon_ids = vertices_df[unique_id_col].gather(polygon_first_idx)
+    id_first_polygon_idx = (
+        polygon_ids.to_frame("id")
+        .with_row_index("polygon_idx")
+        .select(pl.col("polygon_idx").first().over("id"))["polygon_idx"]
+        .to_numpy()
     )
+    pixels_df = pl.DataFrame(
+        {"x": pixel_x, "y": pixel_y, "id_idx": id_first_polygon_idx[pixel_polygon_idx]},
+        schema={"x": PIXEL_DTYPE, "y": PIXEL_DTYPE, "id_idx": pl.Int64},
+    ).unique()
 
-    return pixels_df.select("x", "y", unique_id_col).unique().sort(unique_id_col, "x", "y")
+    return pixels_df.select("x", "y", polygon_ids.gather(pixels_df["id_idx"]).alias(unique_id_col))

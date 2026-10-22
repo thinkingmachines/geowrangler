@@ -560,3 +560,15 @@ def test_fast_bing_tile_grid_generator_random_concave_polygons():
         assert set(zip(polygon_grids.x, polygon_grids.y)) == brute_force_bing_tiles(
             grid_generator, polygon
         ), polygon_id
+
+
+@pytest.mark.parametrize(
+    "geometry", [[], [Polygon()]], ids=["no_rows", "empty_polygon"]
+)
+def test_fast_square_grid_generator_empty_aoi(geometry):
+    gdf = gpd.GeoDataFrame({"polygon_id": range(len(geometry))}, geometry=geometry, crs="EPSG:4326")
+    grid_generator = grids.FastSquareGridGenerator(15000)
+    with pytest.warns(UserWarning):
+        grids_gdf = grid_generator.generate_grid(gdf, unique_id_col="polygon_id")
+    assert len(grids_gdf) == 0
+    assert list(grids_gdf.columns) == ["x", "y", "polygon_id", "geometry"]

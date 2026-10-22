@@ -14,6 +14,8 @@
    - `fast_polygon_fill` returns a polars DataFrame of pixels instead of a dict, and accepts `pixel_bounds`, `y_to_row` and `row_to_y`
    - `voxel_traversal_scanline_fill` returns a set of pixels instead of a dict, and accepts a `ring_col` for polygons with holes
    - `voxel_traversal_2d` returns a set of pixels instead of a dict
+   - the `debug` parameter is removed from `voxel_traversal_2d`, `scanline_fill` and `voxel_traversal_scanline_fill`
+   - `fast_polygon_fill` no longer sorts its output, and raises a `ValueError` when `unique_id_col` is None and `vertices_df` has more than one id column
    - `polygons_to_vertices` adds a `__ring_id__` column
 
 ## 0.5.2

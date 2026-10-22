@@ -242,6 +242,9 @@ def _get_pixel_bounds(
     boundary: SquareGridBoundary,
 ) -> Tuple[int, int, int, int]:
     """Returns the (min_x, min_y, max_x, max_y) tile coordinates of the grid cells within the boundary, inclusive"""
+    if not np.isfinite([boundary.x_min, boundary.y_min, boundary.x_max, boundary.y_max]).all():
+        # e.g. the boundary of an empty AOI
+        return (0, 0, -1, -1)
     n_x = max(int(np.ceil((boundary.x_max - boundary.x_min) / self.cell_size)), 1)
     n_y = max(int(np.ceil((boundary.y_max - boundary.y_min) / self.cell_size)), 1)
     return (0, 0, n_x - 1, n_y - 1)
