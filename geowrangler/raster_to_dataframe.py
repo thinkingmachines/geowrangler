@@ -64,6 +64,11 @@ def generate_mask(
 
     label_values = {}
 
+    if f"{labels_column}_x" not in gdf.columns:
+        raise ValueError(
+            f"labels_column '{labels_column}' not found in the columns of shape_file {shape_file}"
+        )
+
     labels_column = f"{labels_column}_x"
 
     if labels_column in gdf.columns:
