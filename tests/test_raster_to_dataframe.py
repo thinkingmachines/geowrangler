@@ -28,7 +28,7 @@ def test_generate_mask(tmp_path):
 
 
 def test_generate_mask_missing_labels_column(tmp_path):
-    with pytest.raises(ValueError, match="not_a_column"):
+    with pytest.raises(ValueError, match="not_a_column.*Available columns"):
         rtdf.generate_mask(
             tiff_file=TIFF_FILE,
             shape_file=SHAPE_FILE,
