@@ -44,7 +44,11 @@ def mock_geofabrike_req(monkeypatch):
         return MockResponse()
 
     monkeypatch.setattr(requests, "get", mock_get)
+    # load_geofabrik_data is lru_cached: clear it so a response cached by another
+    # test can't leak into this one, and the mocked response can't leak out of it.
+    geofabrik.load_geofabrik_data.cache_clear()
     yield
+    geofabrik.load_geofabrik_data.cache_clear()
 
 
 def test_list_geofabrik_regions(mock_geofabrike_req):
@@ -258,7 +262,7 @@ def test_download_existing_osm_region_data_no_cache(
     assert filepath == mock_region_zip_file
 
 
-def test_download_existing_osm_region_data(mocker, tmpdir):
+def test_download_existing_osm_region_data(mock_geofabrike_req, mocker, tmpdir):
     mock_region_zip_file = mocker.MagicMock()
     mock_region_zip_file.exists = mocker.MagicMock(return_value=True)
     mocker.patch(
@@ -362,6 +366,7 @@ def test_load_roads(mock_geofabrike_req, mocker, monkeypatch, tmpdir):
     mock_gdf = mocker.MagicMock()
     mocker.patch("geopandas.read_file", return_value=mock_gdf)
     monkeypatch.setattr(geofabrik, "urlretrieve", mock_retrieve)
+    mocker.patch("geowrangler.datasets.geofabrik.urlcheck", return_value=True)
     osm_data_manager = geofabrik.OsmDataManager(
         cache_dir=str(tmpdir / "this-directory-does-not-exist")
     )
@@ -390,6 +395,7 @@ def test_load_roads_with_year(mock_geofabrike_req, mocker, monkeypatch, tmpdir):
     mock_gdf = mocker.MagicMock()
     mocker.patch("geopandas.read_file", return_value=mock_gdf)
     monkeypatch.setattr(geofabrik, "urlretrieve", mock_retrieve)
+    mocker.patch("geowrangler.datasets.geofabrik.urlcheck", return_value=True)
     osm_data_manager = geofabrik.OsmDataManager(
         cache_dir=str(tmpdir / "this-directory-does-not-exist")
     )
