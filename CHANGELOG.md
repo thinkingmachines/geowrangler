@@ -1,21 +1,23 @@
 # Release Notes
-## Unreleased
+## 0.6.0
+0.5.2 was not published to PyPI, so this release also includes the 0.5.2 changes below.
+
 ### Fixes
- - Fix `FastSquareGridGenerator` and `FastBingTileGridGenerator` returning cells that don't intersect the AOI and missing cells that do. Polygon edges are now traced in fractional cell coordinates instead of between vertices snapped to integer cells, so both return exactly the cells that share area with the AOI
- - Fix polygons with holes in `FastSquareGridGenerator`: cells fully inside a hole are no longer returned. `FastBingTileGridGenerator` now also excludes holes instead of filling the whole exterior with a warning
- - Fix `fast_polygon_fill` changing the shape of polygons that revisit a cell, by no longer de-duplicating vertices
+ - `FastSquareGridGenerator` and `FastBingTileGridGenerator` return exactly the cells that share area with the AOI. Before, they could return cells that don't touch it and miss cells that do (PR [#271](https://github.com/thinkingmachines/geowrangler/pull/271))
+ - The fast grid generators exclude cells inside polygon holes
+ - `raster_zonal_stats` no longer needs `fiona`, and `datasets.geofabrik` works with `fastcore` 2
+ - `raster_to_dataframe.generate_mask` raises a clear error when `labels_column` is missing (PR [#272](https://github.com/thinkingmachines/geowrangler/pull/272)) from [@AmmarYasser455](https://github.com/AmmarYasser455)
 
 ### Improvements
- - `fast_polygon_fill` is vectorized with numpy, making `FastSquareGridGenerator` and `FastBingTileGridGenerator` faster
+ - The fast grid generators are several times faster
 
 ### Breaking Changes
- - `SquareGridGenerator`, `FastSquareGridGenerator` and `FastBingTileGridGenerator` only return cells that share area with the AOI, like `BingTileGridGenerator`. Cells that only touch the AOI at an edge or a corner are excluded, and so are slivers thinner than a millionth of a cell (`polygon_fill.TOLERANCE`), e.g. from floating point noise after reprojection. This only changes the results for AOIs with edges on the grid lines: e.g. regridding a 15 km cell at 1 km on the same grid returns its 225 cells instead of 289
- - In `gridding_utils.polygon_fill`, vertices are in fractional pixel coordinates and pixel `(x, y)` is the square `[x, x+1] x [y, y+1]`. Off-boundary pixels are removed since the error correction is no longer needed
-   - `fast_polygon_fill` returns a polars DataFrame of pixels instead of a dict, and accepts `pixel_bounds`, `y_to_row`, `row_to_y` and `tolerance`
-   - `voxel_traversal_scanline_fill` returns a set of pixels instead of a dict, and accepts a `ring_col` for polygons with holes and a `tolerance`
-   - `voxel_traversal_2d` returns a set of pixels instead of a dict, and accepts a `tolerance`. Use `tolerance=0` to include the pixels that only touch the segment
-   - the `debug` parameter is removed from `voxel_traversal_2d`, `scanline_fill` and `voxel_traversal_scanline_fill`
-   - `fast_polygon_fill` no longer sorts its output, and raises a `ValueError` when `unique_id_col` is None and `vertices_df` has more than one id column
+ - `SquareGridGenerator`, `FastSquareGridGenerator` and `FastBingTileGridGenerator` exclude cells that only touch the AOI at an edge or corner. This only changes results for AOIs with edges on the grid lines
+ - `gridding_utils.polygon_fill`:
+   - vertices are in fractional pixel coordinates, and off-boundary pixels are removed
+   - `fast_polygon_fill` returns a DataFrame instead of a dict and no longer sorts it
+   - `voxel_traversal_2d` and `voxel_traversal_scanline_fill` return sets instead of dicts
+   - the fill functions take a `tolerance`, and the `debug` parameters are removed
    - `polygons_to_vertices` adds a `__ring_id__` column
 
 ## 0.5.2
