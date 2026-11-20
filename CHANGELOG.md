@@ -20,6 +20,10 @@
    - the fill functions take a `tolerance`, and the `debug` parameters are removed
    - `polygons_to_vertices` adds a `__ring_id__` column
 
+### Others
+ - Requires Python 3.9 or later. `geopandas>=1.0`, already a dependency, needs 3.9, so 3.8 could not install the package anyway
+ - The package metadata lists the license, the supported Python versions (3.9 to 3.14) and the Beta status again. They were lost when the project moved to nbdev 3
+
 ## 0.5.2
 ### Improvements
  - Upgrade Python development version to `3.14` 
